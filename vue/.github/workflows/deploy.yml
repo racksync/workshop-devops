@@ -1,0 +1,25 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+        #with:
+        #  path: 'vue/'
+
+      - name: Build Docker Image 🐳
+        run: docker build . -t vue:latest
+
+      - name: Remove exist container 🏺
+        run: docker rm -f backend
+
+      - name: Run Docker Container 🏺
+        run: docker run -p 8080:8080 --network backend --name backend -d vue:latest

@@ -1,0 +1,25 @@
+name: racksync-ci
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+        with:
+          path: 'www1'
+
+      - name: Build Docker Image 👷🏻‍♂️
+        run: docker build www1/ -t www1
+
+      - name: Remove exist container 🚀
+        run: docker rm -f www1
+
+      - name: Run Docker Container
+        run: docker run -p 8088:80 --name www1 --restart always -d www1 
