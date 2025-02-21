@@ -9,6 +9,31 @@
 - จัดการ networking และ storage ในบริบทของ container environment
 - ทดสอบและ deploy container-based applications บนคลาวด์หรือ on-premise
 
+## รายละเอียดหลักสูตร
+
+DevOps Full Course  
+Video Conference (Live & Record)
+
+เทรนนิ่งคอร์สอบรม DevOps กึ่งปฏิบัติการแบบออนไลน์ถ่ายทอดตัวต่อตัว สำหรับผู้ที่สนใจปรับทักษะเพื่อปูพื้นฐานสู่การเป็น DevOps โดยหลักสูตร เน้นให้ผู้เข้าร่วมเข้าใจโครงสร้างพื้นฐานของระบบปฏิบัติการ Linux ซึ่งเป็นระบบที่ Cloud Provider ทั่วโลกเลือกใช้ ตั้งแต่ระบบขนาดเล็กถึงขนาดใหญ่ พร้อมให้บริการและเป็นโครงสร้างพื้นฐานของ service ขนาดใหญ่
+
+**จุดประสงค์ของหลักสูตร**
+- สามารถติดตั้ง Linux และ Prerequisite ระบบเพื่อเตรียมระบบให้พร้อมสำหรับ deploy services
+- เข้าใจโครงสร้างระบบการจัดเก็บไฟล์ และสามารถใช้คำสั่งที่จำเป็นได้
+- รู้จักเครื่องมือในการ Login Secure Shell และคำสั่งพื้นฐานต่าง ๆ
+- รู้จัก Network, DNS และ Services และรู้จัก Firewall พื้นฐาน
+- ตั้งเวลาด้วย Crontab ได้
+- รู้จัก Container Technology และ Deploy Services ด้วยคำสั่งพื้นฐานได้
+- สามารถ deploy services ด้วย container technology ได้ (node.js, vue, nuxt / react, php)
+- รู้จัก source code management tooling (git based)
+- เข้าใจกลไกการทำงานของ CI/CD พื้นฐาน เพื่อต่อยอดการ deploy ด้วย Cloud Native ได้
+- สามารถ deploy reverse proxy ได้
+- สามารถ deploy monitoring system ได้
+- พัฒนาทักษะพื้นฐานสำหรับการบริหารจัดการระบบ IoT ด้วย DevOps
+- สร้างความเข้าใจในแนวคิดและกระบวนการ DevOps ผสานการทำงานระหว่างการพัฒนา (Development) และการปฏิบัติการ (Operations) เพื่อเพิ่มความเร็วและความยืดหยุ่นในการพัฒนา IoT Service
+- ตั้งค่าระบบและบริหารจัดการ IoT Platform ตั้งแต่การ Spin-Up Service, การตั้งค่าเซิร์ฟเวอร์, และการใช้งาน Container (Docker)
+- สร้างทักษะในการใช้งานเครื่องมือ DevOps สำหรับ IoT และใช้งาน CI/CD Pipeline เพื่ออัปเดตและปรับปรุงระบบ IoT อย่างมีประสิทธิภาพ
+- สร้างและนำระบบ IoT ไปใช้งานจริง บนระบบ Cloud หรือ Edge Device
+- เข้าใจ concept และปฏิบัติบนพื้นฐานและหลักการของ OWASP ได้
 
 ### Links
 
