@@ -9,7 +9,6 @@ RUN npm run build
 RUN ls -lah /app
 
 # Production stage
-FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
+COPY  react-app/dist /usr/share/nginx/html
 EXPOSE 8001
 CMD ["nginx", "-g", "daemon off;"]
