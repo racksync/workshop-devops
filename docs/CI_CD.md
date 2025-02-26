@@ -1,17 +1,17 @@
 # CI/CD Workshop
 
 ## 📑 สารบัญ
-1. [1. Introduction to CI/CD](#-1-introduction-to-cicd)
-2. [2. Overview of CI/CD Platforms 💡](#-2-overview-of-cicd-platforms-💡)
-3. [3. Getting Started with GitHub Actions](#-3-getting-started-with-github-actions)
-4. [4. Core Concepts in GitHub Actions](#-4-core-concepts-in-github-actions)
-5. [5. GitHub Actions Marketplace](#-5-github-actions-marketplace)
-6. [6. Secrets, Security & Permissions](#-6-secrets-security--permissions)
-7. [7. Debugging & Monitoring GitHub Actions](#-7-debugging--monitoring-github-actions)
-8. [8. Optimizing GitHub Actions Workflows ⚡](#-8-optimizing-github-actions-workflows-⚡)
-9. [9. Basic CI/CD Pipelines](#-9-basic-cicd-pipelines)
-10. [10. Deployment Pipelines](#-10-deployment-pipelines)
-11. [11. Advanced Use Cases](#-11-advanced-use-cases)
+[1. Introduction to CI/CD](#-1-introduction-to-cicd)
+[2. Overview of CI/CD Platforms](#-2-overview-of-cicd-platforms)
+[3. Getting Started with GitHub Actions](#-3-getting-started-with-github-actions)
+[4. Core Concepts in GitHub Actions](#-4-core-concepts-in-github-actions)
+[5. GitHub Actions Marketplace](#-5-github-actions-marketplace)
+[6. Secrets, Security & Permissions](#-6-secrets-security--permissions)
+[7. Debugging & Monitoring GitHub Actions](#-7-debugging--monitoring-github-actions)
+[8. Optimizing GitHub Actions Workflows](#-8-optimizing-github-actions-workflows)
+[9. Basic CI/CD Pipelines](#-9-basic-cicd-pipelines)
+[10. Deployment Pipelines](#-10-deployment-pipelines)
+[11. Advanced Use Cases](#-11-advanced-use-cases)
 
 ## 🔹 1. Introduction to CI/CD
 
@@ -68,7 +68,7 @@ DevOps เป็นวัฒนธรรมและแนวทางที่�
 - ช่วยให้ทีมสามารถส่งมอบซอฟต์แวร์ได้อย่างรวดเร็ว มีประสิทธิภาพและคุณภาพ
 - สนับสนุนค่านิยมหลักของ DevOps: การทำงานร่วมกัน, automation, การวัดผล, และการแบ่งปัน
 
-## 🔹 2. Overview of CI/CD Platforms 💡
+## 🔹 2. Overview of CI/CD Platforms
 
 ### เปรียบเทียบ CI/CD Platforms ยอดนิยม
 
@@ -909,7 +909,7 @@ GitHub มีระบบ logs ที่ช่วยให้เราตรว�
        path: debug-info
    ```
 
-## 🔹 8. Optimizing GitHub Actions Workflows ⚡
+## 🔹 8. Optimizing GitHub Actions Workflows
 
 การปรับปรุงประสิทธิภาพของ workflow ช่วยประหยัดเวลาและทรัพยากร ทำให้กระบวนการ CI/CD เร็วขึ้นและมีประสิทธิภาพมากขึ้น
 
