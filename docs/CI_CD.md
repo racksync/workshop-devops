@@ -11,7 +11,7 @@
 [8. Optimizing GitHub Actions Workflows](#-8-optimizing-github-actions-workflows) \
 [9. Basic CI/CD Pipelines](#-9-basic-cicd-pipelines) \
 [10. Deployment Pipelines](#-10-deployment-pipelines) \
-[11. Advanced Use Cases](#-11-advanced-use-cases) \
+[11. Advanced Use Cases](#-11-advanced-use-cases) 
 
 ## 🔹 1. Introduction to CI/CD
 
