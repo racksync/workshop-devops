@@ -1141,3 +1141,846 @@ Reusable workflows ช่วยลดความซ้ำซ้อนและ�
    ```
 
 เทคนิคเหล่านี้ช่วยให้ workflow ของคุณทำงานเร็วขึ้น มีประสิทธิภาพมากขึ้น และง่ายต่อการบำรุงรักษา ลดเวลาในการรอ CI/CD และช่วยให้ทีมพัฒนาได้รวดเร็วขึ้น
+
+## 🔥 ตัวอย่างการใช้งาน GitHub Actions (Workshop + Use Cases)
+
+## 🔹 9. Basic CI/CD Pipelines
+
+### ✅ Example 1: รัน Unit Tests อัตโนมัติ
+
+การรัน unit tests อัตโนมัติเมื่อมีการ push โค้ดเป็นส่วนสำคัญของ CI เพื่อยืนยันว่าโค้ดใหม่ไม่สร้างปัญหา:
+
+```yaml
+# .github/workflows/unit-tests.yml
+name: Run Unit Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests
+        run: npm test
+        
+      - name: Generate test coverage report
+        run: npm run test:coverage
+        
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+```
+
+**ข้อดี**:
+- รันเทสต์อัตโนมัติทุกครั้งที่มีการ push หรือ pull request
+- สร้างรายงานความครอบคลุมของเทสต์ (test coverage)
+- เก็บรายงานเป็น artifact สำหรับดูภายหลัง
+
+### ✅ Example 2: Linting และ Code Quality Checks
+
+การตรวจสอบคุณภาพโค้ดช่วยให้โค้ดสะอาด มีมาตรฐาน และลดปัญหาที่อาจเกิดขึ้น:
+
+```yaml
+# .github/workflows/code-quality.yml
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run ESLint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+        
+      - name: Run Prettier
+        run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}"
+  
+  sonarcloud:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+```
+
+**ข้อดี**:
+- ตรวจสอบและบังคับใช้รูปแบบโค้ด (code style)
+- ตรวจหาปัญหาที่อาจเกิดขึ้น (potential bugs)
+- วิเคราะห์คุณภาพโค้ดด้วย SonarCloud
+
+### ✅ Example 3: Auto Build & Test สำหรับ Frontend
+
+สำหรับโปรเจค frontend เช่น React, Vue หรือ Angular สามารถสร้าง workflow เพื่อ build และทดสอบอัตโนมัติ:
+
+```yaml
+# .github/workflows/frontend-ci.yml
+name: Frontend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+        
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run lint
+        run: npm run lint
+        
+      - name: Run unit tests
+        run: npm run test:ci
+        
+      - name: Build
+        run: npm run build
+        
+      - name: Run E2E tests
+        run: npm run e2e:headless
+        
+      - name: Archive build
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: frontend/build/
+```
+
+**ข้อดี**:
+- จำกัดการทำงานเฉพาะเมื่อมีการเปลี่ยนแปลงโค้ดใน directory frontend
+- รัน unit tests และ E2E tests
+- จัดเก็บ build artifacts สำหรับการตรวจสอบหรือการ deploy
+
+## 🔹 10. Deployment Pipelines
+
+### ✅ Example 4: Deploy React/Vue/Angular ไปที่ GitHub Pages
+
+การ deploy Single Page Application (SPA) ไปยัง GitHub Pages อัตโนมัติ:
+
+```yaml
+# .github/workflows/github-pages-deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - '.github/workflows/github-pages-deploy.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build
+        env:
+          PUBLIC_URL: /${{ github.event.repository.name }}
+          
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          branch: gh-pages
+          clean: true
+```
+
+**ข้อดี**:
+- Deploy อัตโนมัติเมื่อมีการ push ไปยัง main branch
+- จำกัดการทำงานเฉพาะเมื่อมีการเปลี่ยนแปลงไฟล์สำคัญ
+- ตั้งค่า PUBLIC_URL สำหรับ subdirectory การ deploy
+
+### ✅ Example 5: Build & Push Docker Image ไปที่ Docker Hub
+
+การสร้างและ push Docker image ไปยัง Docker Hub อัตโนมัติ:
+
+```yaml
+# .github/workflows/docker-build-push.yml
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: username/appname
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=username/appname:buildcache
+          cache-to: type=registry,ref=username/appname:buildcache,mode=max
+```
+
+**ข้อดี**:
+- สร้าง tags อัตโนมัติจากชื่อ branch, PR หรือ version tags
+- รองรับ multi-architecture builds ด้วย QEMU
+- ใช้ cache เพื่อเร็วขึ้นในการ build
+- แยก build-only สำหรับ PR และ build-and-push สำหรับ push หรือ tag
+
+### ✅ Example 6: Deploy ไปที่ AWS (EC2, S3, Lambda)
+
+การ deploy ไปยัง AWS ด้วยการรวม AWS CLI และ Configure AWS credentials action:
+
+```yaml
+# .github/workflows/aws-deploy.yml
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy-to-s3:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+          
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+          
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} --delete
+          
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          
+  deploy-lambda:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    needs: deploy-to-s3
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+          
+      - name: Package Lambda function
+        run: |
+          cd lambda
+          npm ci
+          zip -r ../function.zip .
+          
+      - name: Deploy Lambda function
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://function.zip
+```
+
+**ข้อดี**:
+- รองรับการ deploy ทั้งแบบอัตโนมัติและ manual trigger
+- ใช้ GitHub Environments สำหรับแยก secrets และ variables
+- Deploy ไปยังหลาย services ของ AWS
+- Invalidate CloudFront cache หลัง deploy
+
+### ✅ Example 7: Deploy ไปที่ Firebase
+
+การ deploy โปรเจคไปยัง Firebase อัตโนมัติ:
+
+```yaml
+# .github/workflows/firebase-deploy.yml
+name: Deploy to Firebase
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_and_preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build
+        
+      - name: Deploy to Firebase Hosting preview channel
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: your-firebase-project-id
+          channelId: preview-${{ github.event.number || github.ref_name }}
+        
+  deploy_production:
+    name: Deploy to Firebase Hosting
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build
+        
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: your-firebase-project-id
+          channelId: live
+```
+
+**ข้อดี**:
+- สร้าง preview channels สำหรับ pull requests
+- Deploy ไปยัง production เฉพาะเมื่อ push ไปยัง main branch
+- ใช้ Firebase service account สำหรับการ authentication
+
+## 🔹 11. Advanced Use Cases
+
+### ✅ Example 8: Multi-Environment Deployment (Dev, Staging, Prod)
+
+การ deploy แบบหลายสภาพแวดล้อมแตกต่างกันตาม branch หรือแบบ manual approval:
+
+```yaml
+# .github/workflows/multi-environment-deploy.yml
+name: Multi-Environment Deployment
+
+on:
+  push:
+    branches: [develop, staging, main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+
+jobs:
+  determine_environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+    steps:
+      - id: set-env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+          
+  deploy:
+    needs: determine_environment
+    environment: ${{ needs.determine_environment.outputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build with environment variables
+        run: |
+          echo "Building for ${{ needs.determine_environment.outputs.environment }} environment"
+          npm run build:${{ needs.determine_environment.outputs.environment }}
+          
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./build s3://${{ secrets.S3_BUCKET_PREFIX }}-${{ needs.determine_environment.outputs.environment }} --delete
+          
+      - name: Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+```
+
+**ข้อดี**:
+- สามารถตรวจจับสภาพแวดล้อมจาก branch หรือ manual trigger
+- ใช้ GitHub Environments สำหรับควบคุมการ approvals
+- เรียกใช้สคริปต์ build ที่แตกต่างกันตามสภาพแวดล้อม
+- แจ้งเตือนผ่าน Slack เมื่อ deploy เสร็จสิ้น
+
+### ✅ Example 9: Automating Database Migrations
+
+การ run database migrations อัตโนมัติเมื่อมีการ deploy:
+
+```yaml
+# .github/workflows/db-migrations.yml
+name: Database Migrations
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'migrations/**'
+      - 'schema/**'
+
+jobs:
+  migrate_database:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    services:
+      # Test database for validation
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Validate migrations against test DB
+        run: |
+          npm run migrate:test
+          npm run migrate:verify
+          
+      - name: Run migrations on production DB
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: npm run migrate:production
+        
+      - name: Create migration report
+        run: npm run migrate:report > migration_report.md
+        
+      - name: Upload migration report
+        uses: actions/upload-artifact@v3
+        with:
+          name: migration-report
+          path: migration_report.md
+          
+      - name: Notify on failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[ALERT] Database migration failed!"
+          body: Migration to production DB failed. Check the logs.
+          to: dbadmin@example.com
+          from: CI System <ci@example.com>
+```
+
+**ข้อดี**:
+- รัน migrations เมื่อมีการเปลี่ยนแปลงไฟล์ที่เกี่ยวข้องกับ database
+- ทดสอบ migrations บน test database ก่อน
+- สร้างรายงานการ migrate สำหรับตรวจสอบ
+- ส่งการแจ้งเตือนทาง email เมื่อ migrations ล้มเหลว
+
+### ✅ Example 10: Monitoring & Alerts (แจ้งเตือน Slack, Discord, Email)
+
+การตั้งค่าการแจ้งเตือนผ่านช่องทางต่างๆ:
+
+```yaml
+# .github/workflows/monitoring-alerts.yml
+name: Monitoring & Alerts
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+  schedule:
+    - cron: '0 */3 * * *'  # ทุก 3 ชั่วโมง
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check API status
+        id: api_check
+        continue-on-error: true
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://api.example.com/health)
+          echo "status=$response" >> $GITHUB_OUTPUT
+          test $response -eq 200
+          
+      - name: Check website status
+        id: web_check
+        continue-on-error: true
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://www.example.com)
+          echo "status=$response" >> $GITHUB_OUTPUT
+          test $response -eq 200
+          
+      - name: Send Slack notification
+        if: steps.api_check.outcome == 'failure' || steps.web_check.outcome == 'failure'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚨 System Alert!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*System Health Check Failed!*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*API Status:* ${{ steps.api_check.outcome == 'success' && '✅ OK' || '❌ Failed' }} (${{ steps.api_check.outputs.status }})"
+                    },
+                    {
+                      "type": "mrkdwn", 
+                      "text": "*Website Status:* ${{ steps.web_check.outcome == 'success' && '✅ OK' || '❌ Failed' }} (${{ steps.web_check.outputs.status }})"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          
+      - name: Send Discord notification
+        if: steps.api_check.outcome == 'failure' || steps.web_check.outcome == 'failure'
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "System Health Check Failed!"
+          description: |
+            API Status: ${{ steps.api_check.outcome == 'success' && '✅ OK' || '❌ Failed' }} (${{ steps.api_check.outputs.status }})
+            Website Status: ${{ steps.web_check.outcome == 'success' && '✅ OK' || '❌ Failed' }} (${{ steps.web_check.outputs.status }})
+          color: 0xff0000
+          
+      - name: Send Email Alert
+        if: steps.api_check.outcome == 'failure' || steps.web_check.outcome == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "🚨 System Health Alert"
+          body: |
+            System health check has detected issues:
+            
+            API Status: ${{ steps.api_check.outcome == 'success' && 'OK' || 'Failed' }} (${{ steps.api_check.outputs.status }})
+            Website Status: ${{ steps.web_check.outcome == 'success' && 'OK' || 'Failed' }} (${{ steps.web_check.outputs.status }})
+            
+            Please check systems immediately.
+          to: ops-team@example.com
+          from: Monitoring System <alerts@example.com>
+```
+
+**ข้อดี**:
+- ตรวจสุขภาพระบบตามระยะเวลาที่กำหนด
+- ส่งการแจ้งเตือนผ่าน Slack, Discord และอีเมล
+- รายงานสถานะที่เฉพาะเจาะจงของแต่ละส่วนของระบบ
+- รันหลังจาก workflow CI/CD เสร็จสิ้นเพื่อตรวจสอบหลัง deploy
+
+### ✅ Example 11: ใช้ GitHub Actions กับ Monorepo
+
+การจัดการ workflow สำหรับ monorepo ที่มีหลาย projects:
+
+```yaml
+# .github/workflows/monorepo.yml
+name: Monorepo CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      api: ${{ steps.filter.outputs.api }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'shared/**'
+            frontend:
+              - 'frontend/**'
+              - 'shared/**'
+            api:
+              - 'api/**'
+              - 'shared/**'
+            docs:
+              - 'docs/**'
+              - '**/*.md'
+  
+  backend:
+    needs: detect_changes
+    if: ${{ needs.detect_changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests
+        run: npm test
+        
+      - name: Build
+        run: npm run build
+  
+  frontend:
+    needs: detect_changes
+    if: ${{ needs.detect_changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests
+        run: npm test
+        
+      - name: Build
+        run: npm run build
+  
+  deploy:
+    needs: [detect_changes, backend, frontend]
+    # รันเมื่อมีการเปลี่ยนแปลงอย่างน้อย 1 โปรเจกต์และทุก jobs ที่เกี่ยวข้องสำเร็จ
+    if: |
+      always() &&
+      (needs.detect_changes.outputs.backend == 'true' || 
+       needs.detect_changes.outputs.frontend == 'true' || 
+       needs.detect_changes.outputs.api == 'true') &&
+      !contains(needs.*.result, 'failure') &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy backend
+        if: needs.detect_changes.outputs.backend == 'true'
+        run: echo "Deploying backend..."
+      
+      - name: Deploy frontend
+        if: needs.detect_changes.outputs.frontend == 'true'
+        run: echo "Deploying frontend..."
+      
+      - name: Deploy API
+        if: needs.detect_changes.outputs.api == 'true'
+        run:
+```
