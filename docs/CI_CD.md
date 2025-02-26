@@ -630,3 +630,384 @@ jobs:
         env:
           DEPLOY_KEY: ${{ secrets.PRODUCTION_DEPLOY_KEY }}
 ```
+
+## 🔹 7. Debugging & Monitoring GitHub Actions
+
+การดีบักและติดตามการทำงานของ GitHub Actions เป็นทักษะสำคัญในการแก้ไขปัญหาและปรับปรุงประสิทธิภาพของ workflow
+
+### การดู Logs
+
+GitHub มีระบบ logs ที่ช่วยให้เราตรวจสอบการทำงานของ workflow ได้อย่างละเอียด:
+
+1. **การเข้าถึง Workflow Logs**:
+   - ไปที่ repository > Actions tab
+   - เลือก workflow run ที่ต้องการตรวจสอบ
+   - คลิกที่ job เพื่อดูรายละเอียดของแต่ละ step
+
+2. **การอ่าน Logs**:
+   - แต่ละ step มีลูกศรสำหรับขยาย/ย่อ logs
+   - สามารถค้นหาข้อความใน logs ได้
+   - ดาวน์โหลด logs เป็นไฟล์ได้โดยใช้ปุ่มด้านบนขวา
+
+3. **องค์ประกอบของ Logs**:
+   - เวลาเริ่มต้นและสิ้นสุดของแต่ละ step
+   - คำสั่งที่รันและผลลัพธ์
+   - สถานะการทำงาน (success/failure)
+   - ข้อความ warning และ error
+
+```
+[2023-05-15 10:15:22] Starting: Setup Node.js
+[2023-05-15 10:15:24] Node.js 16.x installed successfully
+[2023-05-15 10:15:25] Completed: Setup Node.js
+```
+
+### การใช้ debug logs
+
+เมื่อต้องการข้อมูลเพิ่มเติมเกี่ยวกับการทำงานของ workflow สามารถเปิดใช้ debug logs ได้:
+
+1. **การเปิดใช้งาน Debug Logs**:
+   - สร้าง repository secret ชื่อ `ACTIONS_RUNNER_DEBUG` ค่าเป็น `true`
+   - หรือสร้าง repository secret ชื่อ `ACTIONS_STEP_DEBUG` ค่าเป็น `true`
+
+2. **การดู Debug Output ใน Actions Runner**:
+   ```yaml
+   steps:
+     - name: Show debug info
+       env:
+         RUNNER_DEBUG: 1
+       run: |
+         echo "Debug information"
+   ```
+
+3. **Debug ด้วย `set-output`**:
+   ```yaml
+   steps:
+     - name: Set output
+       id: debug-step
+       run: echo "::set-output name=debug-data::This is debug data"
+       
+     - name: Use output
+       run: echo "${{ steps.debug-step.outputs.debug-data }}"
+   ```
+
+### วิธีรีรัน Workflow
+
+มีหลายวิธีในการรีรัน workflow ที่ล้มเหลวหรือต้องการทดสอบซ้ำ:
+
+1. **รีรันทั้ง Workflow**:
+   - ไปที่หน้า workflow run ที่ต้องการรีรัน
+   - คลิกปุ่ม "Re-run all jobs" ที่มุมขวาบน
+
+2. **รีรันเฉพาะ Jobs ที่ล้มเหลว**:
+   - ไปที่หน้า workflow run
+   - คลิกปุ่ม "Re-run failed jobs" (จะปรากฏเมื่อมีงานที่ล้มเหลว)
+
+3. **รีรันผ่าน API**:
+   ```bash
+   curl -X POST \
+     -H "Authorization: token $GITHUB_TOKEN" \
+     -H "Accept: application/vnd.github.v3+json" \
+     https://api.github.com/repos/OWNER/REPO/actions/runs/RUN_ID/rerun
+   ```
+
+### Debugging Techniques
+
+เทคนิคขั้นสูงสำหรับการดีบัก workflow:
+
+1. **ใช้ `tmate` สำหรับ Interactive Debugging**:
+   ```yaml
+   steps:
+     - uses: actions/checkout@v3
+     
+     - name: Setup tmate session
+       uses: mxschmitt/action-tmate@v3
+       if: ${{ failure() }}  # รันเมื่อ step ก่อนหน้าล้มเหลว
+   ```
+
+2. **ตรวจสอบตัวแปรและสภาพแวดล้อม**:
+   ```yaml
+   - name: Debug environment
+     run: |
+       echo "GitHub workspace: $GITHUB_WORKSPACE"
+       echo "GitHub event name: $GITHUB_EVENT_NAME"
+       echo "GitHub ref: $GITHUB_REF"
+       env
+   ```
+
+3. **แสดงข้อมูลเกี่ยวกับ Runner**:
+   ```yaml
+   - name: Debug runner
+     run: |
+       echo "OS: $(uname -a)"
+       echo "Disk space:"
+       df -h
+       echo "Installed packages:"
+       if [ -x "$(command -v apt)" ]; then
+         apt list --installed
+       elif [ -x "$(command -v brew)" ]; then
+         brew list
+       elif [ -x "$(command -v yum)" ]; then
+         yum list installed
+       fi
+   ```
+
+4. **สร้าง Artifacts สำหรับตรวจสอบ**:
+   ```yaml
+   - name: Generate debug info
+     run: |
+       mkdir -p debug-info
+       env > debug-info/environment.txt
+       npm list > debug-info/npm-packages.txt
+     
+   - name: Upload debug info
+     uses: actions/upload-artifact@v3
+     with:
+       name: debug-artifacts
+       path: debug-info
+   ```
+
+## 🔹 8. Optimizing GitHub Actions Workflows
+
+การปรับปรุงประสิทธิภาพของ workflow ช่วยประหยัดเวลาและทรัพยากร ทำให้กระบวนการ CI/CD เร็วขึ้นและมีประสิทธิภาพมากขึ้น
+
+### ลดระยะเวลา Execution
+
+1. **ใช้ GitHub-hosted runner ที่เหมาะสม**:
+   - `ubuntu-latest` มีประสิทธิภาพสูงกว่า Windows และ macOS
+   ```yaml
+   jobs:
+     build:
+       # เลือก OS ที่เร็วที่สุดสำหรับงาน
+       runs-on: ubuntu-latest
+   ```
+
+2. **ลดขนาดของ Repository**:
+   ```yaml
+   - name: Checkout
+     uses: actions/checkout@v3
+     with:
+       fetch-depth: 1  # ดึงเฉพาะ commit ล่าสุด
+   ```
+
+3. **ปรับแต่ง Timeout**:
+   ```yaml
+   jobs:
+     build:
+       runs-on: ubuntu-latest
+       timeout-minutes: 10  # กำหนด timeout สำหรับทั้ง job
+       
+       steps:
+         - name: Long running process
+           timeout-minutes: 5  # กำหนด timeout สำหรับเฉพาะ step
+           run: ./long_process.sh
+   ```
+
+4. **หลีกเลี่ยงการติดตั้งซอฟต์แวร์ที่ไม่จำเป็น**:
+   ```yaml
+   - name: Setup Node.js
+     uses: actions/setup-node@v3
+     with:
+       node-version: '16'
+       # ลดเวลาด้วยการติดตั้งเฉพาะที่จำเป็น
+       check-latest: false
+   ```
+
+### ใช้ Caching (actions/cache)
+
+การใช้ cache ช่วยลดเวลาในการดาวน์โหลดและติดตั้งแพ็คเกจต่างๆ:
+
+1. **Cache สำหรับ npm/yarn**:
+   ```yaml
+   - name: Cache dependencies
+     uses: actions/cache@v3
+     with:
+       path: ~/.npm
+       key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+       restore-keys: |
+         ${{ runner.os }}-node-
+   ```
+
+2. **Cache สำหรับ pip (Python)**:
+   ```yaml
+   - name: Cache pip packages
+     uses: actions/cache@v3
+     with:
+       path: ~/.cache/pip
+       key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+       restore-keys: |
+         ${{ runner.os }}-pip-
+   ```
+
+3. **Cache สำหรับ Gradle**:
+   ```yaml
+   - name: Cache Gradle packages
+     uses: actions/cache@v3
+     with:
+       path: |
+         ~/.gradle/caches
+         ~/.gradle/wrapper
+       key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+       restore-keys: |
+         ${{ runner.os }}-gradle-
+   ```
+
+4. **การใช้ cache ร่วมกับ setup-* actions**:
+   ```yaml
+   - name: Setup Node.js
+     uses: actions/setup-node@v3
+     with:
+       node-version: '16'
+       cache: 'npm'  # ทำ cache โดยอัตโนมัติ
+   ```
+
+### Reusable Workflows
+
+Reusable workflows ช่วยลดความซ้ำซ้อนและทำให้การจัดการ workflow ง่ายขึ้น:
+
+1. **การสร้าง Reusable Workflow**:
+   ```yaml
+   # .github/workflows/reusable.yml
+   name: Reusable workflow
+   
+   on:
+     workflow_call:
+       inputs:
+         node-version:
+           required: true
+           type: string
+       secrets:
+         token:
+           required: true
+   
+   jobs:
+     build:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v3
+         
+         - name: Setup Node
+           uses: actions/setup-node@v3
+           with:
+             node-version: ${{ inputs.node-version }}
+   ```
+
+2. **การเรียกใช้ Reusable Workflow**:
+   ```yaml
+   # .github/workflows/caller.yml
+   name: Caller workflow
+   
+   on:
+     push:
+       branches: [ main ]
+   
+   jobs:
+     call-workflow:
+       uses: ./.github/workflows/reusable.yml
+       with:
+         node-version: '16'
+       secrets:
+         token: ${{ secrets.GITHUB_TOKEN }}
+   ```
+
+3. **ตัวอย่าง Reusable Workflow สำหรับ Deploy**:
+   ```yaml
+   # .github/workflows/deploy-reusable.yml
+   name: Reusable Deploy
+   
+   on:
+     workflow_call:
+       inputs:
+         environment:
+           required: true
+           type: string
+   
+   jobs:
+     deploy:
+       runs-on: ubuntu-latest
+       environment: ${{ inputs.environment }}
+       steps:
+         # ขั้นตอนการ deploy
+   ```
+
+### Parallel & Matrix Jobs
+
+การใช้ parallel jobs และ matrix strategy ช่วยให้สามารถรันงานหลายๆ งานพร้อมกัน:
+
+1. **การใช้ Matrix Strategy**:
+   ```yaml
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       strategy:
+         matrix:
+           node-version: [14.x, 16.x, 18.x]
+           os: [ubuntu-latest, windows-latest]
+           # สามารถยกเว้นบาง combination ได้
+           exclude:
+             - os: windows-latest
+               node-version: 14.x
+       
+       steps:
+         - uses: actions/checkout@v3
+         - name: Use Node.js ${{ matrix.node-version }}
+           uses: actions/setup-node@v3
+           with:
+             node-version: ${{ matrix.node-version }}
+         - run: npm test
+   ```
+
+2. **การแบ่งงานทดสอบ**:
+   ```yaml
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       strategy:
+         matrix:
+           test-group: [unit, integration, e2e]
+       
+       steps:
+         - uses: actions/checkout@v3
+         - name: Run ${{ matrix.test-group }} tests
+           run: npm run test:${{ matrix.test-group }}
+   ```
+
+3. **Job Dependencies**:
+   ```yaml
+   jobs:
+     setup:
+       runs-on: ubuntu-latest
+       # การสร้าง output สำหรับงานอื่น
+       outputs:
+         matrix: ${{ steps.set-matrix.outputs.matrix }}
+       steps:
+         - id: set-matrix
+           run: echo "::set-output name=matrix::{\"include\":[{\"project\":\"foo\",\"config\":\"Debug\"},{\"project\":\"bar\",\"config\":\"Release\"}]}"
+     
+     build:
+       needs: setup
+       runs-on: ubuntu-latest
+       strategy:
+         matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+       steps:
+         - run: build.sh ${{ matrix.project }} ${{ matrix.config }}
+   ```
+
+4. **การเพิ่มประสิทธิภาพด้วย fail-fast**:
+   ```yaml
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       strategy:
+         # หยุดทุก jobs เมื่อมี job หนึ่งล้มเหลว
+         fail-fast: true
+         # หรือยกเลิกการหยุดอัตโนมัติ
+         # fail-fast: false
+         matrix:
+           node-version: [14.x, 16.x, 18.x]
+       
+       steps:
+         - uses: actions/checkout@v3
+         - run: npm test
+   ```
+
+เทคนิคเหล่านี้ช่วยให้ workflow ของคุณทำงานเร็วขึ้น มีประสิทธิภาพมากขึ้น และง่ายต่อการบำรุงรักษา ลดเวลาในการรอ CI/CD และช่วยให้ทีมพัฒนาได้รวดเร็วขึ้น
