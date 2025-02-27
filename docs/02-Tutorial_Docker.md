@@ -158,33 +158,33 @@ graph TD
 อัพเดตแพ็คเกจเพื่อให้มั่นใจว่าระบบเป็นเวอร์ชันล่าสุด:
 
 ```bash
-sudo apt update
-sudo apt upgrade -y
+apt update
+apt upgrade -y
 ```
 
 ติดตั้งแพ็คเกจที่จำเป็นสำหรับการติดตั้ง Docker:
 
 ```bash
-sudo apt install apt-transport-https ca-certificates curl gnupg lsb-release -y
+apt install apt-transport-https ca-certificates curl gnupg lsb-release -y
 ```
 
 เพิ่ม Docker GPG key เพื่อให้ระบบเชื่อถือแหล่งที่มาของแพ็คเกจ:
 
 ```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 ```
 
 เพิ่ม Docker repository เข้าสู่ระบบ:
 
 ```bash
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 
 ติดตั้ง Docker Engine และ components ที่เกี่ยวข้อง:
 
 ```bash
-sudo apt update
-sudo apt install docker-ce docker-ce-cli containerd.io -y
+apt update
+apt install docker-ce docker-ce-cli containerd.io -y
 ```
 
 ตรวจสอบการติดตั้งโดยดูเวอร์ชัน Docker:
@@ -196,7 +196,7 @@ docker --version
 ตรวจสอบว่า Docker daemon กำลังทำงานอยู่:
 
 ```bash
-sudo systemctl status docker
+systemctl status docker
 ```
 
 #### 2.1.2 บน Windows
@@ -242,12 +242,12 @@ docker run hello-world
 
 ### 2.2 การตั้งค่าพื้นฐานหลังการติดตั้ง
 
-#### 2.2.1 การรัน Docker โดยไม่ต้องใช้ sudo (สำหรับ Linux)
+#### 2.2.1 การรัน Docker โดยไม่ต้องใช้ (สำหรับ Linux)
 
 เพิ่มผู้ใช้ปัจจุบันเข้ากลุ่ม docker เพื่อให้สามารถรันคำสั่ง Docker ได้โดยไม่ต้องใช้ sudo:
 
 ```bash
-sudo usermod -aG docker $USER
+usermod -aG docker $USER
 ```
 
 เพื่อให้การเปลี่ยนแปลงมีผล คุณจำเป็นต้อง:
@@ -271,8 +271,8 @@ docker run hello-world
 Docker Compose ไม่ได้มากับ Docker Engine โดยอัตโนมัติในระบบ Linux จึงต้องติดตั้งเพิ่มเติม:
 
 ```bash
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+curl -L "https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
 
@@ -304,7 +304,7 @@ Docker Compose มาพร้อมกับ Docker Desktop แล้ว ไม
 รีสตาร์ท Docker daemon เพื่อให้การเปลี่ยนแปลงมีผล:
 
 ```bash
-sudo systemctl restart docker
+systemctl restart docker
 ```
 
 ---
