@@ -50,6 +50,41 @@ Kubernetes ประกอบด้วยองค์ประกอบหลั
    - Volume: การจัดการพื้นที่เก็บข้อมูล
    - Namespace: การแบ่งแยกทรัพยากรในคลัสเตอร์
 
+#### แผนภาพสถาปัตยกรรม Kubernetes
+
+```mermaid
+flowchart TB
+    subgraph "Control Plane (Master Node)"
+        API[API Server] --> ETCD[etcd]
+        API --> SCH[Scheduler]
+        API --> CM[Controller Manager]
+    end
+    
+    subgraph "Worker Node 1"
+        KL1[Kubelet] --> CR1[Container Runtime]
+        KP1[Kube-proxy]
+        subgraph "Pods"
+            P1[Pod 1] --> C1[Container 1]
+            P1 --> C2[Container 2]
+        end
+    end
+    
+    subgraph "Worker Node 2"
+        KL2[Kubelet] --> CR2[Container Runtime]
+        KP2[Kube-proxy]
+        subgraph "Pods"
+            P2[Pod 2] --> C3[Container 3]
+        end
+    end
+    
+    API --> KL1
+    API --> KL2
+    CM --> KL1
+    CM --> KL2
+    SCH --> KL1
+    SCH --> KL2
+```
+
 ## ⚙️ การเตรียมสภาพแวดล้อมสำหรับ Windows User
 
 สำหรับผู้ใช้ Windows จำเป็นต้องเตรียมสภาพแวดล้อมให้พร้อมก่อนเริ่มใช้งาน Kubernetes:
@@ -178,6 +213,41 @@ Deployment เป็น resource ที่จัดการชุดของ P
 - จัดการและอัปเดตแอปพลิเคชันอย่างนุ่มนวล
 - Roll back ไปยังเวอร์ชันก่อนหน้าได้
 - Scale และ autoscale แอปพลิเคชัน
+
+#### แผนภาพกระบวนการ Deployment และ Service
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant kubectl
+    participant API as API Server
+    participant Deploy as Deployment Controller
+    participant RS as ReplicaSet Controller
+    participant Nodes as Worker Nodes
+    participant SVC as Service
+
+    User->>kubectl: kubectl apply -f deployment.yaml
+    kubectl->>API: Create Deployment
+    API->>Deploy: Notify Deployment creation
+    Deploy->>RS: Create ReplicaSet
+    RS->>Nodes: Schedule Pods
+    Nodes-->>RS: Pods Running
+    RS-->>Deploy: ReplicaSet Ready
+    Deploy-->>API: Deployment Ready
+    API-->>kubectl: Status OK
+    kubectl-->>User: Deployment created
+
+    User->>kubectl: kubectl apply -f service.yaml
+    kubectl->>API: Create Service
+    API->>SVC: Create Service
+    SVC->>Nodes: Set up kube-proxy rules
+    Nodes-->>SVC: Rules Applied
+    SVC-->>API: Service Ready
+    API-->>kubectl: Status OK
+    kubectl-->>User: Service created
+
+    Note over User,SVC: External traffic can now reach Pods
+```
 
 ### การสร้าง Deployment
 
@@ -494,6 +564,52 @@ roleRef:
   kind: Role
   name: pod-reader
   apiGroup: rbac.authorization.k8s.io
+```
+
+#### แผนภาพสิทธิ์การเข้าถึงด้วย RBAC
+
+```mermaid
+flowchart LR
+    subgraph Users
+        U1[Admin]
+        U2[Developer]
+        U3[Operator]
+    end
+
+    subgraph Roles
+        R1[Cluster Admin]
+        R2[Namespace Admin]
+        R3[Pod Reader]
+        R4[Deployment Manager]
+    end
+    
+    subgraph Resources
+        POD[Pods]
+        DEP[Deployments]
+        SVC[Services]
+        SEC[Secrets]
+        CM[ConfigMaps]
+    end
+    
+    U1 --> R1
+    U2 --> R2
+    U2 --> R4
+    U3 --> R3
+    
+    R1 --> POD
+    R1 --> DEP
+    R1 --> SVC
+    R1 --> SEC
+    R1 --> CM
+    
+    R2 --> POD
+    R2 --> DEP
+    R2 --> SVC
+    R2 --> SEC
+    R2 --> CM
+    
+    R3 --> POD
+    R4 --> DEP
 ```
 
 ### Pod Security Policies
