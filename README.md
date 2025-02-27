@@ -4,11 +4,11 @@
 
 ## สารบัญ
 
-- [Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/03-Tutorial_Git.md)
-- [Docker Command Line Exercise](docs/02-Tutorial_Docker.md)
-- [Debian Linux Exercise](docs/01-Tutorial_Debian_Linux.md)
-- [CI/CD Workshop - GitHub Actions](docs/04-Tutorial_CI_CD.md)
-- [Container Orchestration with Kubernetes](docs/05-Tutorial_Container_Orchestration.md)
+- [01 - Debian Linux Exercise](docs/01-Tutorial_Debian_Linux.md)
+- [02 - Docker Command Line Exercise](docs/02-Tutorial_Docker.md)
+- [03 - Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/03-Tutorial_Git.md)
+- [04 - CI/CD Workshop - GitHub Actions](docs/04-Tutorial_CI_CD.md)
+- [05 - Container Orchestration with Kubernetes](docs/05-Tutorial_Container_Orchestration.md)
 
 **จุดประสงค์ของหลักสูตร**
 - สามารถติดตั้ง Linux และ Prerequisite ระบบเพื่อเตรียมระบบให้พร้อมสำหรับ deploy services
