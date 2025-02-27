@@ -1,4 +1,4 @@
-name: React App CI
+name: CI
 
 on:
   push:
@@ -9,29 +9,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: react-app
+
     steps:
-      - name: Checkout code 🛎
+      - name: Checkout repository
         uses: actions/checkout@v2
-      
-      - name: Setup Node.js environment 📦
+
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-      
-      - name: Install dependencies 📦
+          
+      - name: Install dependencies
+        working-directory: react-app
         run: npm install
 
-      - name: Run tests 🧪
-        run: npm run test --if-present
+      - name: Run tests
+        working-directory: react-app
+        run: npm test -- --watchAll=false
 
-      - name: Build app 🏗
+      - name: Build React app
+        working-directory: react-app
         run: npm run build
 
-      - name: Build Docker image 🐳
-        run: docker build -t react-app:latest .
+      - name: Build Docker image
+        run: docker build -t my-react-app react-app
+
       
       - name: Ensure Docker Network Created 🌐
         run: |
@@ -40,4 +42,4 @@ jobs:
           fi
 
       - name: Run Docker container 🏃
-        run: docker run -d -p 3000:3000 --name react-app-container --network backend react-app:latest
+        run: sudo docker run -d -p 3000:80 --name react --network backend my-react-app:latest
