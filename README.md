@@ -4,7 +4,7 @@
 
 ## เนื้อหาการเรียนรู้
 
-- [Git Tutorial - จากศูนย์สู่การ Push โค้ด](docs/Git_Tutorial.md)
+- [Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/Git_Tutorial.md)
 - [Docker Command Line Exercise](docs/Docker_Exercise.md)
 - [Debian Linux Exercise](docs/Debian_Linux_Exercise.md)
 - [CI/CD Workshop - GitHub Actions](docs/CI_CD_Tutorial.md)
