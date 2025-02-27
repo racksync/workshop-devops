@@ -1,4 +1,4 @@
-name: CI
+name: React CI
 
 on:
   push:
@@ -32,8 +32,7 @@ jobs:
         run: npm run build
 
       - name: Build Docker image
-        run: docker build -t my-react-app react-app
-
+        run: docker build -f Dockerfile -t my-react-app:latest .
       
       - name: Ensure Docker Network Created 🌐
         run: |
