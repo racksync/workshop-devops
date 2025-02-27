@@ -19,5 +19,11 @@ jobs:
       - name: Remove exist container 🏺
         run: sudo docker rm -f app1
 
+      - name: Ensure Docker Network Created 🌐
+        run: |
+          if ! sudo docker network inspect backend > /dev/null 2>&1; then
+            sudo docker network create backend
+          fi
+
       - name: Run Docker Container 🏺
-        run: sudo docker run -p 80 --network backend --name app1 -d python-app:latest
+        run: sudo docker run -p 8082 --network backend --name app1 -d python-app:latest
