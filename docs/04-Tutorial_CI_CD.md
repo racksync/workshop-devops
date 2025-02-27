@@ -156,13 +156,13 @@ DevOps เป็นวัฒนธรรมและแนวทางที่�
 4. **การรัน Runner เป็น Service**:
    ```bash
    # ติดตั้งเป็น service (สำหรับ Linux)
-   sudo ./svc.sh install
+   ./svc.sh install
    
    # เริ่มการทำงาน
-   sudo ./svc.sh start
+   ./svc.sh start
    
    # ตรวจสอบสถานะ
-   sudo ./svc.sh status
+   ./svc.sh status
    ```
 
 ### การตั้งค่า Labels
@@ -188,13 +188,13 @@ jobs:
 1. **ติดตั้ง Docker**:
    ```bash
    # สำหรับ Ubuntu
-   sudo apt-get update
-   sudo apt-get install docker.io
-   sudo systemctl start docker
-   sudo systemctl enable docker
+   apt-get update
+   apt-get install docker.io
+   systemctl start docker
+   systemctl enable docker
    
    # เพิ่มผู้ใช้ runner เข้ากลุ่ม docker
-   sudo usermod -aG docker $USER
+   usermod -aG docker $USER
    ```
 
 2. **ตั้งค่า runner ให้ใช้งานร่วมกับ Docker**:
@@ -298,9 +298,9 @@ jobs:
 
 8. **การรัน Runner เป็น Service**:
    ```bash
-   sudo ./svc.sh install
-   sudo ./svc.sh start
-   sudo ./svc.sh status
+   ./svc.sh install
+   ./svc.sh start
+   ./svc.sh status
    ```
 
 การรันด้วย user ปกติช่วยลดสิทธิ์ของ runner ทำให้ระบบปลอดภัยยิ่งขึ้น
@@ -311,12 +311,12 @@ jobs:
 
 1. **หยุดการทำงานของ Runner**:
    ```bash
-   sudo ./svc.sh stop
+   ./svc.sh stop
    ```
 
 2. **ถอนการติดตั้ง Runner**:
    ```bash
-   sudo ./svc.sh uninstall
+   ./svc.sh uninstall
    ```
 
 3. **ลบไฟล์และโฟลเดอร์ของ Runner**:
