@@ -9,6 +9,9 @@
 - [03 - Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/03-Tutorial_Git.md)
 - [04 - CI/CD Workshop - GitHub Actions](docs/04-Tutorial_CI_CD.md)
 - [05 - Container Orchestration with Kubernetes](docs/05-Tutorial_Container_Orchestration.md)
+- [06 - Load Balancing & Content Delivery Networks (CDN)](docs/06-Tutorial_Load-Balance_CDN.md)
+- [07 - Project Monitoring](docs/07-Project_Monitoring.md)
+- [08 - Deploy on Platform](docs/08-Deploy-on-Platform.md)
 
 **จุดประสงค์ของหลักสูตร**
 - สามารถติดตั้ง Linux และ Prerequisite ระบบเพื่อเตรียมระบบให้พร้อมสำหรับ deploy services
