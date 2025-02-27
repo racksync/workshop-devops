@@ -26,4 +26,4 @@ jobs:
           fi
 
       - name: Run Docker Container 🏺
-        run: sudo docker run -p 8082 --network backend --name app1 -d python-app:latest
+        run: sudo docker run -p 8082:80 --network backend --name app1 -d python-app:latest

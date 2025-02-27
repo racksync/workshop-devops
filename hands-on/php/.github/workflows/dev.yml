@@ -26,4 +26,4 @@ jobs:
           fi
 
       - name: Run Docker Container 🏺
-        run: sudo docker run -p 8081 --network backend --name php-dev -d php-dev:latest
+        run: sudo docker run -p 8081:80 --network backend --name php-dev -d php-dev:latest
