@@ -138,13 +138,13 @@ DevOps เป็นวัฒนธรรมและแนวทางที่�
    ```bash
    # 1. ดาวน์โหลด runner
    mkdir actions-runner && cd actions-runner
-   curl -o actions-runner-linux-x64-2.305.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.305.0/actions-runner-linux-x64-2.305.0.tar.gz
+   curl -o actions-runner-linux-x64-2.322.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.322.0/actions-runner-linux-x64-2.322.0.tar.gz
    
    # 2. ตรวจสอบความถูกต้องของไฟล์ (optional)
-   echo "22715802b9dc9476229d2f5bc2d4e85b71c7a377 actions-runner-linux-x64-2.305.0.tar.gz" | shasum -a 256 -c
+   echo "22715802b9dc9476229d2f5bc2d4e85b71c7a377 actions-runner-linux-x64-2.322.0.tar.gz" | shasum -a 256 -c
    
    # 3. แตกไฟล์
-   tar xzf ./actions-runner-linux-x64-2.305.0.tar.gz
+   tar xzf ./actions-runner-linux-x64-2.322.0.tar.gz
    
    # 4. กำหนดค่า และลงทะเบียน runner
    ./config.sh --url https://github.com/`YOUR-ORG/YOUR-REPO` --token `YOUR_TOKEN`
