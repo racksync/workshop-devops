@@ -13,15 +13,31 @@ jobs:
       run:
         working-directory: react-app
     steps:
-      - name: Checkout code
+      - name: Checkout code 🛎
         uses: actions/checkout@v2
-      - name: Setup Node.js
+      
+      - name: Setup Node.js environment 📦
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - name: Install dependencies
+      
+      - name: Install dependencies 📦
         run: npm install
-      - name: Run tests
+
+      - name: Run tests 🧪
         run: npm run test --if-present
-      - name: Build
+
+      - name: Build app 🏗
         run: npm run build
+
+      - name: Build Docker image 🐳
+        run: docker build -t react-app:latest .
+      
+      - name: Ensure Docker Network Created 🌐
+        run: |
+          if ! sudo docker network inspect backend > /dev/null 2>&1; then
+            sudo docker network create backend
+          fi
+
+      - name: Run Docker container 🏃
+        run: docker run -d -p 3000:3000 --name react-app-container --network backend react-app:latest
