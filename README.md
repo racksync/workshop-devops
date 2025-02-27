@@ -2,12 +2,13 @@
 
 เทรนนิ่งคอร์สอบรม DevOps กึ่งปฏิบัติการแบบออนไลน์ถ่ายทอดตัวต่อตัว สำหรับผู้ที่สนใจปรับทักษะเพื่อปูพื้นฐานสู่การเป็น DevOps โดยหลักสูตร เน้นให้ผู้เข้าร่วมเข้าใจโครงสร้างพื้นฐานของระบบปฏิบัติการ Linux ซึ่งเป็นระบบปฏิบัติการที่ Cloud Provider ทั่วโลกตั้งแต่ขนาดเล็กจนถึงขนาดใหญ่เลือกใช้ ซึ่งมีความยืดหยุ่นสูงเหมาะสำหรับการนำมาให้บริการในเชิงพาณิชย์และเป็นโครงสร้างพื้นฐานของ service ขนาดใหญ่ทั่วโลก โดยหลักสูตรเริ่มตั้งแต่แนะนำโครงสร้างพื้นฐานไปจนถึงสามารถ spin-up service เพื่อ deploy infrastructure จริงสำหรับใช้ในองค์กรได้ โดยการเทรนเป็นแบบ Video Conferrence มีการบันทึกวีดีโอสำหรับผู้เข้าร่วมสามารถดูย้อนหลังเพื่อทบทวนได้ (Lifetime Access)
 
-## เนื้อหาการเรียนรู้
+## สารบัญ
 
-- [Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/Git_Tutorial.md)
-- [Docker Command Line Exercise](docs/Docker_Exercise.md)
-- [Debian Linux Exercise](docs/Debian_Linux_Exercise.md)
-- [CI/CD Workshop - GitHub Actions](docs/CI_CD_Tutorial.md)
+- [Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/03-Tutorial_Git.md)
+- [Docker Command Line Exercise](docs/02-Tutorial_Docker.md)
+- [Debian Linux Exercise](docs/01-Tutorial_Debian_Linux.md)
+- [CI/CD Workshop - GitHub Actions](docs/04-Tutorial_CI_CD.md)
+- [Container Orchestration with Kubernetes](docs/05-Tutorial_Container_Orchestration.md)
 
 **จุดประสงค์ของหลักสูตร**
 - สามารถติดตั้ง Linux และ Prerequisite ระบบเพื่อเตรียมระบบให้พร้อมสำหรับ deploy services
