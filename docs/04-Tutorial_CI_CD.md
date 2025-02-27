@@ -1,6 +1,7 @@
 # CI/CD Workshop
 
 ## 📑 สารบัญ
+
 - [1. Introduction to CI/CD](#-1-introduction-to-cicd) 
 - [2. Overview of CI/CD Platforms](#-2-overview-of-cicd-platforms) 
 - [3. Getting Started with GitHub Actions](#-3-getting-started-with-github-actions) 
@@ -12,6 +13,7 @@
 - [9. Basic CI/CD Pipelines](#-9-basic-cicd-pipelines) 
 - [10. Deployment Pipelines](#-10-deployment-pipelines) 
 - [11. Advanced Use Cases](#-11-advanced-use-cases) 
+- [12. ตัวอย่าง Workflow จากโปรเจค Workshop](#-12-ตัวอย่าง-workflow-จากโปรเจค-workshop)
 
 ## 🔹 1. Introduction to CI/CD
 
@@ -1996,3 +1998,192 @@ jobs:
       - name: Deploy API
         if: needs.detect_changes.outputs.api == 'true'
         run:
+`````
+
+## 🔹 12. ตัวอย่าง Workflow จากโปรเจค Workshop
+
+ในส่วนนี้เราจะดูตัวอย่าง workflow ที่มีในโปรเจค workshop จริง ซึ่งแสดงการประยุกต์ใช้ GitHub Actions ในสถานการณ์จริง
+
+### ตัวอย่าง 1: ตัวอย่าง Workflow สำหรับ PHP Application
+
+ตัวอย่าง workflow นี้ใช้สำหรับ build Docker image จาก PHP application และ deploy ไปยัง container บน environment ที่กำหนด
+
+**workflow สำหรับ main branch:**
+
+```yaml
+# .github/workflows/main.yml
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Build Docker Image 🐳
+        run: docker build -f Dockerfile . -t php-main:latest
+
+      - name: Remove exist container 🏺
+        run: docker rm -f php-main
+
+      - name: Run Docker Container 🏺
+        run: docker run -p 80 --network backend --name php-main -d php-main:latest
+```
+
+**workflow สำหรับ dev branch:**
+
+```yaml
+# .github/workflows/dev.yml
+name: deploy
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Build Docker Image 🐳
+        run: docker build -f Dockerfile . -t php-dev:latest
+
+      - name: Remove exist container 🏺
+        run: docker rm -f php-dev:latest
+
+      - name: Run Docker Container 🏺
+        run: docker run -p 80 --network backend --name php-dev -d php-dev:latest
+```
+
+**คำอธิบาย:**
+- ใช้ self-hosted runner ในการรัน workflow ซึ่งสามารถเข้าถึงทรัพยากรเครือข่ายภายใน
+- มีการตั้งชื่อ container และ image ที่แตกต่างกันตาม branch (`php-main` vs `php-dev`)
+- มีการระบุ network ชื่อ `backend` เพื่อให้ container สามารถติดต่อกับ containers อื่นๆ ในเครือข่ายเดียวกันได้
+- ใช้สัญลักษณ์ emoji ในชื่อ step เพื่อความสวยงามและง่ายต่อการอ่าน
+
+### ตัวอย่าง 2: ตัวอย่าง Workflow สำหรับ HTML Static Website
+
+workflow นี้ใช้สำหรับ build และ deploy static HTML website ด้วย Docker:
+
+```yaml
+# .github/workflows/racksync-ci.yml
+name: racksync-ci
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+        with:
+          path: 'www1'
+
+      - name: Build Docker Image 👷🏻‍♂️
+        run: docker build www1/ -t www1
+
+      - name: Remove exist container 🚀
+        run: docker rm -f www1
+
+      - name: Run Docker Container
+        run: docker run -p 8088:80 --name www1 --restart always -d www1
+```
+
+**คำอธิบาย:**
+- ใช้ `path: 'www1'` ใน checkout action เพื่อกำหนดว่าต้องการ clone โค้ดไปยังโฟลเดอร์ `www1` แทนที่จะเป็นโฟลเดอร์ปัจจุบัน
+- สร้าง Docker image จากโค้ดในโฟลเดอร์ `www1/` และตั้งชื่อ image ว่า `www1`
+- ทำการลบ container เดิมที่มีชื่อ `www1` ก่อนที่จะสร้างใหม่ เพื่อหลีกเลี่ยงความขัดแย้งของชื่อ
+- รัน container พร้อมกำหนดการ mapping port จาก 8088 (host) ไปยัง 80 (container)
+- ใช้ flag `--restart always` เพื่อให้ container รีสตาร์ทโดยอัตโนมัติเมื่อเกิดปัญหา หรือเมื่อ host มีการรีสตาร์ท
+
+### การเปรียบเทียบ Workflows จาก Workshop กับ Best Practices
+
+| คุณสมบัติ | Workflows จาก Workshop | Best Practices |
+|---------|-------------------|--------------|
+| **การตั้งชื่อ steps** | ✅ ใช้ emoji ทำให้อ่านง่าย | ควรใช้ชื่อที่มีความหมายชัดเจนและสามารถค้นหาได้ง่าย |
+| **การใช้ versioning** | ❌ ใช้ `@master` สำหรับ actions | ควรระบุเวอร์ชันที่แน่นอน เช่น `@v3` |
+| **กลยุทธ์การ deploy** | ใช้วิธีลบ container เก่าก่อนรันอันใหม่ | อาจพิจารณาใช้ blue-green deployment เพื่อลด downtime |
+| **การใช้ secrets** | ไม่มีการใช้ secrets ในตัวอย่าง | ควรใช้ secrets สำหรับ credentials หรือค่า sensitive |
+| **การแบ่ง environments** | มีการแยก workflow ตาม branch | ✅ เป็นวิธีที่ดีในการจัดการหลาย environment |
+
+### การปรับปรุง Workflows จาก Workshop
+
+หากต้องการปรับปรุง workflows จากตัวอย่าง สามารถทำได้ดังนี้:
+
+1. **ระบุ version ที่แน่นอนของ actions**:
+   ```yaml
+   - name: Checkout 🛎
+     uses: actions/checkout@v3  # แทนที่จะใช้ @master
+   ```
+
+2. **เพิ่มการตรวจสอบ (testing) ก่อน deploy**:
+   ```yaml
+   - name: Run tests
+     run: |
+       cd www1
+       # คำสั่งสำหรับทดสอบ เช่น
+       # npm test หรือ php vendor/bin/phpunit
+   ```
+
+3. **เพิ่ม notifications เมื่อ deploy สำเร็จหรือล้มเหลว**:
+   ```yaml
+   - name: Notify on success
+     if: success()
+     run: curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" -d '{"text":"✅ Deployment successful!"}'
+     
+   - name: Notify on failure
+     if: failure()
+     run: curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" -d '{"text":"❌ Deployment failed!"}'
+   ```
+
+4. **ใช้ Docker tags ที่มีความหมายมากขึ้น**:
+   ```yaml
+   - name: Build Docker Image 🐳
+     run: docker build -f Dockerfile . -t php-main:latest -t php-main:$(date +%Y%m%d%H%M%S)
+   ```
+
+5. **เพิ่ม health check หลังจาก deploy**:
+   ```yaml
+   - name: Health check
+     run: |
+       sleep 10  # รอให้ container เริ่มต้นอย่างสมบูรณ์
+       STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8088)
+       if [ $STATUS -ne 200 ]; then
+         echo "Health check failed with status $STATUS"
+         exit 1
+       fi
+   ```
+
+### บทเรียนจากตัวอย่าง Workshop
+
+1. **การประยุกต์ใช้ self-hosted runners**
+   - เหมาะสำหรับองค์กรที่ต้องการควบคุมสภาพแวดล้อมการ deploy
+   - สามารถเข้าถึงทรัพยากรเครือข่ายภายใน
+   - ไม่มีข้อจำกัดด้านเวลาในการรัน workflow
+
+2. **การใช้ Docker ร่วมกับ CI/CD**
+   - ทำให้การ deploy มีความคงเส้นคงวา
+   - รองรับการ roll back ได้ง่ายโดยการเปลี่ยนกลับไปใช้ image เวอร์ชันก่อนหน้า
+   - ลดปัญหา "works on my machine"
+
+3. **แนวทางการแบ่งแยก environments**
+   - การแยก workflow ตาม branch
+   - การตั้งชื่อ resources (images, containers) ที่แตกต่างกันตาม environment
+
+ตัวอย่าง workflows เหล่านี้แสดงให้เห็นถึงการใช้งาน GitHub Actions ในสถานการณ์จริง แม้จะเป็นตัวอย่างที่เรียบง่าย แต่ก็สามารถปรับปรุงและขยายเพิ่มเติมให้รองรับความต้องการที่ซับซ้อนมากขึ้นได้
