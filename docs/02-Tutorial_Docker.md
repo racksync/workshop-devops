@@ -165,7 +165,7 @@ apt upgrade -y
 ติดตั้งแพ็คเกจที่จำเป็นสำหรับการติดตั้ง Docker:
 
 ```bash
-apt install apt-transport-https ca-certificates curl gnupg lsb-release -y
+apt install apt-transport-https ca-certificates curl gnupg lsb-release curl sudo -y
 ```
 
 เพิ่ม Docker GPG key เพื่อให้ระบบเชื่อถือแหล่งที่มาของแพ็คเกจ:
