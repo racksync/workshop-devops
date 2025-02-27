@@ -14,10 +14,10 @@ jobs:
         uses: actions/checkout@master
 
       - name: Build Docker Image 🐳
-        run: docker build -f Dockerfile . -t php-main:latest
+        run: sudo docker build -f Dockerfile . -t php-main:latest
 
       - name: Remove exist container 🏺
-        run: docker rm -f php-main
+        run: sudo docker rm -f php-main
 
       - name: Run Docker Container 🏺
-        run: docker run -p 80 --network backend --name php-main -d php-main:latest
+        run: sudo docker run -p 80 --network backend --name php-main -d php-main:latest
