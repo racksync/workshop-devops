@@ -14,10 +14,10 @@ jobs:
         uses: actions/checkout@master
 
       - name: Build Docker Image 🐳
-        run: docker build -f Dockerfile . -t python-app:latest
+        run: sudo docker build -f Dockerfile . -t python-app:latest
 
       - name: Remove exist container 🏺
-        run: docker rm -f app1
+        run: sudo docker rm -f app1
 
       - name: Run Docker Container 🏺
-        run: docker run -p 80 --network backend --name app1 -d python-app:latest
+        run: sudo docker run -p 80 --network backend --name app1 -d python-app:latest
