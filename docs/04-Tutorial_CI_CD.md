@@ -242,38 +242,61 @@ jobs:
    - `--ephemeral`: รันแบบใช้ครั้งเดียวแล้วลบตัวเอง
    - `--disableupdate`: ปิดการอัปเดตอัตโนมัติ
 
-### การรัน GitHub Actions Runner ด้วย User ปกติ
+### การรัน GitHub Actions Runner 
 
 การรัน runner ด้วย user ปกติที่ไม่ใช่ root ช่วยเพิ่มความปลอดภัยและลดความเสี่ยงจากการโจมตี:
 
-1. **สร้าง User ใหม่**:
+1. **ติดตั้ง Docker ด้วย root**:
    ```bash
-   sudo useradd -m -s /bin/bash actions-runner
+   apt-get update
+   apt-get install ca-certificates curl
+   install -m 0755 -d /etc/apt/keyrings
+   curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+   chmod a+r /etc/apt/keyrings/docker.asc
+
+   echo \
+     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+     tee /etc/apt/sources.list.d/docker.list > /dev/null
+   apt-get update
+   apt-get install docker.io
+   systemctl start docker
+   systemctl enable docker
    ```
 
-2. **เปลี่ยนไปใช้ User ใหม่**:
+2. **สร้าง User ใหม่**:
    ```bash
-   sudo su - actions-runner
+   useradd -m -s /bin/bash actions-runner
    ```
 
-3. **ดาวน์โหลดและติดตั้ง Runner**:
+3. **เพิ่มผู้ใช้ runner เข้ากลุ่ม docker**:
+   ```bash
+   usermod -aG docker actions-runner
+   ```
+
+4. **เปลี่ยนไปใช้ User ใหม่**:
+   ```bash
+   su - actions-runner
+   ```
+
+5. **ดาวน์โหลดและติดตั้ง Runner**:
    ```bash
    mkdir actions-runner && cd actions-runner
    curl -o actions-runner-linux-x64-2.305.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.305.0/actions-runner-linux-x64-2.305.0.tar.gz
    tar xzf ./actions-runner-linux-x64-2.305.0.tar.gz
    ```
 
-4. **กำหนดค่าและลงทะเบียน Runner**:
+6. **กำหนดค่าและลงทะเบียน Runner**:
    ```bash
    ./config.sh --url https://github.com/YOUR-ORG/YOUR-REPO --token YOUR_TOKEN
    ```
 
-5. **เริ่มการทำงาน**:
+7. **เริ่มการทำงาน**:
    ```bash
    ./run.sh
    ```
 
-6. **การรัน Runner เป็น Service**:
+8. **การรัน Runner เป็น Service**:
    ```bash
    sudo ./svc.sh install
    sudo ./svc.sh start
