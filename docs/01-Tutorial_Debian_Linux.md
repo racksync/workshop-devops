@@ -1,4 +1,25 @@
-# Debian Linux Exercise
+# Debian Linux Tutorial
+
+## สารบัญ
+
+- [1. เริ่มต้น](#1-เริ่มต้น)
+- [2. คำสั่งพื้นฐานและการใช้งาน Terminal](#2-คำสั่งพื้นฐานและการใช้งาน-terminal)
+- [3. โครงสร้างไฟล์ใน Debian](#3-โครงสร้างไฟล์ใน-debian)
+- [4. การใช้คำสั่ง man และเอกสารช่วยเหลือ](#4-การใช้คำสั่ง-man-และเอกสารช่วยเหลือ)
+- [5. การจัดการแพ็คเกจใน Debian](#5-การจัดการแพ็คเกจใน-debian)
+- [6. การจัดการผู้ใช้และกลุ่ม](#6-การจัดการผู้ใช้และกลุ่ม)
+- [7. พื้นฐานเครือข่ายและการบริหารระบบ](#7-พื้นฐานเครือข่ายและการบริหารระบบ)
+- [8. Shell Scripting](#8-shell-scripting)
+- [9. เครื่องมือเพิ่มเติมสำหรับ DevOps](#9-เครื่องมือเพิ่มเติมสำหรับ-devops)
+- [10. การจัดการสิทธิ์ไฟล์และการบริหารโปรเซส](#10-การจัดการสิทธิ์ไฟล์และการบริหารโปรเซส)
+- [11. หัวข้อเพิ่มเติม](#11-หัวข้อเพิ่มเติม)
+- [12. ระบบไฟล์ขั้นสูง](#12-ระบบไฟล์ขั้นสูง)
+- [13. การจัดการผู้ใช้ขั้นสูง](#13-การจัดการผู้ใช้ขั้นสูง)
+- [14. ความปลอดภัยระบบ Linux](#14-ความปลอดภัยระบบ-linux)
+- [15. Systemd และการจัดการบริการ](#15-systemd-และการจัดการบริการ)
+- [16. Linux Performance Monitoring](#16-linux-performance-monitoring)
+- [17. การทำ Linux Automation](#17-การทำ-linux-automation)
+- [18. การสำรองข้อมูลและการกู้คืน](#18-การสำรองข้อมูลและการกู้คืน)
 
 ## 1. เริ่มต้น
 
@@ -396,4 +417,689 @@ find / -name "*.log"
 หาตำแหน่งของคำสั่งในระบบ
 ```sh
 which python3
+```
+
+## 12. ระบบไฟล์ขั้นสูง
+
+### 12.1 ประเภทของระบบไฟล์ใน Linux
+
+Linux รองรับระบบไฟล์หลายประเภท แต่ละประเภทมีข้อดีและข้อเสียต่างกัน:
+
+- **ext4**: ระบบไฟล์มาตรฐานของ Linux ที่มีประสิทธิภาพสูงและเสถียร
+- **XFS**: เหมาะสำหรับไฟล์ขนาดใหญ่และระบบที่มีการเขียนข้อมูลมาก
+- **Btrfs**: ระบบไฟล์รุ่นใหม่ที่มีคุณสมบัติ copy-on-write และ snapshots
+- **ZFS**: ระบบไฟล์ขั้นสูงที่มี data integrity สูงและรองรับการทำ RAID
+- **F2FS**: ออกแบบมาเพื่ออุปกรณ์ flash storage
+
+```sh
+# ตรวจสอบระบบไฟล์ของพาร์ติชัน
+sudo df -T
+
+# สร้างระบบไฟล์บน USB drive
+sudo mkfs.ext4 /dev/sdX1
+```
+
+### 12.2 LVM (Logical Volume Management)
+
+LVM ช่วยให้การจัดการพื้นที่ดิสก์มีความยืดหยุ่นมากขึ้น:
+
+```sh
+# ติดตั้ง LVM
+sudo apt install lvm2
+
+# สร้าง Physical Volume
+sudo pvcreate /dev/sdb
+
+# สร้าง Volume Group
+sudo vgcreate vg_data /dev/sdb
+
+# สร้าง Logical Volume
+sudo lvcreate -n lv_apps -L 20G vg_data
+
+# สร้างระบบไฟล์บน Logical Volume
+sudo mkfs.ext4 /dev/vg_data/lv_apps
+
+# Mount Logical Volume
+sudo mount /dev/vg_data/lv_apps /mnt/apps
+```
+
+### 12.3 RAID (Redundant Array of Independent Disks)
+
+การทำ RAID ช่วยเพิ่มประสิทธิภาพและความน่าเชื่อถือของระบบ:
+
+```sh
+# ติดตั้ง mdadm
+sudo apt install mdadm
+
+# สร้าง RAID 1 (Mirror)
+sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1
+
+# ตรวจสอบสถานะ RAID
+cat /proc/mdstat
+sudo mdadm --detail /dev/md0
+```
+
+### 12.4 การจัดการ Mount Points และ fstab
+
+การจัดการจุดเชื่อมต่อ (mount points) แบบถาวรด้วยการแก้ไขไฟล์ `/etc/fstab`:
+
+```sh
+# เพิ่มบรรทัดใน /etc/fstab สำหรับ mount อัตโนมัติเมื่อเริ่มระบบ
+/dev/vg_data/lv_apps  /mnt/apps  ext4  defaults  0  2
+
+# สำหรับ NFS
+server:/share  /mnt/nfs  nfs  defaults  0  0
+
+# สำหรับ SMB/CIFS
+//server/share  /mnt/smb  cifs  credentials=/etc/samba/credentials,uid=1000,gid=1000  0  0
+
+# ตรวจสอบ fstab หาข้อผิดพลาด
+sudo findmnt --verify
+```
+
+### 12.5 การใช้ inodes และ block
+
+```sh
+# ตรวจสอบการใช้งาน inodes
+df -i
+
+# หาโฟลเดอร์ที่มีไฟล์จำนวนมาก (ใช้ inodes เยอะ)
+find / -xdev -type f | cut -d "/" -f 2 | sort | uniq -c | sort -n
+```
+
+## 13. การจัดการผู้ใช้ขั้นสูง
+
+### 13.1 PAM (Pluggable Authentication Modules)
+
+PAM เป็นระบบรับรองตัวตนแบบโมดูลาร์ใน Linux:
+
+```sh
+# ไฟล์ตั้งค่า PAM
+ls -la /etc/pam.d/
+
+# ตัวอย่างการตั้งค่าให้ผู้ใช้ต้องมีรหัสผ่านที่ซับซ้อน
+sudo apt install libpam-pwquality
+sudo nano /etc/pam.d/common-password
+# เพิ่มพารามิเตอร์: retry=3 minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1
+```
+
+### 13.2 การจัดการสิทธิ์ขั้นสูง
+
+#### ACL (Access Control Lists)
+
+ACL ช่วยให้กำหนดสิทธิ์ได้ละเอียดมากกว่า chmod ปกติ:
+
+```sh
+# ติดตั้ง ACL
+sudo apt install acl
+
+# กำหนดสิทธิ์ให้ผู้ใช้เฉพาะ
+setfacl -m u:username:rwx file.txt
+
+# กำหนดสิทธิ์ให้กลุ่ม
+setfacl -m g:groupname:rw file.txt
+
+# แสดงการตั้งค่า ACL
+getfacl file.txt
+
+# นำ ACL ออก
+setfacl -x u:username file.txt
+```
+
+#### Sudo และ Sudoers
+
+การตั้งค่าขั้นสูงของ sudo:
+
+```sh
+# แก้ไขไฟล์ sudoers (แนะนำให้ใช้ visudo เสมอ)
+sudo visudo
+
+# ตัวอย่างการกำหนดสิทธิ์เฉพาะคำสั่ง
+username ALL=(ALL) /usr/bin/apt, /bin/systemctl restart apache2
+
+# กำหนดให้ไม่ต้องใส่รหัสผ่านเมื่อใช้ sudo
+username ALL=(ALL) NOPASSWD: ALL
+```
+
+### 13.3 Resource Limits
+
+จำกัดทรัพยากรที่ผู้ใช้สามารถใช้งานได้:
+
+```sh
+# แก้ไขไฟล์ limits.conf
+sudo nano /etc/security/limits.conf
+
+# ตัวอย่าง - จำกัดจำนวนไฟล์ที่เปิดได้
+username hard nofile 4096
+username soft nofile 1024
+
+# จำกัด CPU และ RAM ที่ใช้ได้
+username hard as 1000000
+username hard cpu 50
+```
+
+### 13.4 User Quotas
+
+จำกัดพื้นที่ดิสก์ที่ผู้ใช้สามารถใช้ได้:
+
+```sh
+# ติดตั้ง quota
+sudo apt install quota
+
+# แก้ไข /etc/fstab เพิ่ม usrquota,grpquota
+/dev/sda1 / ext4 defaults,usrquota,grpquota 0 1
+
+# Remount หรือรีบูท
+sudo mount -o remount /
+
+# เปิดใช้งาน quota
+sudo quotacheck -cugm /
+sudo quotaon -v /
+
+# กำหนด quota
+sudo edquota -u username
+sudo edquota -g groupname
+
+# ตรวจสอบ quota ที่ใช้งาน
+sudo quota -vs username
+```
+
+## 14. ความปลอดภัยระบบ Linux
+
+### 14.1 การรักษาความปลอดภัยระดับพื้นฐาน
+
+```sh
+# อัปเดตระบบสม่ำเสมอ
+sudo apt update && sudo apt upgrade
+
+# ตรวจสอบพอร์ตที่เปิดรับการเชื่อมต่อ
+sudo ss -tuln
+
+# ปิดบริการที่ไม่จำเป็น
+sudo systemctl disable SERVICE_NAME
+sudo systemctl stop SERVICE_NAME
+```
+
+### 14.2 ไฟร์วอลล์ด้วย UFW (Uncomplicated Firewall)
+
+```sh
+# ติดตั้ง UFW
+sudo apt install ufw
+
+# กำหนดกฎเบื้องต้น - ปฏิเสธการเชื่อมต่อขาเข้าทั้งหมด
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# อนุญาตบริการเฉพาะ
+sudo ufw allow ssh
+sudo ufw allow 80/tcp
+sudo ufw allow from 192.168.1.0/24 to any port 22
+
+# เปิดใช้งาน UFW
+sudo ufw enable
+
+# ตรวจสอบสถานะและกฎ
+sudo ufw status verbose
+```
+
+### 14.3 Fail2ban สำหรับป้องกันการโจมตี Brute Force
+
+```sh
+# ติดตั้ง Fail2ban
+sudo apt install fail2ban
+
+# สร้างไฟล์ตั้งค่าเอง
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo nano /etc/fail2ban/jail.local
+
+# ตัวอย่างการตั้งค่า - แบนหลังจากล็อกอินผิด 5 ครั้ง เป็นเวลา 1 ชั่วโมง
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+bantime = 3600
+
+# รีสตาร์ท Fail2ban
+sudo systemctl restart fail2ban
+
+# ตรวจสอบสถานะ
+sudo fail2ban-client status
+sudo fail2ban-client status sshd
+```
+
+### 14.4 SELinux/AppArmor
+
+#### AppArmor (มาตรฐานใน Debian/Ubuntu)
+
+```sh
+# ตรวจสอบสถานะ
+aa-status
+
+# ดูโปรไฟล์ทั้งหมด
+ls /etc/apparmor.d/
+
+# สร้างโปรไฟล์ใหม่
+sudo aa-genprof /path/to/program
+
+# เปิด/ปิดโปรไฟล์
+sudo aa-enforce /etc/apparmor.d/profile_name
+sudo aa-complain /etc/apparmor.d/profile_name
+sudo aa-disable /etc/apparmor.d/profile_name
+```
+
+#### SELinux (มาตรฐานใน Fedora/CentOS/RHEL)
+
+```sh
+# ติดตั้ง SELinux บน Debian
+sudo apt install selinux-basics selinux-policy-default
+
+# เรียกใช้ selinux-activate และรีบูท
+sudo selinux-activate
+sudo reboot
+
+# ตรวจสอบสถานะ
+sestatus
+```
+
+### 14.5 Auditd สำหรับการตรวจสอบระบบ
+
+```sh
+# ติดตั้ง auditd
+sudo apt install auditd
+
+# ตั้งค่ากฎการตรวจสอบ
+sudo nano /etc/audit/rules.d/audit.rules
+
+# เพิ่มกฎติดตามการเข้าถึงไฟล์สำคัญ
+-w /etc/passwd -p wa -k user_modification
+-w /etc/shadow -p wa -k user_modification
+-w /etc/sudoers -p wa -k sudo_modification
+
+# รีสตาร์ท auditd
+sudo systemctl restart auditd
+
+# ค้นหาข้อมูล audit
+sudo ausearch -k user_modification
+```
+
+### 14.6 การเข้ารหัสและ GPG
+
+```sh
+# สร้างคู่กุญแจ GPG
+gpg --full-generate-key
+
+# เข้ารหัสไฟล์
+gpg --encrypt --recipient user@example.com file.txt
+
+# ถอดรหัสไฟล์
+gpg --decrypt file.txt.gpg > file.txt
+
+# เซ็นไฟล์ดิจิทัล
+gpg --sign document.txt
+
+# ตรวจสอบลายเซ็น
+gpg --verify document.txt.gpg
+```
+
+### 14.7 การสแกนช่องโหว่ด้วย Lynis
+
+```sh
+# ติดตั้ง Lynis
+sudo apt install lynis
+
+# ทำการสแกนระบบ
+sudo lynis audit system
+
+# ดูรายงานล่าสุด
+cat /var/log/lynis.log
+```
+
+## 15. Systemd และการจัดการบริการ
+
+### 15.1 พื้นฐาน Systemd
+
+Systemd เป็นระบบ init และจัดการบริการหลักของ Linux สมัยใหม่:
+
+```sh
+# ตรวจสอบสถานะบริการ
+systemctl status SERVICE_NAME
+
+# เปิด/ปิดบริการ
+sudo systemctl start SERVICE_NAME
+sudo systemctl stop SERVICE_NAME
+
+# ตั้งค่าให้ทำงานเมื่อเริ่มระบบ
+sudo systemctl enable SERVICE_NAME
+sudo systemctl disable SERVICE_NAME
+
+# รีสตาร์ทบริการ
+sudo systemctl restart SERVICE_NAME
+
+# โหลดการตั้งค่าใหม่โดยไม่หยุดบริการ
+sudo systemctl reload SERVICE_NAME
+```
+
+### 15.2 การสร้าง Systemd Service เอง
+
+```sh
+# สร้างไฟล์บริการใหม่
+sudo nano /etc/systemd/system/myapp.service
+
+# ตัวอย่างไฟล์ service
+[Unit]
+Description=My Custom Application
+After=network.target
+
+[Service]
+Type=simple
+User=myuser
+WorkingDirectory=/opt/myapp
+ExecStart=/usr/bin/python3 /opt/myapp/app.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+# โหลดไฟล์บริการใหม่
+sudo systemctl daemon-reload
+sudo systemctl enable myapp
+sudo systemctl start myapp
+```
+
+### 15.3 การจัดการ Systemd Timers (ทางเลือกทดแทน Cron)
+
+```sh
+# สร้างไฟล์ timer
+sudo nano /etc/systemd/system/backup.timer
+
+# ตัวอย่างไฟล์ timer
+[Unit]
+Description=Daily backup timer
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+# สร้างไฟล์ service ที่ทำงานเมื่อ timer ทำงาน
+sudo nano /etc/systemd/system/backup.service
+
+[Unit]
+Description=Daily backup service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup-script.sh
+
+# เปิดใช้งาน timer
+sudo systemctl daemon-reload
+sudo systemctl enable backup.timer
+sudo systemctl start backup.timer
+
+# ดูรายการ timers ทั้งหมด
+systemctl list-timers
+```
+
+### 15.4 Systemd Journal
+
+```sh
+# ดูข้อความ log ล่าสุด
+journalctl -e
+
+# ดูข้อความ log ของบริการเฉพาะ
+journalctl -u SERVICE_NAME
+
+# กรองตามช่วงเวลา
+journalctl --since "2023-01-01" --until "2023-01-02"
+
+# ติดตาม log แบบเรียลไทม์
+journalctl -f
+
+# ดูข้อความ log ของการบูทครั้งล่าสุด
+journalctl -b
+```
+
+## 16. Linux Performance Monitoring
+
+### 16.1 เครื่องมือติดตามประสิทธิภาพ
+
+```sh
+# สถิติ CPU, Memory, Process
+top
+htop  # (ต้องติดตั้งเพิ่ม: sudo apt install htop)
+
+# สถานะการใช้ Memory
+free -h
+
+# การใช้งานดิสก์
+df -h
+du -sh /path/to/directory
+
+# สถิติระบบ
+vmstat 1
+```
+
+### 16.2 การใช้งาน Atop และ Iotop
+
+```sh
+# ติดตั้ง Atop และ Iotop
+sudo apt install atop iotop
+
+# ใช้งาน Atop
+atop
+
+# ดูกิจกรรม I/O ของระบบ
+sudo iotop
+```
+
+### 16.3 การเก็บข้อมูลประสิทธิภาพด้วย SAR
+
+```sh
+# ติดตั้ง SAR
+sudo apt install sysstat
+
+# เปิดใช้งานการเก็บข้อมูล
+sudo nano /etc/default/sysstat
+ENABLED="true"
+
+# รีสตาร์ทบริการ
+sudo systemctl restart sysstat
+
+# ดูรายงานประสิทธิภาพ CPU
+sar -u
+
+# ดูรายงานการใช้งาน Memory
+sar -r
+
+# ดูรายงานการใช้งานดิสก์
+sar -b
+```
+
+### 16.4 การวิเคราะห์ Network Traffic
+
+```sh
+# ติดตั้ง nethogs และ iftop
+sudo apt install nethogs iftop
+
+# ดูแบนด์วิดท์ที่ใช้โดยแต่ละโปรเซส
+sudo nethogs
+
+# ดูการใช้งานเครือข่ายแบบเรียลไทม์
+sudo iftop
+```
+
+### 16.5 การวิเคราะห์ระบบด้วย strace และ ltrace
+
+```sh
+# ติดตั้ง strace และ ltrace
+sudo apt install strace ltrace
+
+# ติดตาม system calls ของโปรเซส
+sudo strace -p PID
+
+# ติดตาม library calls ของโปรเซส
+sudo ltrace -p PID
+```
+
+## 17. การทำ Linux Automation
+
+### 17.1 Crontab ขั้นสูง
+
+```sh
+# แก้ไข crontab
+crontab -e
+
+# รูปแบบ crontab: m h dom mon dow command
+# ตัวอย่าง - รันทุกวันจันทร์เวลา 8:00
+0 8 * * 1 /path/to/script.sh
+
+# รองรับช่วงเวลาและตัวคั่น
+*/5 9-17 * * 1-5 /path/to/workday_script.sh  # ทุก 5 นาทีในเวลาทำงานวันจันทร์-ศุกร์
+```
+
+### 17.2 การใช้ Ansible สำหรับ Configuration Management
+
+```sh
+# ติดตั้ง Ansible
+sudo apt install ansible
+
+# สร้างไฟล์ inventory
+sudo nano /etc/ansible/hosts
+[webservers]
+web1.example.com
+web2.example.com
+
+# ทดสอบการเชื่อมต่อ
+ansible webservers -m ping
+
+# รันคำสั่งบนเซิร์ฟเวอร์ทั้งหมด
+ansible webservers -a "df -h"
+
+# สร้างและรัน playbook
+sudo nano webserver.yml
+---
+- hosts: webservers
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: latest
+
+# รัน playbook
+ansible-playbook webserver.yml
+```
+
+### 17.3 การใช้ Shell Script กับ Expect
+
+Expect ช่วยให้ทำงานอัตโนมัติกับโปรแกรมที่ต้องการการโต้ตอบ:
+
+```sh
+# ติดตั้ง Expect
+sudo apt install expect
+
+# ตัวอย่าง script expect
+#!/usr/bin/expect
+
+spawn ssh user@example.com
+expect "password:"
+send "your-password\r"
+expect "$ "
+send "ls -la\r"
+expect "$ "
+send "exit\r"
+expect eof
+```
+
+### 17.4 ใช้ AWK สำหรับประมวลผลข้อความขั้นสูง
+
+```sh
+# ดึงคอลัมน์เฉพาะจากไฟล์
+awk '{print $1, $3}' file.txt
+
+# คำนวณค่าเฉลี่ย
+cat values.txt | awk '{sum+=$1} END {print sum/NR}'
+
+# นับจำนวนการเกิดของแต่ละคำ
+cat file.txt | awk '{for(i=1;i<=NF;i++) words[$i]++} END {for(w in words) print w, words[w]}'
+
+# แทนที่ข้อความในไฟล์
+awk '{gsub(/old/, "new"); print}' file.txt > newfile.txt
+```
+
+### 17.5 การจัดการงาน (Jobs) ขั้นสูง
+
+```sh
+# รันงานในพื้นหลัง
+command &
+
+# แสดงรายการงานที่กำลังทำงาน
+jobs
+
+# นำงานกลับมาทำงานในพื้นหน้า
+fg %job_number
+
+# ส่งงานไปทำงานในพื้นหลัง
+bg %job_number
+
+# รันคำสั่งอย่างต่อเนื่องแม้จะออกจาก terminal (nohup)
+nohup command > output.log &
+
+# จำกัดทรัพยากรสำหรับคำสั่ง
+nice -n 19 command  # น้อยที่สุด
+sudo nice -n -20 command  # มากที่สุด
+```
+
+## 18. การสำรองข้อมูลและการกู้คืน
+
+### 18.1 การใช้ rsync สำหรับการสำรองข้อมูล
+
+```sh
+# ทำสำเนาไฟล์และโฟลเดอร์
+rsync -a source/ destination/
+
+# รวมการบีบอัด
+rsync -az source/ destination/
+
+# แสดงความคืบหน้า
+rsync -azP source/ destination/
+
+# สำรองข้อมูลไปยัง remote server
+rsync -azP source/ user@remote_host:/path/to/destination/
+
+# แบบเก็บประวัติ
+rsync -azP --link-dest=/path/to/prev_backup source/ /path/to/new_backup/
+```
+
+### 18.2 การสำรองข้อมูลด้วย Duplicity
+
+```sh
+# ติดตั้ง Duplicity
+sudo apt install duplicity
+
+# สำรองข้อมูลไปยัง FTP server
+duplicity /home/user/data ftp://user:pass@ftp.example.com/backup
+
+# สำรองข้อมูลแบบเข้ารหัส
+duplicity --encrypt-key key_id /home/user/data rsync://user@backup.example.com/backup
+
+# กู้คืนข้อมูลทั้งหมด
+duplicity restore rsync://user@backup.example.com/backup /home/user/restored_data
+```
+
+### 18.3 การสำรองและกู้คืนด้วย dd
+
+```sh
+# สำรองพาร์ติชันทั้งหมด
+sudo dd if=/dev/sda1 of=/path/to/sda1.img bs=4M status=progress
+
+# กู้คืนพาร์ติชัน
+sudo dd if=/path/to/sda1.img of=/dev/sda1 bs=4M status=progress
+
+# สำรอง MBR
+sudo dd if=/dev/sda of=mbr.img bs=512 count=1
 ```
