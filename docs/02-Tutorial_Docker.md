@@ -153,7 +153,7 @@ graph TD
 
 ### 2.1 การติดตั้ง Docker บนระบบปฏิบัติการต่าง ๆ
 
-#### 2.1.1 บน Linux (Ubuntu)
+#### 2.1.1 บน Linux (Debian)
 
 อัพเดตแพ็คเกจเพื่อให้มั่นใจว่าระบบเป็นเวอร์ชันล่าสุด:
 
@@ -171,13 +171,13 @@ apt install apt-transport-https ca-certificates curl gnupg lsb-release -y
 เพิ่ม Docker GPG key เพื่อให้ระบบเชื่อถือแหล่งที่มาของแพ็คเกจ:
 
 ```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 ```
 
 เพิ่ม Docker repository เข้าสู่ระบบ:
 
 ```bash
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 
 ติดตั้ง Docker Engine และ components ที่เกี่ยวข้อง:
