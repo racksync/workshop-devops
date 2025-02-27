@@ -325,6 +325,11 @@ jobs:
    rm -rf actions-runner
    ```
 
+4. **ลบ Token ที่ใช้ในการลงทะเบียน Runner**:
+   ```bash
+   ./config.sh remove --token YOUR_REMOVE_TOKEN
+   ```
+
 การหยุดและถอนการติดตั้ง runner ช่วยให้ระบบสะอาดและปลอดภัยเมื่อไม่ต้องการใช้งาน runner อีกต่อไป
 
 ### การตั้งค่าให้ Runner ใช้ sudo โดยไม่ต้องถามรหัสผ่าน
