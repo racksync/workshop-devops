@@ -4,14 +4,16 @@
 
 ## สารบัญ 📅
 
-- [01 - Debian Linux Exercise](docs/01-Tutorial_Debian_Linux.md)
+- [01 - Debian Linux Tutorial](docs/01-Tutorial_Debian_Linux.md)
 - [02 - Docker Command Line Exercise](docs/02-Tutorial_Docker.md)
 - [03 - Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/03-Tutorial_Git.md)
-- [04 - CI/CD Workshop - GitHub Actions](docs/04-Tutorial_CI_CD.md)
-- [05 - Container Orchestration with Kubernetes](docs/05-Tutorial_Container_Orchestration.md)
-- [06 - Load Balancing & Content Delivery Networks (CDN)](docs/06-Tutorial_Load-Balance_CDN.md)
-- [07 - Project Monitoring](docs/07-Project_Monitoring.md)
-- [08 - Deploy on Platform](docs/08-Deploy-on-Platform.md)
+- [04 - CI/CD Workshop - GitHub Actions](docs/04-Tutorial_CI_CD_GitHub.md)
+- [05 - CI/CD Workshop - GitLab CI/CD](docs/05-Tutorial_CI_CD_GitLab.md)
+- [06 - CI/CD Workshop - BitBucket Pipelines](docs/06-Tutorial_CI_CD_BitBucket.md)
+- [07 - Container Orchestration with Kubernetes](docs/07-Tutorial_Container_Orchestration.md)
+- [08 - Load Balancing & Content Delivery Networks (CDN)](docs/08-Tutorial_Load-Balance_CDN.md)
+- [09 - Project Monitoring](docs/09-Project_Monitoring.md)
+- [10 - Deploy on Platform](docs/10-Deploy-on-Platform.md)
 
 **จุดประสงค์ของหลักสูตร**
 - สามารถติดตั้ง Linux และ Prerequisite ระบบเพื่อเตรียมระบบให้พร้อมสำหรับ deploy services
