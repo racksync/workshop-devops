@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -20,25 +20,32 @@ jobs:
           node-version: '14'
           
       - name: Install dependencies
-        working-directory: react-app
+        #working-directory: react-app
         run: npm install
 
       - name: Run tests
-        working-directory: react-app
+        #working-directory: react-app
         run: npm test -- --watchAll=false
 
       - name: Build React app
-        working-directory: react-app
+        #working-directory: react-app
         run: npm run build
 
       - name: Build Docker image
-        run: docker build -f Dockerfile -t my-react-app:latest .
+        run: docker build -f Dockerfile -t react-app:latest .
       
       - name: Ensure Docker Network Created 🌐
         run: |
-          if ! sudo docker network inspect backend > /dev/null 2>&1; then
-            sudo docker network create backend
+          if ! docker network inspect backend > /dev/null 2>&1; then
+             docker network create backend
           fi
 
+      - name: Stop and remove existing Docker container 
+        run: |
+          if docker ps -a --format '{{.Names}}' | grep -Eq '^react$'; then
+            docker stop react
+            docker rm react
+          fi  
+
       - name: Run Docker container 🏃
-        run: sudo docker run -d -p 3000:80 --name react --network backend my-react-app:latest
+        run:  docker run -d -p 3001:80 --name react --network backend react-app:latest
