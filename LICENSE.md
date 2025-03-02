@@ -35,4 +35,4 @@ This License shall be governed by and construed in accordance with the laws of t
 This License constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior or contemporaneous understandings or agreements, whether written or oral.
 
 ## 10. Contact Information
-For any questions regarding this License, please contact the Licensor at devops@racksync.com
+For any questions regarding this License, please contact the Licensor at [devops@racksync.com](mailto:devops@racksync.com)
