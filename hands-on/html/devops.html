@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps - Principles and Practices</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header-section {
+            background: linear-gradient(90deg, #6c3494 0%, #8a4baf 100%);
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+            padding: 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(180deg, #6c3494 0%, #8a4baf 100%);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+        }
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            top: 15px;
+            border-radius: 50%;
+            background: #6c3494;
+            box-shadow: 0 0 0 4px rgba(108, 52, 148, 0.2);
+        }
+        .timeline-item:nth-child(even)::after {
+            left: -10px;
+        }
+        .timeline-content {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .practice-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            height: 100%;
+        }
+        .practice-card:hover {
+            transform: translateY(-5px);
+        }
+        .practice-header {
+            background-color: #6c3494;
+            color: white;
+            padding: 15px;
+        }
+        .tool-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #6c3494;
+        }
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 8px solid #e9ecef;
+            border-top-color: #6c3494;
+            animation: spin 1.5s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: rgba(108, 52, 148, 0.1);
+            color: #6c3494;
+        }
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(108, 52, 148, 0.25);
+        }
+        .footer {
+            background-color: #212529;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-gear-fill me-2"></i>DevOps Workshop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="racksync.html">Company</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="devops.html">DevOps</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/racksync/devops-workshop">Repository</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://racksync.com" target="_blank">Website</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="header-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold">DevOps Principles & Practices</h1>
+            <p class="lead">Understanding the culture, methodologies, and tools that enable rapid delivery</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row mb-5">
+            <div class="col-md-8 mx-auto text-center">
+                <h2 class="mb-4">What is DevOps?</h2>
+                <p class="lead">DevOps is a set of practices that combines software development (Dev) and IT operations (Ops) to shorten the systems development life cycle while delivering features, fixes, and updates frequently in close alignment with business objectives.</p>
+                <div class="d-flex justify-content-center mt-4">
+                    <a href="https://github.com/racksync/devops-workshop" class="btn btn-primary mx-2">Workshop Materials</a>
+                    <a href="https://racksync.com" class="btn btn-outline-primary mx-2">Visit RACKSYNC</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- DevOps Principles Cards -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-4">
+                <h2>Core DevOps Principles</h2>
+                <p class="lead">The fundamental concepts that drive DevOps culture</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="practice-card">
+                    <div class="practice-header">
+                        <h4 class="text-center mb-0">Collaboration</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <i class="bi bi-people-fill tool-icon"></i>
+                        </div>
+                        <p>Breaking down silos between development and operations teams to foster shared responsibility.</p>
+                        <ul>
+                            <li>Shared goals and objectives</li>
+                            <li>Cross-functional teams</li>
+                            <li>Transparent communication</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="practice-card">
+                    <div class="practice-header">
+                        <h4 class="text-center mb-0">Automation</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <i class="bi bi-robot tool-icon"></i>
+                        </div>
+                        <p>Reducing manual work to increase efficiency, consistency, and reliability.</p>
+                        <ul>
+                            <li>CI/CD pipelines</li>
+                            <li>Infrastructure as Code</li>
+                            <li>Automated testing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="practice-card">
+                    <div class="practice-header">
+                        <h4 class="text-center mb-0">Continuous Improvement</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <i class="bi bi-graph-up-arrow tool-icon"></i>
+                        </div>
+                        <p>Regularly implementing feedback and learning from failures to improve processes.</p>
+                        <ul>
+                            <li>Post-mortems and retrospectives</li>
+                            <li>Measurement and metrics</li>
+                            <li>Incremental change</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DevOps Timeline Section -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-4">
+                <h2>DevOps Evolution Timeline</h2>
+                <p class="lead">The journey from traditional operations to modern DevOps</p>
+            </div>
+            <div class="col-12">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Traditional IT</h4>
+                            <p>Development and operations teams work in isolation. Long release cycles with manual processes.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Agile Development</h4>
+                            <p>Faster development cycles, but operations still struggles to keep up with frequent changes.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>DevOps Emergence</h4>
+                            <p>Breaking down walls between development and operations for better collaboration.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Continuous Integration</h4>
+                            <p>Automated building and testing of code to catch issues early.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Continuous Delivery</h4>
+                            <p>Automating the release process to deploy at any time.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Modern DevOps</h4>
+                            <p>Fully integrated pipeline with infrastructure as code, monitoring, and self-healing systems.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DevOps Tools Section -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-4">
+                <h2>Essential DevOps Tools</h2>
+                <p class="lead">The technologies powering modern DevOps practices</p>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="text-center">
+                    <i class="bi bi-git tool-icon"></i>
+                    <h5>Version Control</h5>
+                    <p>Git, GitHub, GitLab</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="text-center">
+                    <i class="bi bi-infinity tool-icon"></i>
+                    <h5>CI/CD</h5>
+                    <p>Jenkins, GitHub Actions, GitLab CI</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="text-center">
+                    <i class="bi bi-boxes tool-icon"></i>
+                    <h5>Containerization</h5>
+                    <p>Docker, Kubernetes, Helm</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="text-center">
+                    <i class="bi bi-cloud-check tool-icon"></i>
+                    <h5>Infrastructure as Code</h5>
+                    <p>Terraform, Ansible, CloudFormation</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RACKSYNC DevOps Services -->
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2>RACKSYNC DevOps Services</h2>
+                <p class="lead">Expert solutions to accelerate your DevOps journey</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">DevOps Assessment</h5>
+                        <p>Evaluate your current processes and identify improvement opportunities with our comprehensive DevOps maturity assessment.</p>
+                        <a href="https://racksync.com" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">CI/CD Implementation</h5>
+                        <p>Streamline your development pipeline with automated testing, building, and deployment solutions.</p>
+                        <a href="https://racksync.com" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Kubernetes Migration</h5>
+                        <p>Modernize your applications and infrastructure with container orchestration expertise from RACKSYNC.</p>
+                        <a href="https://racksync.com" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-3">
+                    <h5>RACKSYNC DevOps Workshop</h5>
+                    <p>Comprehensive training and resources for modern DevOps practices.</p>
+                    <p><a href="https://racksync.com" class="text-white" target="_blank">https://racksync.com</a></p>
+                </div>
+                <div class="col-lg-4 mb-3">
+                    <h5>Resources</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="https://github.com/racksync/devops-workshop" class="text-white">Workshop Repository</a></li>
+                        <li><a href="racksync.html" class="text-white">About RACKSYNC</a></li>
+                        <li><a href="index.html" class="text-white">Home</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-3">
+                    <h5>Contact Us</h5>
+                    <p><i class="bi bi-envelope-fill me-2"></i> workshop@racksync.com</p>
+                    <p><i class="bi bi-github me-2"></i> <a href="https://github.com/racksync" class="text-white">github.com/racksync</a></p>
+                </div>
+            </div>
+            <hr class="bg-white">
+            <div class="text-center">
+                <p class="mb-0">© 2025 RACKSYNC. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
