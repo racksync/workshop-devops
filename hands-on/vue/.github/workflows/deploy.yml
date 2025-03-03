@@ -1,7 +1,10 @@
-name: Deploy Vue Application
+name: Deploy Vue
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
@@ -21,7 +24,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Remove exist container 🏺
-        run: docker rm -f backend
+        run: docker rm -f vue-app
 
       - name: Ensure Docker Network Created 🌐
         run: |
@@ -30,4 +33,4 @@ jobs:
           fi
 
       - name: Run Docker Container 🏺
-        run: docker run -p 8085:8080 --network backend --name backend -d vue-app:latest
+        run: docker run -p 8085:8080 --network backend --name vue-app -d vue-app:latest
