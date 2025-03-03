@@ -6,9 +6,8 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: self-hosted
-
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -16,8 +15,11 @@ jobs:
       - name: Build Docker Image 🐳
         run: sudo docker build -f Dockerfile . -t python-app:latest
 
+  deploy:
+    runs-on: self-hosted
+    steps:
       - name: Remove exist container 🏺
-        run: sudo docker rm -f app1
+        run: sudo docker rm -f python-app
 
       - name: Ensure Docker Network Created 🌐
         run: |
@@ -26,4 +28,4 @@ jobs:
           fi
 
       - name: Run Docker Container 🏺
-        run: sudo docker run -p 8082:80 --network backend --name app1 -d python-app:latest
+        run: sudo docker run -p 8083:80 --network backend --name python-app -d python-app:latest
