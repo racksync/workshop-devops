@@ -73,13 +73,14 @@ DevOps เป็นวัฒนธรรมและแนวทางที่�
 
 ### เปรียบเทียบ CI/CD Platforms ยอดนิยม
 
-| Platform | รูปแบบ | ข้อดี | ข้อเสีย |
-|----------|--------|-------|---------|
-| **GitHub Actions** | Cloud/Self-hosted | - ใช้งานง่าย<br>- รวมกับ GitHub<br>- Marketplace ใหญ่ | - เป็นแพลตฟอร์มที่ค่อนข้างใหม่กว่า |
-| **GitLab CI/CD** | Cloud/Self-hosted | - All-in-one platform<br>- Built-in container registry | - UI ซับซ้อน<br>- Self-hosted อาจยุ่งยาก |
-| **Jenkins** | Self-hosted | - Customizable<br>- Plugin ecosystem ใหญ่มาก | - ต้องการ maintenance สูง<br>- Setup ยาก |
-| **CircleCI** | Cloud/Self-hosted | - ใช้งานง่าย<br>- Orbs (reusable configurations) | - ราคาอาจแพงสำหรับทีมขนาดใหญ่ |
-| **Travis CI** | Cloud | - Setup ง่าย<br>- เหมาะกับ open source | - จำกัดความสามารถในการ customize |
+| Platform | รูปแบบ | ข้อดี | ข้อเสีย | Free Build Minutes | จุดเด่นด้าน CI/CD |
+|----------|--------|-------|---------|-------------------|------------------|
+| **GitHub Actions** | Cloud/Self-hosted | - ใช้งานง่าย<br>- รวมกับ GitHub<br>- Marketplace ใหญ่ | - เป็นแพลตฟอร์มที่ค่อนข้างใหม่กว่า | - ไม่จำกัดสำหรับ public repos<br>- 2,000 นาที/เดือนสำหรับ private repos | - Reusable workflows<br>- Matrix builds<br>- Environment protection rules<br>- รวมกับ GitHub Packages |
+| **GitLab CI/CD** | Cloud/Self-hosted | - All-in-one platform<br>- Built-in container registry | - UI ซับซ้อน<br>- Self-hosted อาจยุ่งยาก | - 400 นาที/เดือน | - Auto DevOps (สร้าง pipelines อัตโนมัติ)<br>- Multi-project pipelines<br>- SAST/DAST scanning ในตัว<br>- Review apps |
+| **Jenkins** | Self-hosted | - Customizable<br>- Plugin ecosystem ใหญ่มาก | - ต้องการ maintenance สูง<br>- Setup ยาก | - ไม่จำกัด (self-hosted) | - Pipeline-as-Code<br>- Blue-Ocean UI<br>- Shared libraries<br>- Distributed builds |
+| **CircleCI** | Cloud/Self-hosted | - ใช้งานง่าย<br>- Orbs (reusable configurations) | - ราคาอาจแพงสำหรับทีมขนาดใหญ่ | - 6,000 นาที/เดือน | - First-class Docker support<br>- SSH debugging<br>- Test splitting<br>- Resource classes |
+| **Travis CI** | Cloud | - Setup ง่าย<br>- เหมาะกับ open source | - จำกัดความสามารถในการ customize | - ไม่มีแผนฟรีสำหรับ private repos | - Auto-deployment<br>- Build matrix<br>- Cron jobs |
+| **Bitbucket Pipelines** | Cloud | - รวมกับ Bitbucket<br>- ใช้งานง่าย | - ความยืดหยุ่นน้อย | - 50 นาที/เดือน | - รวมกับ Jira/Confluence<br>- Deployments dashboard<br>- Pipes ทดแทน actions<br>- เชื่อมกับ Opsgenie |
 
 ### จุดเด่นและข้อเสียของแต่ละแพลตฟอร์ม
 
