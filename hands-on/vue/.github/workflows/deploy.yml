@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy Vue Application
 
 on:
   push:
@@ -6,9 +6,8 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: self-hosted
-
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -16,10 +15,19 @@ jobs:
         #  path: 'vue/'
 
       - name: Build Docker Image 🐳
-        run: docker build . -t vue:latest
+        run: docker build . -t vue-app:latest
 
+  deploy:
+    runs-on: self-hosted
+    steps:
       - name: Remove exist container 🏺
         run: docker rm -f backend
 
+      - name: Ensure Docker Network Created 🌐
+        run: |
+          if ! sudo docker network inspect backend > /dev/null 2>&1; then
+            sudo docker network create backend
+          fi
+
       - name: Run Docker Container 🏺
-        run: docker run -p 8080:8080 --network backend --name backend -d vue:latest
+        run: docker run -p 8085:8080 --network backend --name backend -d vue-app:latest
