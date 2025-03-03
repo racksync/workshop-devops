@@ -3,20 +3,23 @@ FROM node:lts-alpine
 # install simple http server for serving static content
 RUN npm install -g http-server
 
-# make the 'app' folder the current working directory
+# set working directory
 WORKDIR /app
 
-# copy both 'package.json' and 'package-lock.json' (if available)
-COPY app/package*.json ./
+# copy both 'package.json' and 'yarn.lock' (if available)
+COPY app/package*.json app/yarn*.lock ./
 
 # install project dependencies
-RUN npm install
+RUN yarn install
 
 # copy project files and folders to the current working directory (i.e. 'app' folder)
 COPY app/ ./
 
-# build app for production with minification
-RUN npm run build
+# build app for production with static generation
+RUN yarn generate
 
-EXPOSE 80
-CMD [ "http-server", "dist" ]
+# expose the correct port
+EXPOSE 8080
+
+# use -p flag to specify port 8080
+CMD [ "http-server", "/app/.output/public", "-p", "8080" ]
