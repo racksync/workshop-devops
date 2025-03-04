@@ -1,37 +1,48 @@
-# DevOps Learning Path by RACKSYNC CO., LTD. 🚀
+# DevOps Workshop
 
-เทรนนิ่งคอร์สอบรม DevOps กึ่งปฏิบัติการแบบออนไลน์ถ่ายทอดตัวต่อตัว สำหรับผู้ที่สนใจปรับทักษะเพื่อปูพื้นฐานสู่การเป็น DevOps โดยหลักสูตร เน้นให้ผู้เข้าร่วมเข้าใจโครงสร้างพื้นฐานของระบบปฏิบัติการ Linux ซึ่งเป็นระบบปฏิบัติการที่ Cloud Provider ทั่วโลกตั้งแต่ขนาดเล็กจนถึงขนาดใหญ่เลือกใช้ ซึ่งมีความยืดหยุ่นสูงเหมาะสำหรับการนำมาให้บริการในเชิงพาณิชย์และเป็นโครงสร้างพื้นฐานของ service ขนาดใหญ่ทั่วโลก โดยหลักสูตรเริ่มตั้งแต่แนะนำโครงสร้างพื้นฐานไปจนถึงสามารถ spin-up service เพื่อ deploy infrastructure จริงสำหรับใช้ในองค์กรได้ โดยการเทรนเป็นแบบ Video Conferrence มีการบันทึกวีดีโอสำหรับผู้เข้าร่วมสามารถดูย้อนหลังเพื่อทบทวนได้ (Lifetime Access)
+Welcome to the DevOps Workshop repository. This repository contains tutorials and guides on various DevOps tools and practices.
 
-## สารบัญ 📅
+## 📚 Table of Contents
 
-- [01 - Debian Linux Tutorial](docs/01-Tutorial_Debian_Linux.md)
-- [02 - Docker Command Line Exercise](docs/02-Tutorial_Docker.md)
-- [03 - Git Tutorial จาก Local Environment สู่การ Push โค้ด](docs/03-Tutorial_Git.md)
-- [04 - CI/CD Workshop - GitHub Actions](docs/04-Tutorial_CI_CD_GitHub.md)
-- [05 - CI/CD Workshop - GitLab CI/CD](docs/05-Tutorial_CI_CD_GitLab.md)
-- [06 - CI/CD Workshop - BitBucket Pipelines](docs/06-Tutorial_CI_CD_BitBucket.md)
-- [07 - Container Orchestration with Kubernetes](docs/07-Tutorial_Container_Orchestration.md)
-- [08 - Load Balancing & Content Delivery Networks (CDN)](docs/08-Tutorial_Load-Balance_CDN.md)
-- [09 - Project Monitoring](docs/09-Project_Monitoring.md)
-- [10 - Deploy on Platform](docs/10-Deploy-on-Platform.md)
+1. [Debian Linux Tutorial](docs/01-Tutorial_Debian_Linux.md) - Introduction to Linux commands, file system, package management, and more
+2. [Docker Tutorial](docs/02-Tutorial_Docker.md) - Learn Docker, containers, images, and Docker Compose
+3. [Git Tutorial](docs/03-Tutorial_Git.md) - Version control, branches, commits, and collaboration
+4. [CI/CD with GitHub Actions](docs/04-Tutorial_CI_CD_GitHub.md) - Continuous Integration/Continuous Deployment with GitHub Actions
+5. [CI/CD with GitLab](docs/05-Tutorial_CI_CD_GitLab.md) - Implementing CI/CD pipelines with GitLab
+6. [CI/CD with BitBucket](docs/06-Tutorial_CI_CD_BitBucket.md) - Setting up CI/CD workflows in BitBucket
+7. [CI/CD Testing & Linting](docs/07-Tutorial_CI_CD_Test_Lint.md) - Advanced testing and linting in CI/CD pipelines
+8. [Container Orchestration](docs/08-Tutorial_Container_Orchestration.md) - Introduction to Kubernetes and container orchestration
+9. [Project Monitoring](docs/09-Project_Monitoring.md) - Tools and techniques for monitoring applications
+10. [Load Balancing & CDN](docs/10-Tutorial_Load-Balance_CDN.md) - Implementing load balancing and content delivery networks
+11. [Deploy on Platforms](docs/11-Deploy-on-Platform.md) - Deploying applications to various cloud platforms
 
-**จุดประสงค์ของหลักสูตร**
-- สามารถติดตั้ง Linux และ Prerequisite ระบบเพื่อเตรียมระบบให้พร้อมสำหรับ deploy services
-- เข้าใจโครงสร้างระบบการจัดเก็บไฟล์ และสามารถใช้คำสั่งที่จำเป็นได้
-- รู้จักเครื่องมือในการ Login Secure Shell และคำสั่งพื้นฐานต่าง ๆ
-- รู้จัก Network, DNS และ Services และรู้จัก Firewall พื้นฐาน
-- ตั้งเวลาด้วย Crontab ได้
-- รู้จัก Container Technology และ Deploy Services ด้วยคำสั่งพื้นฐานได้
-- สามารถ deploy services ด้วย container technology ได้ (node.js, vue, nuxt / react, php)
-- รู้จัก source code management tooling (git based)
-- เข้าใจกลไกการทำงานของ CI/CD พื้นฐาน เพื่อต่อยอดการ deploy ด้วย Cloud Native ได้
-- สามารถ deploy reverse proxy ได้
-- สามารถ deploy monitoring system ได้
-- พัฒนาทักษะพื้นฐานสำหรับการบริหารจัดการระบบด้วย DevOps
-- สร้างความเข้าใจในแนวคิดและกระบวนการ DevOps ผสานการทำงานระหว่างการพัฒนา (Development) และการปฏิบัติการ (Operations) เพื่อเพิ่มความเร็วและความยืดหยุ่นในการพัฒนาบริการ
-- ตั้งค่าระบบและบริหารจัดการ Platform ตั้งแต่การ Spin-Up Service, การตั้งค่าเซิร์ฟเวอร์, และการใช้งาน Container (Docker)
-- สร้างทักษะในการใช้งานเครื่องมือ DevOps และใช้งาน CI/CD Pipeline เพื่ออัปเดตและปรับปรุงระบบอย่างมีประสิทธิภาพ
-- เข้าใจ concept และปฏิบัติบนพื้นฐานและหลักการของ OWASP ได้
+## 🚀 Getting Started
+
+Clone this repository to get started:
+
+```bash
+git clone https://github.com/racksync/devops-workshop.git
+cd devops-workshop
+```
+
+Follow the tutorials in the suggested order to build a comprehensive understanding of DevOps practices and tools.
+
+## 📋 Prerequisites
+
+See individual tutorials for specific prerequisites. Generally, you'll need:
+
+- A Linux-based system or WSL2 on Windows
+- Docker installed
+- Git installed
+- GitHub/GitLab/BitBucket accounts
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ### Links
 
