@@ -1,0 +1,36 @@
+pipelines:
+  default:
+    - step:
+        runs-on:
+          - self.hosted
+          - macos
+        name: Build and Run Docker Image
+        script:
+
+          # Set Docker socket path for Linux/macOS
+          - export DOCKER_HOST=unix:///var/run/docker.sock
+
+          # Set Docker socket path for Windows Docker Desktop
+          # - export DOCKER_HOST=npipe:////./pipe/docker_engine
+
+          # Check Docker status
+          - echo "Checking Docker status..."
+          - if ! docker info >/dev/null 2>&1; then echo "Docker is not running or accessible" && exit 1; fi
+          - docker info
+
+          # Disable BuildKit to avoid privileged mode issues
+          - export DOCKER_BUILDKIT=0
+
+          - echo "Building Docker image..."
+          - docker build -t html-app .
+
+          # Running
+          - echo "Running container..."
+
+          # Stop & Remove existing container
+          - echo "Stop & Remove existing container"
+          - docker stop html-app || true
+          - docker rm html-app || true
+
+          # For demonstration purposes, run the container (it will run in the background)
+          - docker run -d -p 8085:80 --name html-app html-app
