@@ -75,9 +75,9 @@ pipelines:
             - echo "Building Django Docker image for testing..."
             - docker build -t django-app-dev-test .
             - echo "Running unit tests..."
-            - docker run --rm -e DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY django-app-dev-test python manage.py test
+            - docker run --rm -e DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY -e DJANGO_SETTINGS_MODULE=django_project.settings django-app-dev-test python manage.py test
             - echo "Running Django system checks..."
-            - docker run --rm -e DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY django-app-dev-test python manage.py check
+            - docker run --rm -e DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY -e DJANGO_SETTINGS_MODULE=django_project.settings django-app-dev-test python manage.py check
             - echo "All tests passed!"
       - step:
           name: Integration Tests
@@ -93,7 +93,7 @@ pipelines:
             - docker network create test-network || true
             - docker run -d --name test-db --network test-network -e POSTGRES_PASSWORD=test postgres:13
             - echo "Running integration tests..."
-            - docker run --rm --network test-network -e DATABASE_URL=postgres://postgres:test@test-db:5432/postgres django-app-dev-test python manage.py test --tag=integration
+            - docker run --rm --network test-network -e DATABASE_URL=postgres://postgres:test@test-db:5432/postgres -e DJANGO_SETTINGS_MODULE=django_project.settings django-app-dev-test python manage.py test --tag=integration
             - echo "Cleaning up test environment..."
             - docker stop test-db || true
             - docker rm test-db || true
@@ -137,13 +137,13 @@ pipelines:
                 --network backend \
                 -e DEBUG=True \
                 -e DJANGO_VERSION=Development \
-                -e DJANGO_SETTINGS_MODULE=myproject.settings.dev \
+                -e DJANGO_SETTINGS_MODULE=django_project.settings \
                 -e DJANGO_SECRET_KEY="$DJANGO_SECRET_KEY" \
                 -e ALLOWED_HOSTS="localhost,127.0.0.1,dev.example.com" \
                 django-app-dev
             - echo "Verifying deployment..."
             - sleep 10
-            - curl -f http://localhost:8001/health-check || (echo "Health check failed"; exit 1)
+            - curl -f http://127.0.0.1:8001/health-check || (echo "Health check failed"; exit 1)
             - echo "Deployment successful!"
       - step:
           name: Post-Deployment Notifications
@@ -162,7 +162,7 @@ pipelines:
               Commit: ${BITBUCKET_COMMIT}
               Branch: ${BITBUCKET_BRANCH}
               Deployment timestamp: $(date)
-              Dev environment URL: http://dev.example.com:8001
+              Dev environment URL: http://127.0.0.1:8001
               EOF
             - cat deployment-report.txt
             - echo "Sending notification to team channels..."

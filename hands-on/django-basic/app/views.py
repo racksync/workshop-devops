@@ -1,13 +1,8 @@
-from django.shortcuts import render
-import platform
-import os
+from django.http import HttpResponse
 
 
 def index(request):
-    context = {
-        "title": "DevOps Workshop - Django Example",
-        "python_version": platform.python_version(),
-        "django_version": os.environ.get("DJANGO_VERSION", "Development"),
-        "hostname": platform.node(),
-    }
-    return render(request, "app/index.html", context)
+    return HttpResponse("Hello, world. You're at the app index.")
+
+
+# Add more views as needed

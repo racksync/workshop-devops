@@ -2,18 +2,25 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy project files
 COPY . .
 
-# Add an environment variable to ensure Django can find settings
+# Make manage.py executable
+RUN chmod +x manage.py
+
+# Add environment variables (these will be overridden by pipeline secrets)
 ENV PYTHONPATH=/app
 ENV DJANGO_SETTINGS_MODULE=django_project.settings
-
-# Remove problematic collectstatic command until project structure is fixed
-# RUN python manage.py collectstatic --noinput
+ENV PYTHONUNBUFFERED=1
+# Note: DJANGO_SECRET_KEY should be provided by the CI/CD pipeline
+# ENV DJANGO_DEBUG="True" - should also be set in pipeline
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "django_project.wsgi:application"]
+# Display a message if no secret key is provided
+CMD if [ -z "$DJANGO_SECRET_KEY" ]; then echo "WARNING: No DJANGO_SECRET_KEY provided. Using a randomly generated key."; fi && \
+    gunicorn --bind 0.0.0.0:8000 django_project.wsgi:application

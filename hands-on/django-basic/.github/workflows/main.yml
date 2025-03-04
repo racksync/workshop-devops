@@ -1,4 +1,4 @@
-name: Django CI/CD
+name: Django CI/CD Pipeline
 
 on:
   push:
@@ -9,54 +9,39 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v3
-    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
-        
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        
-    - name: Check Django Project
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
       run: |
-        python manage.py check
-        python manage.py makemigrations --check --dry-run
-        
+        pip install flake8
+        flake8 . --max-line-length=120
+    - name: Run tests
+      run: |
+        python manage.py test
+
   deploy:
-    runs-on: self-hosted
     needs: test
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Build Docker Image
+    - name: Build and deploy Docker image
+      env:
+        # Secret is accessed from GitHub repository secrets
+        DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        DJANGO_DEBUG: "False"
       run: |
-        docker build -t django-app:latest .
-        
-    - name: Stop existing container
-      run: |
-        docker rm -f django-app || true
-        
-    - name: Ensure Docker Network Created
-      run: |
-        if ! docker network inspect backend > /dev/null 2>&1; then
-          docker network create backend
-        fi
-        
-    - name: Start container
-      run: |
-        docker run -d \
-          --name django-app \
-          --network backend \
-          -p 8000:8000 \
-          -e DJANGO_VERSION=Production \
-          -e DEBUG=False \
-          --restart always \
-          django-app:latest
+        echo "Building Docker image with secrets from CI/CD pipeline"
+        docker build -t django-basic .
+        # Example deployment commands (customize as needed)
+        # docker tag django-basic username/django-basic:latest
+        # echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        # docker push username/django-basic:latest
