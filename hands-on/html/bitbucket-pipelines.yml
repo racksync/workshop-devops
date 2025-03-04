@@ -3,7 +3,6 @@ pipelines:
     - step:
         runs-on:
           - self.hosted
-          - macos
         name: Build and Run Docker Image
         script:
 

@@ -1,0 +1,78 @@
+pipelines:
+  default:
+    - step:
+        runs-on:
+          - self.hosted
+        name: Build and Run Django Docker Image
+        script:
+          # Set Docker socket path for Linux/macOS
+          - export DOCKER_HOST=unix:///var/run/docker.sock
+
+          # Set Docker socket path for Windows Docker Desktop
+          # - export DOCKER_HOST=npipe:////./pipe/docker_engine
+
+          # Check Docker status
+          - echo "Checking Docker status..."
+          - if ! docker info >/dev/null 2>&1; then echo "Docker is not running or accessible" && exit 1; fi
+          - docker info
+
+          # Disable BuildKit to avoid privileged mode issues
+          - export DOCKER_BUILDKIT=0
+
+          # Build Django Docker image
+          - echo "Building Django Docker image..."
+          - docker build -t django-app .
+
+          # Run tests inside Docker container
+          - echo "Running Django tests..."
+          - docker run --rm django-app python manage.py check
+
+          # Stop & Remove existing container
+          - echo "Stop & Remove existing container"
+          - docker stop django-app || true
+          - docker rm django-app || true
+
+          # Create backend network if it doesn't exist
+          - |
+            if ! docker network inspect backend > /dev/null 2>&1; then
+              docker network create backend
+            fi
+
+          # Start the Django application container
+          - echo "Starting Django application..."
+          - docker run -d -p 8000:8000 --name django-app --network backend -e DEBUG=False django-app
+
+  branches:
+    dev:
+      - step:
+          runs-on:
+            - self.hosted
+            - macos
+          name: Build and Deploy Django (Dev)
+          script:
+            # Set Docker socket path for Linux/macOS
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+
+            # Set Docker socket path for Windows Docker Desktop
+            # - export DOCKER_HOST=npipe:////./pipe/docker_engine
+            
+            # Disable BuildKit
+            - export DOCKER_BUILDKIT=0
+            
+            # Build Django Docker image for dev
+            - echo "Building Django Docker image (Dev)..."
+            - docker build -t django-app-dev .
+            
+            # Stop & Remove existing dev container
+            - docker stop django-app-dev || true
+            - docker rm django-app-dev || true
+            
+            # Create backend network if it doesn't exist
+            - |
+              if ! docker network inspect backend > /dev/null 2>&1; then
+                docker network create backend
+              fi
+            
+            # Start dev container on different port with DEBUG enabled
+            - echo "Starting Django dev application..."
+            - docker run -d -p 8001:8000 --name django-app-dev --network backend -e DEBUG=True -e DJANGO_VERSION=Development django-app-dev
