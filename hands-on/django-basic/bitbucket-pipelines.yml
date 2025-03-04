@@ -1,57 +1,181 @@
+image: atlassian/default-image:latest
+
+definitions:
+  services:
+    docker:
+      memory: 2048
+
 pipelines:
-  default:
-    - step:
-        runs-on:
-          - self.hosted
-          #- linux
-          - macos
-          #- windows
-        name: Build and Run Django Docker Image
-        script:
-          # Set Docker socket path for Linux/macOS
-          - export DOCKER_HOST=unix:///var/run/docker.sock
-
-          # Set Docker socket path for Windows Docker Desktop
-          # - export DOCKER_HOST=npipe:////./pipe/docker_engine
-
-          # Check Docker status
-          - echo "Checking Docker status..."
-          - if ! docker info >/dev/null 2>&1; then echo "Docker is not running or accessible" && exit 1; fi
-          - docker info
-
-          # Disable BuildKit to avoid privileged mode issues
-          - export DOCKER_BUILDKIT=0
-
-          # Build Django Docker image
-          - echo "Building Django Docker image..."
-          - docker build -t django-app .
-
-          # Run tests inside Docker container
-          - echo "Running Django tests..."
-          - docker run --rm django-app python manage.py check
-
-          # Stop & Remove existing container
-          - echo "Stop & Remove existing container"
-          - docker stop django-app || true
-          - docker rm django-app || true
-
-          # Create backend network if it doesn't exist
-          - |
-            if ! docker network inspect backend > /dev/null 2>&1; then
-              docker network create backend
-            fi
-
-          # Start the Django application container
-          - echo "Starting Django application..."
-          - docker run -d -p 8000:8000 --name django-app --network backend -e DEBUG=False django-app
-
   branches:
     dev:
       - step:
+          name: Setup & Prepare Environment
           runs-on:
             - self.hosted
+            #- linux
             - macos
-          name: Build and Deploy Django (Dev)
+            #- windows
+          script:
+            - echo "Setting up environment variables..."
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Checking Docker status..."
+            - if ! docker info >/dev/null 2>&1; then echo "Docker is not running or accessible" && exit 1; fi
+            - docker info
+            - echo "Environment setup complete"
+      - step:
+          name: Code Quality & Linting
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          script:
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Running flake8 for Python code quality..."
+            - docker build -t django-lint-image -f Dockerfile.lint .
+            - docker run --rm django-lint-image flake8 --max-line-length=120 .
+            
+            # Format code with Black using proper volume mounting
+            - echo "Formatting code with Black..."
+            - docker run -v "$(pwd)":/app:rw --user $(id -u):$(id -g) --rm django-lint-image black .
+            
+            # Now check if formatting is correct (should pass after formatting)
+            - echo "Verifying code formatting..."
+            - docker run --rm django-lint-image black --check .
+            
+            - echo "Code quality checks passed!"
+      - step:
+          name: Security Scanning
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          script:
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Running security scan on dependencies..."
+            - echo "Checking requirements.txt for vulnerabilities..."
+            - docker run --rm django-lint-image safety check -r requirements.txt
+            - echo "Running bandit for security vulnerabilities..."
+            - docker run --rm django-lint-image bandit -r . -x ./venv,./tests
+            - echo "Security scans completed!"
+      - step:
+          name: Build & Unit Tests
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          script:
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Building Django Docker image for testing..."
+            - docker build -t django-app-dev-test .
+            - echo "Running unit tests..."
+            - docker run --rm -e DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY django-app-dev-test python manage.py test
+            - echo "Running Django system checks..."
+            - docker run --rm -e DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY django-app-dev-test python manage.py check
+            - echo "All tests passed!"
+      - step:
+          name: Integration Tests
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          script:
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Starting temporary services for integration tests..."
+            - docker network create test-network || true
+            - docker run -d --name test-db --network test-network -e POSTGRES_PASSWORD=test postgres:13
+            - echo "Running integration tests..."
+            - docker run --rm --network test-network -e DATABASE_URL=postgres://postgres:test@test-db:5432/postgres django-app-dev-test python manage.py test --tag=integration
+            - echo "Cleaning up test environment..."
+            - docker stop test-db || true
+            - docker rm test-db || true
+            - docker network rm test-network || true
+      - step:
+          name: Build Final Image
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          script:
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Building final dev image with optimizations..."
+            - docker build -t django-app-dev --build-arg ENVIRONMENT=development .
+            - echo "Tagging image with build number..."
+            - docker tag django-app-dev django-app-dev:${BITBUCKET_BUILD_NUMBER}
+            - echo "Image build complete!"
+      - step:
+          name: Deploy to Dev Environment
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          script:
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Preparing for deployment to dev environment..."
+            - docker stop django-app-dev || true
+            - docker rm django-app-dev || true
+            - |
+              if ! docker network inspect backend > /dev/null 2>&1; then
+                docker network create backend
+              fi
+            - echo "Deploying to dev environment..."
+            - |
+              docker run -d -p 8001:8000 \
+                --name django-app-dev \
+                --network backend \
+                -e DEBUG=True \
+                -e DJANGO_VERSION=Development \
+                -e DJANGO_SETTINGS_MODULE=myproject.settings.dev \
+                -e DJANGO_SECRET_KEY="$DJANGO_SECRET_KEY" \
+                -e ALLOWED_HOSTS="localhost,127.0.0.1,dev.example.com" \
+                django-app-dev
+            - echo "Verifying deployment..."
+            - sleep 10
+            - curl -f http://localhost:8001/health-check || (echo "Health check failed"; exit 1)
+            - echo "Deployment successful!"
+      - step:
+          name: Post-Deployment Notifications
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          script:
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            - echo "Generating deployment report..."
+            - |
+              cat << EOF > deployment-report.txt
+              Build ${BITBUCKET_BUILD_NUMBER} deployed to Dev environment
+              Commit: ${BITBUCKET_COMMIT}
+              Branch: ${BITBUCKET_BRANCH}
+              Deployment timestamp: $(date)
+              Dev environment URL: http://dev.example.com:8001
+              EOF
+            - cat deployment-report.txt
+            - echo "Sending notification to team channels..."
+            - echo "Notification would be sent via webhook/API in real scenario"
+            - echo "Deployment process complete!"
+    main:
+      - step:
+          runs-on:
+             - self.hosted
+             #- linux
+             - macos
+             #- windows
+          name: Build and Deploy Django (Production)
           script:
             # Set Docker socket path for Linux/macOS
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -62,13 +186,13 @@ pipelines:
             # Disable BuildKit
             - export DOCKER_BUILDKIT=0
             
-            # Build Django Docker image for dev
-            - echo "Building Django Docker image (Dev)..."
-            - docker build -t django-app-dev .
+            # Build Django Docker image for production
+            - echo "Building Django Docker image (Production)..."
+            - docker build -t django-app-prod .
             
-            # Stop & Remove existing dev container
-            - docker stop django-app-dev || true
-            - docker rm django-app-dev || true
+            # Stop & Remove existing production container
+            - docker stop django-app-prod || true
+            - docker rm django-app-prod || true
             
             # Create backend network if it doesn't exist
             - |
@@ -76,6 +200,13 @@ pipelines:
                 docker network create backend
               fi
             
-            # Start dev container on different port with DEBUG enabled
-            - echo "Starting Django dev application..."
-            - docker run -d -p 8001:8000 --name django-app-dev --network backend -e DEBUG=True -e DJANGO_VERSION=Development django-app-dev
+            # Start production container with appropriate settings
+            - echo "Starting Django production application..."
+            - |
+              docker run -d -p 8000:8000 \
+                --name django-app-prod \
+                --network backend \
+                -e DEBUG=False \
+                -e DJANGO_VERSION=Production \
+                -e DJANGO_SECRET_KEY="$DJANGO_PROD_SECRET_KEY" \
+                django-app-prod
