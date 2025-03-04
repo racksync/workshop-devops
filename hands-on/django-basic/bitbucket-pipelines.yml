@@ -143,8 +143,8 @@ pipelines:
                 django-app-dev
             - echo "Verifying deployment..."
             - sleep 10
-            - curl -f http://127.0.0.1:8001/health-check || (echo "Health check failed"; exit 1)
-            - echo "Deployment successful!"
+            - curl -f http://127.0.0.1:8001 || (echo "Health check failed"; exit 1)
+            - echo "Deployment successful ✅"
       - step:
           name: Post-Deployment Notifications
           runs-on:
