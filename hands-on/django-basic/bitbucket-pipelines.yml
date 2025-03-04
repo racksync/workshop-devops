@@ -3,6 +3,9 @@ pipelines:
     - step:
         runs-on:
           - self.hosted
+          #- linux
+          - macos
+          #- windows
         name: Build and Run Django Docker Image
         script:
           # Set Docker socket path for Linux/macOS

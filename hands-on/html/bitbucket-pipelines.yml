@@ -3,6 +3,9 @@ pipelines:
     - step:
         runs-on:
           - self.hosted
+          #- linux
+          - macos
+          #- windows
         name: Build and Run Docker Image
         script:
 
