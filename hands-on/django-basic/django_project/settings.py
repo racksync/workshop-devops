@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "app",  # Add your app to installed apps
+    "registration",  # Add the registration app
 ]
 
 MIDDLEWARE = [
