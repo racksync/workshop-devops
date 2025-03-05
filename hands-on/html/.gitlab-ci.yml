@@ -23,7 +23,7 @@ build:
     - shell    # Use a runner with shell executor
     - self-hosted  # Use a self-hosted runner
   script:
-    - echo "Building Docker image..."
+    - echo "Building Docker image...."
     - docker build -t $CONTAINER_NAME:$CI_COMMIT_SHORT_SHA .
     - docker tag $CONTAINER_NAME:$CI_COMMIT_SHORT_SHA $CONTAINER_NAME:latest
     - echo "Docker image built successfully"
