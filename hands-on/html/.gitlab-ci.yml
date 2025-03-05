@@ -20,8 +20,7 @@ cache:
 build:
   stage: build
   tags:
-    - shell    # Use a runner with shell executor
-    - self-hosted  # Use a self-hosted runner
+    - html
   script:
     - echo "Building Docker image...."
     - docker build -t $CONTAINER_NAME:$CI_COMMIT_SHORT_SHA .
