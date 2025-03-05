@@ -438,3 +438,639 @@ services:
 
 volumes:
   prometheus_data
+  grafana-data:
+```
+
+### 5.2 การตั้งค่า Prometheus
+
+สร้างไฟล์ `prometheus.yml` สำหรับกำหนดค่า Prometheus:
+
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'app'
+    static_configs:
+      - targets: ['app:8000']  # พอร์ตของแอปพลิเคชัน
+```
+
+### 5.3 การตั้งค่า Alert Manager
+
+สร้างไฟล์ `alertmanager.yml` เพื่อกำหนดค่า Alert Manager:
+
+```yaml
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'email-notifications'
+
+receivers:
+- name: 'email-notifications'
+  email_configs:
+  - to: 'alerts@example.com'
+    from: 'alertmanager@example.com'
+    smarthost: 'smtp.example.com:587'
+    auth_username: 'alertmanager'
+    auth_password: 'password'
+
+- name: 'slack-notifications'
+  slack_configs:
+  - api_url: 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX'
+    channel: '#alerts'
+    send_resolved: true
+```
+
+### 5.4 การสร้าง Alert Rules
+
+สร้างไฟล์ `alert_rules.yml` เพื่อกำหนดกฎการแจ้งเตือน:
+
+```yaml
+groups:
+- name: example
+  rules:
+  - alert: HighCPULoad
+    expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU load (instance {{ $labels.instance }})"
+      description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes) / node_memory_MemTotal_bytes * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage (instance {{ $labels.instance }})"
+      description: "Memory usage is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HighDiskUsage
+    expr: 100 - ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes) > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High disk usage (instance {{ $labels.instance }})"
+      description: "Disk usage is > 85%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+```
+
+### 5.5 ตั้งค่า Application สำหรับ Monitoring
+
+#### 5.5.1 Python Application
+
+หากคุณใช้ Python, คุณสามารถใช้ `prometheus-client` package:
+
+```python
+from prometheus_client import start_http_server, Counter, Gauge, Histogram
+import random
+import time
+
+# สร้าง metrics
+REQUEST_COUNT = Counter('app_requests_total', 'Total app HTTP requests')
+REQUEST_INPROGRESS = Gauge('app_requests_inprogress', 'Number of in-progress HTTP requests')
+REQUEST_DURATION = Histogram('app_request_duration_seconds', 'HTTP request duration in seconds')
+
+# ฟังก์ชันจำลองการทำงาน
+def process_request():
+    REQUEST_COUNT.inc()
+    REQUEST_INPROGRESS.inc()
+    
+    duration = random.uniform(0.1, 0.5)
+    time.sleep(duration)
+    
+    REQUEST_INPROGRESS.dec()
+    REQUEST_DURATION.observe(duration)
+
+if __name__ == '__main__':
+    # เริ่มต้น metrics server ที่พอร์ต 8000
+    start_http_server(8000)
+    
+    # จำลองการทำงานของแอปพลิเคชัน
+    while True:
+        process_request()
+        time.sleep(random.uniform(0.1, 0.3))
+```
+
+#### 5.5.2 Node.js Application
+
+สำหรับ Node.js, คุณสามารถใช้ `prom-client`:
+
+```javascript
+const express = require('express');
+const promClient = require('prom-client');
+
+const app = express();
+const register = new promClient.Registry();
+promClient.collectDefaultMetrics({ register });
+
+const httpRequestDurationMicroseconds = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'HTTP request duration in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
+});
+
+register.registerMetric(httpRequestDurationMicroseconds);
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+app.get('/', (req, res) => {
+  const end = httpRequestDurationMicroseconds.startTimer();
+  res.send('Hello World!');
+  end({ method: 'GET', route: '/', status_code: 200 });
+});
+
+app.listen(8000, () => {
+  console.log('Server listening on port 8000');
+});
+```
+
+## 6. การประยุกต์ใช้กับ Real-World Projects
+
+### 6.1 การ Monitor Microservices Architecture
+
+การทำ monitoring สำหรับ microservices มีความซับซ้อนมากกว่า monolithic applications เนื่องจากมีหลายส่วนประกอบที่ต้องติดตาม และต้องสามารถเชื่อมโยง request ที่ผ่านบริการต่างๆ เข้าด้วยกัน
+
+#### 6.1.1 การใช้ Service Mesh
+
+Service Mesh เช่น Istio หรือ Linkerd ช่วยให้สามารถ monitor ได้แบบอัตโนมัติ โดยไม่ต้องแก้ไขโค้ด โดยจะให้ข้อมูลเช่น:
+
+- Request volume
+- Success/error rates
+- Latency
+- Service dependencies
+- Traffic flow
+
+#### 6.1.2 Distributed Tracing
+
+Distributed Tracing ช่วยให้ติดตาม request ที่ผ่านระบบ microservices ได้อย่างต่อเนื่อง เพื่อเข้าใจการทำงานของระบบและหาปัญหาได้ง่ายขึ้น
+
+เครื่องมือที่นิยมใช้:
+- Jaeger
+- Zipkin
+- OpenTelemetry
+
+ตัวอย่างการตั้งค่า OpenTelemetry สำหรับ Python:
+
+```python
+from opentelemetry import trace
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+# ตั้งค่า tracer
+resource = Resource(attributes={
+    SERVICE_NAME: "my-service"
+})
+
+jaeger_exporter = JaegerExporter(
+    agent_host_name="jaeger",
+    agent_port=6831,
+);
+
+provider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(jaeger_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+tracer = trace.get_tracer(__name__)
+
+# ใช้งาน tracer
+with tracer.start_as_current_span("my_function") as span:
+    span.set_attribute("operation.name", "processing")
+    # ดำเนินการบางอย่าง
+    result = do_something()
+    span.set_attribute("operation.result", result)
+```
+
+#### 6.1.3 Dashboard สำหรับ Microservices
+
+ตัวอย่าง Grafana dashboard ที่ควรมีสำหรับ microservices:
+
+1. **Service Overview**: แสดงภาพรวมของทุกบริการ
+2. **Service Detail**: รายละเอียดของแต่ละบริการ
+3. **Dependency Map**: แผนผังการพึ่งพากันระหว่างบริการ
+4. **Error Analysis**: วิเคราะห์ error โดยละเอียด
+5. **Trace Analysis**: แสดง trace ของ request ที่น่าสนใจ
+
+### 6.2 การ Monitor ระบบ Containerized
+
+การ monitor containers มีความแตกต่างจากการ monitor เซิร์ฟเวอร์ทั่วไป เนื่องจาก containers มีลักษณะเป็น ephemeral และมีการเปลี่ยนแปลงบ่อย
+
+#### 6.2.1 การใช้ cAdvisor
+
+cAdvisor เป็นเครื่องมือที่ออกแบบมาสำหรับเก็บ metrics จาก containers โดยเฉพาะ โดยจะให้ข้อมูลเช่น:
+
+- CPU usage
+- Memory usage
+- Network I/O
+- Disk I/O
+
+#### 6.2.2 การ Monitor Kubernetes
+
+สำหรับ Kubernetes ควรใช้ kube-state-metrics และ Prometheus เพื่อเก็บข้อมูลเกี่ยวกับ:
+
+- Node status
+- Pod status
+- Deployment status
+- ReplicaSet status
+- Resource usage vs. requests/limits
+
+ตัวอย่างการตั้งค่า kube-prometheus-stack ด้วย Helm:
+
+```bash
+# เพิ่ม Helm repo
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# ติดตั้ง kube-prometheus-stack
+helm install monitoring prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --create-namespace \
+  --set grafana.adminPassword=admin
+```
+
+#### 6.2.3 การสร้าง Custom Metrics สำหรับ Auto-scaling
+
+Kubernetes สามารถใช้ custom metrics สำหรับ auto-scaling ได้ด้วย Prometheus Adapter:
+
+```yaml
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: 100
+```
+
+### 6.3 Case Studies
+
+#### 6.3.1 E-commerce Platform
+
+บริษัท ABC ประสบปัญหา performance และ downtime บนแพลตฟอร์ม e-commerce ของพวกเขา โดยเฉพาะในช่วงการขายที่มีปริมาณสูง
+
+**แนวทางแก้ไข**:
+
+1. ติดตั้ง Prometheus และ Grafana เพื่อ monitor:
+   - API response times
+   - Database query performance
+   - Cache hit/miss rates
+   - Error rates
+
+2. สร้าง dashboards เฉพาะสำหรับ:
+   - Real-time sales monitoring
+   - Inventory system performance
+   - Payment gateway status
+   - User activity
+
+3. ตั้งค่าการแจ้งเตือนสำหรับ:
+   - Latency เกิน 500ms
+   - Error rate เกิน 1%
+   - CPU/Memory usage เกิน 80%
+
+**ผลลัพธ์**:
+- ลดเวลาในการตรวจจับปัญหาลง 75%
+- ลด downtime ลง 90%
+- เพิ่มความสามารถในการรองรับผู้ใช้ 3 เท่า
+- เพิ่มรายได้ในช่วงการขายพิเศษ 30%
+
+#### 6.3.2 SaaS Application
+
+บริษัท XYZ มี SaaS application ที่ให้บริการลูกค้าหลายราย โดยแต่ละรายใช้ทรัพยากรไม่เท่ากัน ทำให้ยากในการ monitor และ billing
+
+**แนวทางแก้ไข**:
+
+1. ใช้ Prometheus with multi-tenancy:
+   - เพิ่ม tenant_id เป็น label ใน metrics ทั้งหมด
+   - แยก Grafana dashboard ตาม tenant
+
+2. สร้าง custom metrics สำหรับ billing:
+   - API call counts per tenant
+   - Storage usage per tenant
+   - Processing time per tenant
+
+3. ส่ง metrics ไปยัง time-series database สำหรับเก็บข้อมูลระยะยาว (เช่น InfluxDB, TimescaleDB)
+
+**ผลลัพธ์**:
+- สามารถคิดค่าบริการตามการใช้จริงได้อย่างแม่นยำ
+- เพิ่มความโปร่งใสให้ลูกค้าเห็นการใช้งานของตัวเอง
+- ลดการใช้ทรัพยากรที่ไม่จำเป็น 25%
+- เพิ่มอัตรากำไร 15%
+
+## 7. Best Practices ในการ Monitoring
+
+### 7.1 Four Golden Signals
+
+Google SRE (Site Reliability Engineering) แนะนำให้ focus ที่ "Four Golden Signals":
+
+1. **Latency**: เวลาที่ใช้ในการตอบสนองต่อ request
+   - ควรแยกระหว่าง successful responses และ failed responses
+   - ควรใช้ percentiles (p50, p95, p99) แทน averages
+
+2. **Traffic**: ปริมาณงานที่เข้ามาในระบบ
+   - HTTP requests per second
+   - Queries per second
+   - Network bandwidth
+   - Concurrent sessions
+
+3. **Errors**: อัตราส่วนของ requests ที่ล้มเหลว
+   - HTTP 5xx errors
+   - Application errors
+   - Failed validations
+   - Timeout errors
+
+4. **Saturation**: ระดับการใช้งานของทรัพยากรในระบบ
+   - CPU usage
+   - Memory usage
+   - Disk I/O
+   - Network bandwidth
+   - Connection pool usage
+
+ตัวอย่างการ query ใน Prometheus:
+
+```
+# Latency
+histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+
+# Traffic
+sum(rate(http_requests_total[5m]))
+
+# Errors
+sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))
+
+# Saturation
+100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[1m])) * 100)
+```
+
+### 7.2 USE Method
+
+USE Method ถูกพัฒนาโดย Brendan Gregg สำหรับการวิเคราะห์ประสิทธิภาพของทรัพยากรระบบ:
+
+- **Utilization**: เปอร์เซ็นต์ของเวลาที่ทรัพยากรถูกใช้งาน
+- **Saturation**: ปริมาณงานที่รอคิวเพื่อใช้ทรัพยากร
+- **Errors**: จำนวนข้อผิดพลาดที่เกิดขึ้น
+
+ตัวอย่างการนำ USE Method ไปใช้:
+
+| ทรัพยากร | Utilization | Saturation | Errors |
+|---------|-------------|------------|--------|
+| CPU | `avg by (instance) (irate(node_cpu_seconds_total{mode!="idle"}[1m]))` | `node_load1`, `node_load5`, `node_load15` | `node_context_switches_total` |
+| Memory | `node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes` | `node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes` | `oom_kills` |
+| Disk | `rate(node_disk_io_time_seconds_total[1m])` | `node_disk_io_time_weighted_seconds_total` | `node_disk_io_time_weighted_seconds_total - node_disk_io_time_seconds_total` |
+| Network | `rate(node_network_transmit_bytes_total[1m]) + rate(node_network_receive_bytes_total[1m])` | `node_network_transmit_queue_length`, `node_network_receive_queue_length` | `node_network_transmit_errs_total`, `node_network_receive_errs_total` |
+
+### 7.3 Alert Design
+
+การออกแบบการแจ้งเตือนที่ดีควรมีลักษณะดังนี้:
+
+1. **Actionable**: ควรมีการกระทำที่ชัดเจนที่ต้องทำเมื่อได้รับการแจ้งเตือน
+2. **Accurate**: ลดการเกิด false positives และ false negatives
+3. **Contextual**: มีข้อมูลที่เพียงพอที่จะเข้าใจและแก้ไขปัญหา
+4. **Meaningful**: แจ้งเตือนเฉพาะเรื่องที่มีผลกระทบต่อผู้ใช้หรือธุรกิจ
+
+ตัวอย่างการตั้งค่าการแจ้งเตือนที่ดี:
+
+```yaml
+- alert: APIHighLatency
+  expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="api-service"}[5m])) by (le)) > 0.5
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "API latency is above threshold"
+    description: "95th percentile of API response time is above 500ms for 5 minutes"
+    dashboard: "https://grafana.example.com/d/api-performance"
+    playbook: "https://wiki.example.com/playbooks/high-api-latency"
+```
+
+### 7.4 Dashboard Design
+
+การออกแบบ dashboard ที่มีประสิทธิภาพควรคำนึงถึง:
+
+1. **Keep it simple**: แสดงเฉพาะข้อมูลที่สำคัญ ไม่แน่นเกินไป
+2. **Hierarchy of information**: จัดข้อมูลตามลำดับความสำคัญ
+3. **Consistency**: ใช้สี, หน่วย, และการจัดวางที่สอดคล้องกัน
+4. **Context**: ให้ข้อมูลพื้นฐานเพียงพอที่จะเข้าใจ dashboard
+5. **Time alignment**: ใช้ช่วงเวลาเดียวกันในทุก panel เพื่อให้เปรียบเทียบได้
+6. **Annotations**: เพิ่มเหตุการณ์สำคัญ เช่น deployments หรือการเปลี่ยนแปลงระบบ
+
+### 7.5 Monitoring as Code
+
+การจัดการระบบ monitoring ด้วย code (Infrastructure as Code) มีข้อดีหลายประการ:
+
+1. **Version control**: เก็บประวัติการเปลี่ยนแปลงในระบบ monitoring
+2. **Consistency**: ทำให้แน่ใจว่าการตั้งค่าเหมือนกันในทุกสภาพแวดล้อม
+3. **Automation**: ลดข้อผิดพลาดจากการตั้งค่าด้วยมือ
+4. **Scalability**: สามารถจัดการระบบ monitoring ขนาดใหญ่ได้อย่างมีประสิทธิภาพ
+
+ตัวอย่าง Monitoring as Code ด้วย Jsonnet สำหรับ Grafana dashboard:
+
+```jsonnet
+local grafana = import 'grafonnet/grafana.libsonnet';
+local dashboard = grafana.dashboard;
+local row = grafana.row;
+local prometheus = grafana.prometheus;
+local template = grafana.template;
+local graphPanel = grafana.graphPanel;
+
+dashboard.new(
+  'API Service Dashboard',
+  tags=['api', 'service'],
+  time_from='now-1h',
+)
+.addTemplate(
+  template.new(
+    'instance',
+    'Prometheus',
+    'label_values(api_requests_total, instance)',
+    label='Instance',
+    refresh='time',
+  )
+)
+.addRow(
+  row.new(
+    title='Request Rate'
+  )
+  .addPanel(
+    graphPanel.new(
+      'Requests per Second',
+      datasource='Prometheus',
+      min=0,
+    )
+    .addTarget(
+      prometheus.target(
+        'sum(rate(api_requests_total{instance=~"$instance"}[1m]))',
+        legendFormat='{{instance}}',
+      )
+    )
+  )
+)
+```
+
+## 8. แนวโน้มในอนาคตของ Monitoring
+
+### 8.1 AIOps และ Machine Learning
+
+AIOps (Artificial Intelligence for IT Operations) กำลังเปลี่ยนแปลงวิธีการ monitoring ระบบ โดยใช้ AI และ machine learning:
+
+1. **Anomaly Detection**: ตรวจจับรูปแบบที่ผิดปกติโดยอัตโนมัติ
+2. **Root Cause Analysis**: วิเคราะห์หาสาเหตุที่แท้จริงของปัญหา
+3. **Predictive Monitoring**: คาดการณ์ปัญหาก่อนที่จะเกิดขึ้น
+4. **Noise Reduction**: ลดการแจ้งเตือนที่ไม่จำเป็น
+5. **Auto-remediation**: แก้ไขปัญหาโดยอัตโนมัติ
+
+เครื่องมือที่น่าสนใจ:
+- Dynatrace
+- Datadog
+- New Relic
+- Elastic Observability
+- Splunk IT Service Intelligence
+
+### 8.2 eBPF (Extended Berkeley Packet Filter)
+
+eBPF เป็นเทคโนโลยีที่กำลังเปลี่ยนแปลงการ monitoring ใน Linux kernel โดยมีความสามารถ:
+
+1. **Performance Observability**: เก็บ metrics โดยไม่ต้องแก้ไขโค้ดแอปพลิเคชัน
+2. **Deep Inspection**: สามารถดูข้อมูลระดับลึกของ kernel และ application
+3. **Low Overhead**: มี overhead ต่ำมากเมื่อเทียบกับวิธีการแบบเดิม
+4. **Dynamic Deployment**: สามารถเพิ่มหรือลบการ monitoring ได้แบบ runtime
+
+เครื่องมือที่ใช้ eBPF:
+- Falco
+- Cilium
+- Pixie
+- bpftrace
+
+### 8.3 OpenTelemetry
+
+OpenTelemetry เป็นมาตรฐานเปิดสำหรับ telemetry ที่กำลังได้รับความนิยมมากขึ้น:
+
+1. **Vendor Neutral**: ไม่ผูกติดกับผู้ให้บริการรายใดรายหนึ่ง
+2. **Unified Approach**: รวม metrics, logs และ traces ไว้ในมาตรฐานเดียวกัน
+3. **Wide Adoption**: มีการสนับสนุนจากผู้ให้บริการ cloud และ observability หลายราย
+4. **Cross-language**: รองรับหลายภาษาโปรแกรม
+
+ตัวอย่างการใช้ OpenTelemetry กับ Node.js:
+
+```javascript
+const { NodeTracerProvider } = require('@opentelemetry/node');
+const { SimpleSpanProcessor } = require('@opentelemetry/tracing');
+const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+
+// ตั้งค่า tracer provider
+const provider = new NodeTracerProvider();
+
+// ตั้งค่า exporter
+const exporter = new JaegerExporter({
+  serviceName: 'my-service',
+  host: 'jaeger',
+  port: 6832,
+});
+
+// ตั้งค่า processor และเพิ่มเข้าไปใน provider
+const processor = new SimpleSpanProcessor(exporter);
+provider.addSpanProcessor(processor);
+provider.register();
+
+// ลงทะเบียน auto-instrumentations
+registerInstrumentations({
+  instrumentations: [
+    new HttpInstrumentation(),
+    new ExpressInstrumentation(),
+  ],
+});
+
+// ทำงานต่อไปตามปกติ
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
+
+### 8.4 Real User Monitoring (RUM)
+
+Real User Monitoring เป็นการติดตามประสบการณ์ของผู้ใช้จริง ซึ่งกำลังกลายเป็นส่วนสำคัญของระบบ monitoring:
+
+1. **Frontend Performance**: ติดตามความเร็วในการโหลดหน้าเว็บและการทำงานของ frontend
+2. **User Journey**: ติดตามเส้นทางการใช้งานของผู้ใช้
+3. **Conversion Funnel**: ติดตามอัตราการเปลี่ยนแปลงในแต่ละขั้นตอน
+4. **Error Tracking**: บันทึกข้อผิดพลาดที่เกิดขึ้นกับผู้ใช้
+
+เครื่องมือที่น่าสนใจ:
+- Google Analytics
+- Sentry
+- Datadog RUM
+- LogRocket
+- Mixpanel
+
+ตัวอย่างการใช้งานกับ JavaScript:
+
+```javascript
+// ติดตั้ง script ที่ head ของเว็บไซต์
+<script>
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "YOUR_CLARITY_PROJECT_ID");
+</script>
+
+// เพิ่มการติดตาม custom events
+document.getElementById('signup-button').addEventListener('click', function() {
+  clarity('event', 'signup_click');
+});
