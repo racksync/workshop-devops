@@ -91,6 +91,84 @@ test-job:
    sudo gitlab-runner start
    ```
 
+### การติดตั้ง GitLab Runner บน Linux ทั่วไป (Binary)
+
+หากระบบไม่สนับสนุนการติดตั้งผ่าน package manager คุณสามารถติดตั้งจาก binary ได้โดยตรง:
+
+1. **ดาวน์โหลด binary**:
+   ```bash
+   sudo curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+   ```
+
+2. **กำหนดสิทธิ์การทำงาน**:
+   ```bash
+   sudo chmod +x /usr/local/bin/gitlab-runner
+   ```
+
+3. **สร้างผู้ใช้สำหรับ GitLab Runner**:
+   ```bash
+   sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+   ```
+
+4. **ติดตั้งและเริ่มใช้งานเป็น service**:
+   ```bash
+   sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+   sudo gitlab-runner start
+   ```
+
+5. **ลงทะเบียน Runner**:
+   ```bash
+   sudo gitlab-runner register
+   ```
+
+### การตั้งค่า GitLab Runner บน macOS (Apple Silicon/ARM)
+
+1. **ติดตั้ง GitLab Runner ด้วย Homebrew**:
+   ```bash
+   brew install gitlab-runner
+   ```
+
+2. **ติดตั้งเป็น service**:
+   ```bash
+   brew services start gitlab-runner
+   ```
+
+3. **ลงทะเบียน Runner**:
+   ```bash
+   gitlab-runner register
+   ```
+   คุณต้องกรอกข้อมูลต่อไปนี้:
+   - GitLab URL (เช่น https://gitlab.com/)
+   - Registration token (หาได้จาก Settings > CI/CD > Runners)
+   - Description (เช่น "Mac M4 Runner")
+   - Tags (เช่น "macos,arm64")
+   - Executor type (แนะนำให้ใช้ "shell" สำหรับ macOS)
+
+4. **ตรวจสอบสถานะ**:
+   ```bash
+   gitlab-runner status
+   ```
+
+5. **หากใช้ Docker executor บน M1/M2**:
+   
+   เนื่องจาก Apple Silicon อาจมีความท้าทายเรื่อง compatibility กับ Docker images บางตัว คุณควรเพิ่มการตั้งค่าเหล่านี้ใน `/etc/gitlab-runner/config.toml`:
+   
+   ```toml
+   [[runners]]
+     // ...existing config...
+     executor = "docker"
+     [runners.docker]
+       platform = "linux/amd64"  # บังคับให้ใช้ platform x86_64
+       image = "alpine:latest"
+   ```
+   
+   คำสั่งนี้จะทำให้ Docker บน M1/M2 รัน image ในโหมด emulation สำหรับ x86_64 ซึ่งรองรับ image ส่วนใหญ่ได้ดีขึ้น แต่อาจจะช้ากว่าการรัน native ARM images
+
+6. **รีสตาร์ท service หลังจากปรับแก้ config**:
+   ```bash
+   brew services restart gitlab-runner
+   ```
+
 ## 🔹 3. Core Concepts in GitLab CI/CD
 
 ### โครงสร้างของไฟล์ .gitlab-ci.yml
@@ -822,4 +900,9 @@ frontend:build:
     - cd frontend
     - docker build -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG .
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker push $CI_REGISTRY
+    - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG
+  needs:
+    - frontend:test
+  only:
+    - main
+    - develop
