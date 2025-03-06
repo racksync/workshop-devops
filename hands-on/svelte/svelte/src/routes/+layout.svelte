@@ -1,14 +1,13 @@
-<script lang="ts">
+<script>
 	import Header from './Header.svelte';
 	import '../app.css';
 
+	/** @type {{children: import('svelte').Snippet}} */
 	let { children } = $props();
 </script>
 
 <div class="app">
 	<Header />
-
-	
 
 	<main>
 		{@render children()}
@@ -18,7 +17,6 @@
 		<p>
 			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to learn about SvelteKit
 		</p>
-		<p><a href="https://github.com/racksync/devops-workshop">RACKSYNC CO., LTD.</a></p>
 	</footer>
 </div>
 

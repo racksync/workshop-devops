@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { page } from '$app/state';
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
@@ -24,10 +24,6 @@
 			</li>
 			<li aria-current={page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
 				<a href="/sverdle">Sverdle</a>
-			</li>
-			<li>
-				<!-- Updated workshop link to workshop register page -->
-				<a href="/workshop">Workshop</a>
 			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
