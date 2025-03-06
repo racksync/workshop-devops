@@ -17,6 +17,7 @@
     - [2.1 สิ่งที่ต้องมีก่อน](#21-สิ่งที่ต้องมีก่อน)
     - [2.2 การสร้างและการพุช Docker images](#22-การสร้างและการพุช-docker-images)
     - [2.3 การ Deployไปยัง DigitalOcean Kubernetes](#23-การ-deployไปยัง-digitalocean-kubernetes)
+    - [2.4 การจัดการ Load Balancer บน DigitalOcean Kubernetes](#24-การจัดการ-load-balancer-บน-digitalocean-kubernetes)
 
 ## 1. Kubernetes แบบโลคอลด้วย Docker Desktop
 
@@ -142,3 +143,40 @@ kubectl get services
 ```
 
 สำหรับคำแนะนำโดยละเอียดเพิ่มเติม โปรดดูที่ [เอกสารของ DigitalOcean](https://docs.digitalocean.com/products/kubernetes/getting-started/deploy-image-to-cluster/)
+
+### 2.4 การจัดการ Load Balancer บน DigitalOcean Kubernetes
+
+Load Balancer เป็นส่วนสำคัญในการกระจายโหลดของการร้องขอไปยัง Pod ต่างๆ บน Kubernetes ด้วย DigitalOcean มีวิธีการดังนี้:
+
+1. สร้าง Load Balancer Service:
+
+```bash
+kubectl apply -f load-balancer/load-balancer.yaml
+```
+
+2. ตรวจสอบสถานะของ Load Balancer:
+
+```bash
+kubectl get service nginx-lb
+```
+
+3. การย้าย Load Balancer ไปยังคลัสเตอร์ใหม่ (กรณีต้องการย้าย):
+
+```bash
+# สำรองข้อมูล Load Balancer เดิม
+kubectl get service nginx-lb -o yaml > lb-backup.yaml
+
+# ลบ Service เดิมโดยไม่ลบ Load Balancer
+kubectl delete service nginx-lb --wait=false
+kubectl patch service nginx-lb -p '{"metadata":{"finalizers":null}}'
+
+# สร้าง Service ใหม่ในคลัสเตอร์ปลายทาง
+kubectl apply -f lb-backup.yaml
+```
+
+4. การตั้งค่า Load Balancer แบบกำหนดเอง:
+   - สามารถกำหนด annotation เพื่อปรับแต่ง Load Balancer ได้
+   - รองรับการตั้งค่า health check
+   - สามารถกำหนด protocol และ port ได้หลากหลาย
+
+ดูตัวอย่างการตั้งค่าได้ที่ไฟล์ `load-balancer/load-balancer.yaml`
