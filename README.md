@@ -6,7 +6,7 @@ Welcome to the DevOps Workshop repository. This repository contains tutorials an
 
 1. [Debian Linux Tutorial](docs/01-Tutorial_Debian_Linux.md) - Introduction to Linux commands, file system, package management, and more
 2. [Docker Tutorial](docs/02-Tutorial_Docker.md) - Learn Docker, containers, images, and Docker Compose
-3. [Git Tutorial](docs/03-Tutorial_Git.md) - Version control, branches, commits, and collaboration
+3. [Git Tutorial](docs/03-Tutorial_Git_Github.md) - Version control, branches, commits, and collaboration
 4. [CI/CD with GitHub Actions](docs/04-Tutorial_CI_CD_GitHub.md) - Continuous Integration/Continuous Deployment with GitHub Actions
 5. [CI/CD with GitLab](docs/05-Tutorial_CI_CD_GitLab.md) - Implementing CI/CD pipelines with GitLab
 6. [CI/CD with BitBucket](docs/06-Tutorial_CI_CD_BitBucket.md) - Setting up CI/CD workflows in BitBucket
@@ -15,6 +15,7 @@ Welcome to the DevOps Workshop repository. This repository contains tutorials an
 9. [Project Monitoring](docs/09-Project_Monitoring.md) - Tools and techniques for monitoring applications
 10. [Load Balancing & CDN](docs/10-Tutorial_Load-Balance_CDN.md) - Implementing load balancing and content delivery networks
 11. [Deploy on Platforms](docs/11-Deploy-on-Platform.md) - Deploying applications to various cloud platforms
+12. [Load Testing](docs/12-Tutorial_Load-Test.md) - Performance testing and load testing techniques
 
 ## 🚀 Getting Started
 
