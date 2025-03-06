@@ -1,7 +1,3 @@
-networks:
-  kong-net:
-    external: false
-
 x-kong-config:
   &kong-env
   KONG_PG_DATABASE: ${KONG_PG_DATABASE:-kong}
@@ -45,7 +41,7 @@ services:
     stdin_open: true
     tty: true
     networks:
-      - kong-net
+      - backend_network
     volumes:
       - kong_data:/var/lib/postgresql/data
     ports:
@@ -60,12 +56,15 @@ services:
     environment:
       <<: *kong-env
     networks:
-      - kong-net
+      - backend_network
     restart: on-failure
 
   kong:
     container_name: kong
-    image: kong:3.6
+    #image: kong:3.6
+    build:
+      context: .
+      dockerfile: Dockerfile
     user: "${KONG_USER:-kong}"
     environment:
       <<: *kong-env
@@ -79,7 +78,7 @@ services:
       KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
       KONG_DECLARATIVE_CONFIG: "/opt/kong/kong.yaml"
     networks:
-      - kong-net
+      - backend_network
     ports:
       - "8000:8000"
       - "8443:8443"
@@ -92,7 +91,7 @@ services:
       timeout: 10s
       retries: 10
     restart: on-failure:5
-    read_only: true
+    #read_only: true
     depends_on:
       - kong-database
     volumes:
@@ -101,3 +100,8 @@ services:
       - ./config:/opt/kong
     security_opt:
       - no-new-privileges
+
+networks:
+  backend_network:
+    external: true
+
