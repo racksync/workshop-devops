@@ -1,0 +1,78 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+# Build job for all branches
+build:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker build -t php-app:$CI_COMMIT_REF_SLUG -f Dockerfile .
+    - docker save php-app:$CI_COMMIT_REF_SLUG -o php-app-$CI_COMMIT_REF_SLUG.tar
+  artifacts:
+    paths:
+      - php-app-$CI_COMMIT_REF_SLUG.tar
+    expire_in: 1 hour
+  tags:
+    - docker
+
+# Basic testing job
+test:
+  stage: test
+  image: php:8.0-cli
+  script:
+    - echo "Running tests for PHP application..."
+    - php -l src/index.php
+    - php -l src/pages/home.php
+    - php -l src/pages/about.php
+    - php -l src/pages/services.php
+    - php -l src/includes/header.php
+    - php -l src/includes/footer.php
+  tags:
+    - docker
+
+# Deploy to development environment
+deploy_dev:
+  stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker load -i php-app-$CI_COMMIT_REF_SLUG.tar
+    - docker rm -f php-dev || true
+    - docker network create backend || true
+    - docker run -d -p 8082:80 --network backend --name php-dev php-app:$CI_COMMIT_REF_SLUG
+  environment:
+    name: development
+    url: http://dev-server:8082
+  only:
+    - dev
+  tags:
+    - shell
+
+# Deploy to production environment
+deploy_prod:
+  stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker load -i php-app-$CI_COMMIT_REF_SLUG.tar
+    - docker rm -f php-main || true
+    - docker network create backend || true
+    - docker run -d -p 8081:80 --network backend --name php-main php-app:$CI_COMMIT_REF_SLUG
+  environment:
+    name: production
+    url: http://prod-server:8081
+  when: manual
+  only:
+    - main
+  tags:
+    - shell

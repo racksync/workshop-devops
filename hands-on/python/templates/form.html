@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}User Registration Form{% endblock %}
+
+{% block content %}
+    <h1>User Registration Form</h1>
+    <p>Please fill out this form to register in our system.</p>
+    
+    <form method="POST" action="{{ url_for('index') }}">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.username.label }}
+            {{ form.username(class="form-control") }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.age.label }}
+            {{ form.age(class="form-control") }}
+            {% if form.age.errors %}
+                {% for error in form.age.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.occupation.label }}
+            {{ form.occupation(class="form-control") }}
+            {% if form.occupation.errors %}
+                {% for error in form.occupation.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label>{{ form.experience.label }}</label>
+            <div class="radio-group">
+                {% for subfield in form.experience %}
+                    {{ subfield }}
+                    {{ subfield.label }}
+                {% endfor %}
+            </div>
+            {% if form.experience.errors %}
+                {% for error in form.experience.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.skills.label }}
+            {{ form.skills(class="form-control") }}
+            {% if form.skills.errors %}
+                {% for error in form.skills.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group checkbox-group">
+            {{ form.subscribe() }}
+            {{ form.subscribe.label }}
+            {% if form.subscribe.errors %}
+                {% for error in form.subscribe.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.comments.label }}
+            {{ form.comments(class="form-control", rows=4) }}
+            {% if form.comments.errors %}
+                {% for error in form.comments.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.submit(class="btn") }}
+        </div>
+    </form>
+    
+    {% if submissions %}
+        <div class="submissions">
+            <h2>Recent Submissions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Age</th>
+                        <th>Occupation</th>
+                        <th>Experience</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in submissions %}
+                        <tr>
+                            <td>{{ sub['username'] }}</td>
+                            <td>{{ sub['email'] }}</td>
+                            <td>{{ sub['age'] }}</td>
+                            <td>{{ sub['occupation'] }}</td>
+                            <td>{{ sub['experience'] }}</td>
+                            <td>{{ sub['timestamp'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

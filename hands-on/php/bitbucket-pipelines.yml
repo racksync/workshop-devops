@@ -1,0 +1,74 @@
+image: atlassian/default-image:3
+
+definitions:
+  services:
+    docker:
+      memory: 2048
+  steps:
+    - step: &build-step
+        name: Build and Test
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - docker build -t php-app:$BITBUCKET_COMMIT -f Dockerfile .
+          - docker save php-app:$BITBUCKET_COMMIT -o php-app-image.tar
+          # Basic syntax checking for PHP files
+          - docker run --rm php-app:$BITBUCKET_COMMIT php -l /var/www/html/index.php
+          - docker run --rm php-app:$BITBUCKET_COMMIT php -l /var/www/html/pages/home.php
+          - docker run --rm php-app:$BITBUCKET_COMMIT php -l /var/www/html/pages/about.php
+          - docker run --rm php-app:$BITBUCKET_COMMIT php -l /var/www/html/pages/services.php
+        artifacts:
+          - php-app-image.tar
+
+    - step: &deploy-dev-step
+        name: Deploy to Development
+        deployment: development
+        services:
+          - docker
+        script:
+          - docker load -i php-app-image.tar
+          - pipe: atlassian/ssh-run:0.4.0
+            variables:
+              SSH_USER: $SSH_USER
+              SERVER: $DEV_SERVER
+              MODE: 'script'
+              COMMAND: 'deploy-scripts/deploy-dev.sh'
+              ENVIRONMENT_VARIABLES: >-
+                IMAGE_NAME=php-app:$BITBUCKET_COMMIT
+                CONTAINER_NAME=php-dev
+                PORT=8082
+
+    - step: &deploy-prod-step
+        name: Deploy to Production
+        deployment: production
+        trigger: manual
+        services:
+          - docker
+        script:
+          - docker load -i php-app-image.tar
+          - pipe: atlassian/ssh-run:0.4.0
+            variables:
+              SSH_USER: $SSH_USER
+              SERVER: $PROD_SERVER
+              MODE: 'script'
+              COMMAND: 'deploy-scripts/deploy-prod.sh'
+              ENVIRONMENT_VARIABLES: >-
+                IMAGE_NAME=php-app:$BITBUCKET_COMMIT
+                CONTAINER_NAME=php-main
+                PORT=8081
+
+pipelines:
+  branches:
+    main:
+      - step: *build-step
+      - step: *deploy-prod-step
+    
+    dev:
+      - step: *build-step
+      - step: *deploy-dev-step
+    
+  pull-requests:
+    '**':
+      - step: *build-step

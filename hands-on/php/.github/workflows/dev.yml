@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy Development
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
         run: sudo docker build -f Dockerfile . -t php-dev:latest
 
       - name: Remove exist container 🏺
-        run: sudo docker rm -f php-dev:latest
+        run: sudo docker rm -f php-dev || true
 
       - name: Ensure Docker Network Created 🌐
         run: |
@@ -26,4 +26,4 @@ jobs:
           fi
 
       - name: Run Docker Container 🏺
-        run: sudo docker run -p 8081:80 --network backend --name php-dev -d php-dev:latest
+        run: sudo docker run -p 8082:80 --network backend --name php-dev -d php-dev:latest
