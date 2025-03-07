@@ -1,4 +1,4 @@
-# BitBucket Pipelines Test
+# BitBucket Pipelines Demo
 image: atlassian/default-image:latest
 
 definitions:
