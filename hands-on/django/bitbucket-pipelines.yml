@@ -1,4 +1,4 @@
-# BitBucket Pipelines Demo
+# BitBucket Pipelines Workshop Demo
 image: atlassian/default-image:latest
 
 definitions:
@@ -13,8 +13,8 @@ pipelines:
           name: Setup & Prepare Environment
           runs-on:
             - self.hosted
-            #- linux
-            - macos
+            - linux.shell
+            #- macos
             #- windows
           script:
             - echo "Setting up environment variables..."
@@ -28,8 +28,8 @@ pipelines:
           name: Code Quality & Linting
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           script:
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -51,8 +51,8 @@ pipelines:
           name: Security Scanning
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           script:
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -67,8 +67,8 @@ pipelines:
           name: Build & Unit Tests
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           script:
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -84,8 +84,8 @@ pipelines:
           name: Integration Tests
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           script:
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -103,8 +103,8 @@ pipelines:
           name: Build Final Image
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           script:
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -118,8 +118,8 @@ pipelines:
           name: Deploy to Dev Environment
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           script:
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -150,8 +150,8 @@ pipelines:
           name: Post-Deployment Notifications
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           script:
             - export DOCKER_HOST=unix:///var/run/docker.sock
@@ -173,8 +173,8 @@ pipelines:
       - step:
           runs-on:
              - self.hosted
-             #- linux
-             - macos
+             - linux.shell
+             #- macos
              #- windows
           name: Build and Deploy Django (Production)
           script:
