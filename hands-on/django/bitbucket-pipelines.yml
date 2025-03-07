@@ -1,4 +1,4 @@
-# BitBucket Pipelines Workshop Demo
+# BitBucket Pipelines Workshop Demo v6
 image: atlassian/default-image:latest
 
 definitions:
@@ -7,6 +7,25 @@ definitions:
       memory: 2048
 
 pipelines:
+  tags:
+    "*":
+      - step:
+          name: Release by Tag
+          runs-on:
+            - self.hosted
+            - linux.shell
+            #- macos
+            #- windows
+          script:
+            - echo "Setting up environment variables..."
+            - export DOCKER_HOST=unix:///var/run/docker.sock
+            - export DOCKER_BUILDKIT=0
+            # Received Tag from Pipelines
+            - export TAG={$BITBUCKET_TAG}
+
+            # Passing tag to Docker build arg
+            - docker build --build-arg BUILD_TAG={$TAG} -t django-tag:{$TAG} .
+
   branches:
     dev:
       - step:

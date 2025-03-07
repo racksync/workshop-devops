@@ -17,7 +17,7 @@ def home(request):
     """View for the root URL that redirects to the registration page or displays a home page"""
     # For a simple solution, you can just return a basic HttpResponse
     return HttpResponse(
-        "<h1>Welcome to the Registration App v.3</h1><p>Go to <a href='/register/'>register</a> to get started.</p>"
+        "<h1>Test & Quality Check</h1><p>Go to <a href='/register/'>register</a> to get started.</p>"
     )
 
     # Alternatively, render a template when you create one:
