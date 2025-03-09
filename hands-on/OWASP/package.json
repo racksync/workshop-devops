@@ -1,0 +1,19 @@
+{
+  "name": "owasp-demo",
+  "version": "1.0.0",
+  "description": "แอปพลิเคชันตัวอย่างสำหรับศึกษาช่องโหว่ OWASP",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["owasp", "security", "vulnerability"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.4",
+    "body-parser": "^1.20.1",
+    "cookie-parser": "^1.4.6"
+  }
+}

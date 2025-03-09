@@ -1,0 +1,47 @@
+image: php:7.4-fpm
+
+pipelines:
+  default:
+    - step:
+        name: Lint PHP
+        script:
+          - apt-get update && apt-get install -y git
+          - apt-get install -y default-mysql-client
+          - docker-php-ext-install mysqli pdo pdo_mysql
+          - php -l wp-config.php
+          - find wp-content/themes/ -name "*.php" -exec php -l {} \;
+    - step:
+        name: Test
+        services:
+          - mysql
+        script:
+          - apt-get update && apt-get install -y subversion
+          - curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          - chmod +x wp-cli.phar
+          - mv wp-cli.phar /usr/local/bin/wp
+          - wp --info
+          - echo "Running WordPress tests..."
+
+  branches:
+    master:
+      - step:
+          name: Deploy to Production
+          deployment: production
+          script:
+            - echo "Deploying to production environment"
+            - pipe: atlassian/rsync-deploy:0.8.0
+              variables:
+                USER: '$DEPLOY_USER'
+                SERVER: '$DEPLOY_HOST'
+                REMOTE_PATH: '$DEPLOY_PATH'
+                LOCAL_PATH: '.'
+                SSH_KEY: '$SSH_KEY'
+                EXTRA_ARGS: '--exclude=wp-config.php --exclude=.git'
+
+definitions:
+  services:
+    mysql:
+      image: mysql:5.7
+      environment:
+        MYSQL_DATABASE: 'wordpress_test'
+        MYSQL_ROOT_PASSWORD: 'root'
