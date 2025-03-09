@@ -788,36 +788,166 @@ kubectl rollout undo deployment/nginx-deployment
 
 Ingress ช่วยจัดการการเข้าถึงจากภายนอกในระดับ HTTP/HTTPS
 
-```yaml
-# my-ingress.yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-ingress
-spec:
-  rules:
-  - host: myapp.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-service
-            port:
-              number: 80
-```
+#### Ingress คืออะไร?
 
-```bash
-# ต้องเปิด ingress ใน minikube ก่อน
-minikube addons enable ingress
+Ingress เป็น Kubernetes resource ที่จัดการการเข้าถึงจากภายนอกไปยัง Services ภายใน cluster โดยทำหน้าที่เป็น layer 7 (HTTP/HTTPS) load balancer และ reverse proxy ช่วยให้สามารถ:
 
-# สร้าง ingress
-kubectl apply -f my-ingress.yaml
+1. **จัดการ HTTP routing** - กำหนดเส้นทางการเข้าถึง services ตาม URL path หรือ subdomain
+2. **SSL/TLS termination** - จัดการการเข้ารหัสและถอดรหัส TLS
+3. **Name-based virtual hosting** - ให้บริการหลายโดเมนบน IP เดียว
+4. **Load balancing** - กระจายภาระงานไปยัง services ต่างๆ
 
-# ดูรายการ ingress
-kubectl get ingress
-```
+#### Ingress Controller คืออะไร?
+
+Ingress เป็นเพียงกฎที่กำหนดว่าควรจัดการ traffic อย่างไร แต่ไม่ได้ทำงานด้วยตัวเอง จำเป็นต้องมี **Ingress Controller** ทำหน้าที่อ่านและทำงานตามกฎที่กำหนด ตัวอย่าง Ingress Controller ที่นิยมใช้:
+
+- **NGINX Ingress Controller** - สร้างบน NGINX web server
+- **Traefik** - ออกแบบมาเพื่อ microservices
+- **HAProxy** - High Availability Proxy
+- **Kong** - API Gateway ที่สร้างบน NGINX
+- **Istio Ingress** - เป็นส่วนหนึ่งของ Istio service mesh
+- **AWS ALB Ingress** - ใช้ Application Load Balancer ของ AWS
+
+#### ตัวอย่างสถานการณ์การทำงานจริงของ Ingress
+
+สมมติว่าคุณมี microservices หลายตัวที่ให้บริการเป็นส่วนหนึ่งของแอปพลิเคชันเว็บไซต์ อีคอมเมิร์ซ:
+
+- `web-frontend` - UI ของเว็บไซต์
+- `api-products` - API ข้อมูลสินค้า
+- `api-orders` - API สำหรับการสั่งซื้อ
+- `api-users` - API สำหรับข้อมูลผู้ใช้
+- `admin-dashboard` - ส่วนจัดการสำหรับผู้ดูแลระบบ
+
+แต่ละส่วนได้ถูก deploy เป็น Deployment และมี Service เป็นของตัวเอง
+
+**สถานการณ์ที่ 1: การตั้งค่าเว็บไซต์อีคอมเมิร์ซด้วย path-based routing**
+
+1. **การกำหนดค่า Ingress**:
+   ```yaml
+   apiVersion: networking.k8s.io/v1
+   kind: Ingress
+   metadata:
+     name: ecommerce-ingress
+     annotations:
+       nginx.ingress.kubernetes.io/rewrite-target: /
+   spec:
+     rules:
+     - host: shop.example.com
+       http:
+         paths:
+         - path: /
+           pathType: Prefix
+           backend:
+             service:
+               name: web-frontend
+               port:
+                 number: 80
+         - path: /api/products
+           pathType: Prefix
+           backend:
+             service:
+               name: api-products
+               port:
+                 number: 8080
+         - path: /api/orders
+           pathType: Prefix
+           backend:
+             service:
+               name: api-orders
+               port:
+                 number: 8080
+         - path: /api/users
+           pathType: Prefix
+           backend:
+             service:
+               name: api-users
+               port:
+                 number: 8080
+     - host: admin.example.com
+       http:
+         paths:
+         - path: /
+           pathType: Prefix
+           backend:
+             service:
+               name: admin-dashboard
+               port:
+                 number: 80
+     tls:
+     - hosts:
+       - shop.example.com
+       - admin.example.com
+       secretName: example-tls-secret
+   ```
+
+2. **ขั้นตอนการทำงาน**:
+   - ผู้ใช้เข้าชม `https://shop.example.com`
+   - DNS ส่ง traffic ไปยัง public IP ของ Ingress Controller
+   - Ingress Controller ตรวจสอบ Host header และพบว่าตรงกับ `shop.example.com`
+   - สำหรับเส้นทาง root path (`/`), traffic ถูกส่งไปยัง `web-frontend` service
+   - เมื่อผู้ใช้เข้าถึง `/api/products`, Ingress จะส่ง traffic ไปยัง `api-products` service
+
+3. **การจัดการ TLS**:
+   - Ingress ใช้ Secret ชื่อ `example-tls-secret` ที่มีใบรับรอง TLS และ private key
+   - การเข้ารหัส HTTPS จะถูกจัดการที่ Ingress Controller (TLS termination)
+   - การสื่อสารระหว่าง Ingress Controller และ backend services เป็น HTTP ธรรมดา (ปลอดภัยเพราะอยู่ใน cluster)
+
+**สถานการณ์ที่ 2: การอัพเดตแบบ Blue-Green Deployment**
+
+1. **เมื่อต้องการอัพเดต `api-products` เป็นเวอร์ชันใหม่**:
+   - Deploy `api-products-v2` เป็น Service ใหม่
+   - ทดสอบ `api-products-v2` ด้วย internal testing
+   - อัพเดต Ingress rule เพื่อเปลี่ยน traffic จาก `api-products` ไปที่ `api-products-v2`:
+
+   ```yaml
+   - path: /api/products
+     pathType: Prefix
+     backend:
+       service:
+         name: api-products-v2
+         port:
+           number: 8080
+   ```
+   
+2. **การ Rollback ถ้าพบปัญหา**:
+   - หากพบปัญหาในเวอร์ชันใหม่ สามารถแก้ไข Ingress เพื่อกลับไปใช้เวอร์ชันเดิมได้ทันที
+   - เปลี่ยน backend service กลับเป็น `api-products`
+   - ผู้ใช้งานไม่ได้รับผลกระทบจากการ rollback
+
+**สถานการณ์ที่ 3: การจัดการ Traffic แบบ Canary**
+
+1. **การทดลองฟีเจอร์ใหม่กับผู้ใช้บางส่วน**:
+   - ใช้ annotations ของ Ingress Controller เพื่อแบ่ง traffic:
+
+   ```yaml
+   metadata:
+     annotations:
+       nginx.ingress.kubernetes.io/canary: "true"
+       nginx.ingress.kubernetes.io/canary-weight: "20"
+   ```
+
+   - ส่ง 20% ของ traffic ไปยังเวอร์ชันใหม่
+   - ค่อยๆ เพิ่มค่า weight เมื่อมั่นใจว่าเวอร์ชันใหม่ทำงานได้ดี
+
+#### แนวทางปฏิบัติที่ดีและควรหลีกเลี่ยงสำหรับ Ingress
+
+##### สิ่งที่ควรทำ ✅
+
+1. **เลือก Ingress Controller ให้เหมาะสม**
+   - พิจารณาความต้องการด้าน performance, ฟีเจอร์, และการรองรับจากทีมงาน
+   - ใช้ Ingress Controller ที่มาพร้อมกับ cloud provider หากเป็นไปได้ เพื่อการบูรณาการที่ดีกว่า
+
+2. **วางแผนเส้นทาง URL อย่างรอบคอบ**
+   - ออกแบบโครงสร้าง URL ที่สมเหตุสมผลและสอดคล้องกับโครงสร้าง microservices
+   - ใช้ path prefixes ที่ชัดเจน เช่น `/api/v1/` สำหรับ API เวอร์ชัน 1
+
+3. **ใช้ Annotations เพื่อปรับแต่งพฤติกรรม**
+   - Ingress Controllers ส่วนใหญ่มี annotations เฉพาะที่เพิ่มความสามารถ
+   ```yaml
+   annotations:
+     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+   ```
 
 ### Network Policies
 
