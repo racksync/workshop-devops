@@ -1,4 +1,4 @@
-name: WordPress Deployment
+name: WordPress Deployment Demo
 
 on:
   push:
