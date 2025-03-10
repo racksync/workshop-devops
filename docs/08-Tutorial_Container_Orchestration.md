@@ -141,13 +141,11 @@ Container Runtime เป็นซอฟต์แวร์ที่รับผ�
 
 ```mermaid
 pie 
-    "containerd" : 63
-    "CRI-O" : 21
-    "Docker + containerd" : 9
-    "Kata Containers" : 3
-    "gVisor" : 2
-    "Firecracker" : 1
-    "อื่นๆ" : 1
+    "containerd" : 65
+    "CRI-O" : 20
+    "Docker" : 10
+    "runc" : 3
+    "rkt" : 2
 ```
 
 #### 2.3.3 เปรียบเทียบคุณสมบัติของ Container Runtime
@@ -156,10 +154,9 @@ pie
 |------------------|---------|-----------|-----------|-------------|---------|
 | containerd | สูง | ปานกลาง | สูง | ✅ | การใช้งานทั่วไป, production workloads |
 | CRI-O | สูง | ปานกลาง | สูง | ✅ | Red Hat OpenShift, production workloads |
-| Docker + containerd | ปานกลาง | ปานกลาง | สูง | ✅ | การพัฒนา, การทดสอบ |
-| Kata Containers | ปานกลาง | สูงมาก | สูง | ✅ | multi-tenant, security-critical workloads |
-| gVisor | ปานกลาง | สูง | ปานกลาง | ✅ | multi-tenant, untrusted workloads |
-| Firecracker | สูง | สูงมาก | ปานกลาง | ⚠️ (ผ่าน firecracker-containerd) | serverless, function-as-a-service |
+| Docker | ปานกลาง | ปานกลาง | สูง | ✅ | การพัฒนา, การทดสอบ |
+| runc | สูงมาก | ปานกลาง | สูง | ✅ | low-level runtime ที่ใช้โดย containerd และ CRI-O |
+| rkt | ปานกลาง | สูง | ปานกลาง | ✅ | ระบบที่ต้องการความปลอดภัยเพิ่มเติม |
 
 #### 2.3.4 แนวโน้มในอนาคต
 
@@ -294,35 +291,69 @@ Kubernetes ประกอบด้วยองค์ประกอบหลั
 
 ```mermaid
 flowchart TB
-    subgraph "Control Plane (Master Node)"
-        API[API Server] --> ETCD[etcd]
-        API --> SCH[Scheduler]
-        API --> CM[Controller Manager]
+    %% Styling
+    classDef controlplane fill:#e6f7ff,stroke:#1890ff,stroke-width:2px
+    classDef etcd fill:#f9f0ff,stroke:#722ed1,stroke-width:2px
+    classDef node fill:#f6ffed,stroke:#52c41a,stroke-width:2px
+    classDef pod fill:#fff7e6,stroke:#fa8c16,stroke-width:2px
+    classDef container fill:#fff1f0,stroke:#f5222d,stroke-width:1px
+    classDef network fill:#fcffe6,stroke:#bae637,stroke-width:2px
+    
+    %% Control Plane Components
+    subgraph CP ["Control Plane (Master Node)"]
+        direction TB
+        API["API Server<br>(ศูนย์กลางการสื่อสาร)"]:::controlplane
+        ETCD["etcd<br>(ฐานข้อมูลคลัสเตอร์)"]:::etcd
+        SCH["Scheduler<br>(จัดสรร Pods ไปยัง Nodes)"]:::controlplane
+        CM["Controller Manager<br>(ควบคุมสถานะของระบบ)"]:::controlplane
+        
+        API --> ETCD
+        API --> SCH
+        API --> CM
     end
     
-    subgraph "Worker Node 1"
-        KL1[Kubelet] --> CR1[Container Runtime]
-        KP1[Kube-proxy]
-        subgraph "Pods"
-            P1[Pod 1] --> C1[Container 1]
-            P1 --> C2[Container 2]
+    %% Worker Node 1
+    subgraph WN1 ["Worker Node 1"]
+        direction TB
+        KL1["Kubelet<br>(ตัวแทนบน Node)"]:::node
+        CR1["Container Runtime<br>(เช่น Docker, containerd)"]:::node
+        KP1["Kube-proxy<br>(จัดการ Network)"]:::network
+        
+        subgraph PODS1 ["Pods"]
+            direction LR
+            P1["Pod 1"]:::pod --> C1["Container 1"]:::container
+            P1 --> C2["Container 2"]:::container
         end
+        
+        KL1 --> CR1
+        CR1 --> PODS1
     end
     
-    subgraph "Worker Node 2"
-        KL2[Kubelet] --> CR2[Container Runtime]
-        KP2[Kube-proxy]
-        subgraph "Pods"
-            P2[Pod 2] --> C3[Container 3]
+    %% Worker Node 2
+    subgraph WN2 ["Worker Node 2"]
+        direction TB
+        KL2["Kubelet<br>(ตัวแทนบน Node)"]:::node
+        CR2["Container Runtime<br>(เช่น Docker, containerd)"]:::node
+        KP2["Kube-proxy<br>(จัดการ Network)"]:::network
+        
+        subgraph PODS2 ["Pods"]
+            P2["Pod 2"]:::pod --> C3["Container 3"]:::container
         end
+        
+        KL2 --> CR2
+        CR2 --> PODS2
     end
     
-    API --> KL1
-    API --> KL2
-    CM --> KL1
-    CM --> KL2
-    SCH --> KL1
-    SCH --> KL2
+    %% Connections between components
+    API --"1. ส่งคำสั่ง"--> KL1
+    API --"1. ส่งคำสั่ง"--> KL2
+    CM --"2. ตรวจสอบสถานะ"--> KL1
+    CM --"2. ตรวจสอบสถานะ"--> KL2
+    SCH --"3. จัดสรร Pods"--> KL1
+    SCH --"3. จัดสรร Pods"--> KL2
+    
+    %% Network connections
+    KP1 <--"4. การสื่อสารระหว่าง Pods"--> KP2
 ```
 
 ## 3. ⚙️ การเตรียมสภาพแวดล้อมสำหรับ Windows User
@@ -771,6 +802,8 @@ Service เป็นแบบจำลองที่ให้บริการ
 - payment-service (API สำหรับการชำระเงิน)
 - database-service (PostgreSQL)
 
+แต่ละส่วนได้ถูก deploy เป็น Deployment และมี Service เป็นของตัวเอง
+
 **ขั้นตอนการทำงาน:**
 
 1. **การกำหนดค่า Services**
@@ -1190,6 +1223,8 @@ spec:
   podSelector:
     matchLabels:
       app: nginx
+  ingress:
+  - from:
   ingress:
   - from:
     - podSelector:
