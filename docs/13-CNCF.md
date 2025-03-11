@@ -66,7 +66,7 @@ CNCF จัดงานสำคัญหลายงาน:
 ### การเรียนรู้และฝึกอบรม
 - [CNCF Online Training](https://www.cncf.io/certification/training/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/home/)
-- [CNCF YouTube Channel](https://www.youtube.com/c/CloudNativeComputingFoundation)
+- [CNCF YouTube Channel](https://www.youtube.com/@cncf)
 - [CNCF Blog](https://www.cncf.io/blog/)
 - [Cloud Native Interactive Landscape](https://landscape.cncf.io/)
 - [DevOps Roadmap](https://roadmap.sh/devops)
@@ -74,7 +74,6 @@ CNCF จัดงานสำคัญหลายงาน:
 
 ### ชุมชน
 - [CNCF Slack](https://slack.cncf.io/)
-- [CNCF Forums](https://discuss.cncf.io/)
 - [CNCF Events](https://www.cncf.io/events/)
 - [CNCF Community Groups](https://community.cncf.io/)
 
