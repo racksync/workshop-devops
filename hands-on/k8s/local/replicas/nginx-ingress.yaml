@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1  # API version ของ Kubernetes สำหรับ Ingress
+kind: Ingress                     # ประเภทของ Object คือ Ingress (ใช้จัดการ HTTP/HTTPS routing)
+metadata:
+  name: nginx-ingress             # ชื่อของ Ingress
+  namespace: replica-demo         # Namespace ที่สร้าง Ingress นี้
+  annotations:                    # Annotations สำหรับกำหนดพฤติกรรมเพิ่มเติม
+    nginx.ingress.kubernetes.io/rewrite-target: / # กำหนดให้ปรับเปลี่ยน path ที่เข้ามาเป็น /
+  labels:
+    app: nginx
+    demo: replicas
+spec:                             # ข้อมูลจำเพาะของ Ingress
+  rules:                          # กฎการ routing
+  - host: nginx-demo.local        # hostname ที่ Ingress นี้จะรับผิดชอบ
+    http:                         # กำหนดการ routing สำหรับ HTTP
+      paths:                      # paths ที่จะ route
+      - path: /                   # path ที่จะ route คือ root (/)
+        pathType: Prefix          # ประเภทของ path (Prefix = ตรงกับทุก path ที่ขึ้นต้นด้วย /)
+        backend:                  # backend ที่จะส่งต่อ request
+          service:                # Service ที่จะรับ request
+            name: nginx-service   # ชื่อของ Service
+            port:                 # port ของ Service
+              number: 80          # เลข port
+# Ingress เป็นระบบ routing ระดับแอปพลิเคชัน (L7) ช่วยให้เข้าถึง Services จากภายนอกคลัสเตอร์
+# Ingress ต้องการ Ingress Controller (เช่น nginx, traefik) ทำงานในคลัสเตอร์
+# Annotations ใช้กำหนดค่าเฉพาะสำหรับ Ingress Controller แต่ละประเภท

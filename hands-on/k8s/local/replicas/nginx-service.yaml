@@ -1,0 +1,15 @@
+apiVersion: v1             # API version ของ Kubernetes สำหรับ Service
+kind: Service              # ประเภทของ Object คือ Service (ใช้เป็นจุดเชื่อมต่อไปยัง Pods)
+metadata:
+  name: nginx-service      # ชื่อของ Service
+  namespace: replica-demo  # Namespace ที่สร้าง Service นี้
+  labels:                  # Labels สำหรับการจัดกลุ่มและค้นหา
+    app: nginx
+    demo: replicas
+spec:                      # ข้อมูลจำเพาะของ Service
+  selector:                # กำหนดว่า Service จะส่งทราฟฟิกไปหา Pods ที่มี labels ตรงกับอะไร
+    app: nginx             # เลือก Pods ที่มี label app=nginx
+  ports:                   # การกำหนด ports ที่ Service จะให้บริการ
+  - port: 80               # port ที่ Service เปิดให้บริการ (ภายในคลัสเตอร์)
+    targetPort: 80         # port ของ Pod ที่ traffic จะถูกส่งไป
+  type: ClusterIP          # ประเภทของ Service (ClusterIP = เข้าถึงได้เฉพาะภายในคลัสเตอร์)
