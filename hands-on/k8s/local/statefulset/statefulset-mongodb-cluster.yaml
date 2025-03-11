@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-cluster
+  namespace: statefulset-demo
+  labels:
+    app: mongodb-cluster
+    type: database-cluster
+spec:
+  serviceName: "mongodb-cluster-headless"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongodb-cluster
+  template:
+    metadata:
+      labels:
+        app: mongodb-cluster
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: mongodb
+        image: mongo:4.4
+        command: 
+        - bash
+        - -c
+        - |
+          # ตัวอย่างสคริปต์สำหรับการตั้งค่า replica set
+          # (ในสภาพแวดล้อมจริงควรใช้ MongoDB Operator แทนการเขียนสคริปต์เอง)
+          
+          # หาก mongod.conf ยังไม่มีให้สร้างขึ้นมาใหม่
+          if [ ! -f /data/configdb/mongod.conf ]; then
+            cat > /data/configdb/mongod.conf <<EOF
+          replication:
+            replSetName: rs0
+          EOF
+          fi
+          
+          # เริ่มต้น MongoDB ด้วยการตั้งค่า replica set
+          mongod --bind_ip_all --config /data/configdb/mongod.conf &
+          
+          # รอให้ MongoDB เริ่มต้นทำงาน
+          sleep 10
+          
+          # เตรียมสคริปต์ JavaScript สำหรับการตั้งค่า replica set
+          if [ "$(hostname)" == "mongodb-cluster-0" ]; then
+            # เฉพาะ primary (mongodb-cluster-0) เป็นผู้เริ่มต้น replica set
+            mongo --eval "rs.status()" | grep "no replset config has been received"
+            if [ $? -eq 0 ]; then
+              mongo --eval "rs.initiate({
+                _id: 'rs0',
+                members: [
+                  {_id: 0, host: 'mongodb-cluster-0.mongodb-cluster-headless.statefulset-demo.svc.cluster.local:27017'},
+                  {_id: 1, host: 'mongodb-cluster-1.mongodb-cluster-headless.statefulset-demo.svc.cluster.local:27017'},
+                  {_id: 2, host: 'mongodb-cluster-2.mongodb-cluster-headless.statefulset-demo.svc.cluster.local:27017'}
+                ]
+              })"
+            fi
+          fi
+          
+          # เปิดให้ MongoDB ทำงานในด้านหน้า
+          wait
+        ports:
+        - containerPort: 27017
+          name: mongodb
+        volumeMounts:
+        - name: data
+          mountPath: /data/db
+        - name: config
+          mountPath: /data/configdb
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "admin"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: "password"
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "0.5"
+            memory: "512Mi"
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+  - metadata:
+      name: config
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 500Mi
+
+# ตัวอย่าง StatefulSet ที่ซับซ้อนขึ้น โดยจำลองการสร้าง MongoDB Replica Set 
+# ซึ่งเป็น cluster ที่มี primary และ secondary nodes
+# แสดงให้เห็นถึงการใช้ StatefulSet ในการสร้าง distributed database
+# ที่ต้องการทำงานร่วมกันระหว่าง pods และต้องการ stable network identities
