@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-k8s-app
+  namespace: gitlab-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-k8s-app
+  template:
+    metadata:
+      labels:
+        app: my-k8s-app
+    spec:
+      containers:
+      - name: my-k8s-app
+        image: $IMAGE_NAME:$IMAGE_TAG
+        ports:
+        - containerPort: 3000
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+# คำอธิบาย: Deployment นี้สร้าง Pod จำนวน 3 replicas ที่รัน container ชื่อ my-k8s-app
+# โดยใช้ image ที่ระบุในตัวแปร $IMAGE_NAME:$IMAGE_TAG จาก GitLab CI/CD
+# มีการกำหนด resource limits เพื่อจำกัดการใช้ทรัพยากรของ Pod
