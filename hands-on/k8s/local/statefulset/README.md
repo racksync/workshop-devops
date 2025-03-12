@@ -31,6 +31,10 @@
   - [ปัญหาที่อาจพบและวิธีแก้ไข](#ปัญหาที่อาจพบและวิธีแก้ไข)
   - [แผนภาพสถาปัตยกรรม](#แผนภาพสถาปัตยกรรม)
   - [แผนภาพ MongoDB Replica Set](#แผนภาพ-mongodb-replica-set)
+  - [การใช้ Shell Script สำหรับการจัดการทรัพยากร](#การใช้-shell-script-สำหรับการจัดการทรัพยากร)
+    - [1. การติดตั้งทรัพยากรทั้งหมด (deploy.sh)](#1-การติดตั้งทรัพยากรทั้งหมด-deploysh)
+    - [2. การทดสอบทรัพยากร (test.sh)](#2-การทดสอบทรัพยากร-testsh)
+    - [3. การลบทรัพยากรทั้งหมด (cleanup.sh)](#3-การลบทรัพยากรทั้งหมด-cleanupsh)
   - [สรุป](#สรุป)
 
 ## สิ่งที่จะได้เรียนรู้
@@ -214,7 +218,7 @@ spec:
 kubectl apply -f mongodb-admin-service.yaml
 ```
 
-**mongodb-admin-service.yaml** (ย่อ):
+**mongodb-admin-service.yaml**:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -234,7 +238,26 @@ spec:
       containers:
       - name: mongo-express
         image: mongo-express:latest
-        # ...เพิ่มค่า config อื่นๆ...
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          value: mongodb
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          value: admin
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          value: password
+        - name: ME_CONFIG_BASICAUTH_USERNAME
+          value: admin
+        - name: ME_CONFIG_BASICAUTH_PASSWORD
+          value: pass
+        ports:
+        - containerPort: 8081
+        resources:
+          limits:
+            cpu: "0.3"
+            memory: "256Mi"
+          requests:
+            cpu: "0.1"
+            memory: "128Mi"
 ```
 
 ### 6. สร้าง Ingress เพื่อเข้าถึง Web UI
@@ -427,6 +450,60 @@ graph TD
         Client2 -->|Load Balanced| Secondary2
     end
 ```
+
+## การใช้ Shell Script สำหรับการจัดการทรัพยากร
+
+เพื่อความสะดวกในการติดตั้งและทดสอบ workshop นี้ เราได้เตรียม shell script สำหรับการจัดการทรัพยากรทั้งหมด:
+
+### 1. การติดตั้งทรัพยากรทั้งหมด (deploy.sh)
+
+Script นี้จะสร้าง namespace และทรัพยากรทั้งหมดที่จำเป็นสำหรับ workshop นี้:
+
+```bash
+chmod +x deploy.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./deploy.sh
+```
+
+เมื่อรัน script นี้แล้ว จะมีการดำเนินการดังนี้:
+- สร้าง namespace `statefulset-demo`
+- ตั้งค่า context ให้ใช้งาน namespace `statefulset-demo`
+- สร้าง Headless Service สำหรับ StatefulSet
+- สร้าง StatefulSet สำหรับ MongoDB
+- สร้าง Service ปกติสำหรับการเข้าถึง MongoDB
+- สร้าง Web UI สำหรับจัดการ MongoDB
+- สร้าง Ingress สำหรับเข้าถึง Web UI จากภายนอก
+
+### 2. การทดสอบทรัพยากร (test.sh)
+
+Script นี้จะทดสอบการทำงานของทรัพยากรต่างๆ ที่สร้างขึ้น:
+
+```bash
+chmod +x test.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./test.sh
+```
+
+การทดสอบประกอบด้วย:
+- ตรวจสอบว่า StatefulSet ถูกสร้างและ Pod ทำงานปกติ
+- ตรวจสอบการเชื่อมต่อกับ MongoDB ผ่าน Headless Service
+- ทดสอบความคงทนของข้อมูลโดยการเพิ่มข้อมูล ลบ Pod และตรวจสอบว่าข้อมูลยังคงอยู่
+- ทดสอบการทำงานของ MongoDB Replica Set (ถ้ามี)
+
+### 3. การลบทรัพยากรทั้งหมด (cleanup.sh)
+
+เมื่อต้องการลบทรัพยากรทั้งหมดที่สร้างขึ้นในบทเรียนนี้:
+
+```bash
+chmod +x cleanup.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./cleanup.sh
+```
+
+Script นี้จะดำเนินการ:
+- ลบ StatefulSet และ รอให้ Pod ถูกลบให้เรียบร้อย
+- ลบ Services ทั้งหมด (Headless Service และ ClusterIP Service)
+- ลบ MongoDB Admin UI Deployment และ Ingress
+- ลบ PersistentVolumeClaims (ทำให้ข้อมูลสูญหาย) - มีตัวเลือกให้เก็บ PVC ไว้ได้
+- ลบ namespace `statefulset-demo`
+- ตั้งค่า context กลับไปที่ namespace `default`
 
 ## สรุป
 
