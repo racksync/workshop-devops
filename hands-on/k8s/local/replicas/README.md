@@ -156,6 +156,61 @@ kubectl scale deployment nginx-deployment --replicas=5
 kubectl scale deployment nginx-deployment --replicas=2
 ```
 
+## การใช้ Shell Script สำหรับการจัดการทรัพยากร
+
+เพื่อความสะดวกในการติดตั้งและทดสอบ workshop นี้ เราได้เตรียม shell script สำหรับการจัดการทรัพยากรทั้งหมด:
+
+### 1. การติดตั้งทรัพยากรทั้งหมด (deploy.sh)
+
+Script นี้จะสร้าง namespace และทรัพยากรทั้งหมดที่จำเป็นสำหรับ workshop นี้:
+
+```bash
+chmod +x deploy.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./deploy.sh
+```
+
+เมื่อรัน script นี้แล้ว จะมีการดำเนินการดังนี้:
+- สร้าง namespace `replica-demo`
+- ตั้งค่า context ให้ใช้งาน namespace `replica-demo`
+- สร้าง ReplicaSet ตามที่กำหนดใน replicaset.yaml
+- สร้าง Deployment ตามที่กำหนดใน deployment.yaml
+- สร้าง Service สำหรับเข้าถึง Pod ใน Deployment
+- สร้าง ConfigMap สำหรับตั้งค่า environments ต่างๆ
+
+### 2. การทดสอบทรัพยากร (test.sh)
+
+Script นี้จะทดสอบการทำงานของทรัพยากรต่างๆ ที่สร้างขึ้น:
+
+```bash
+chmod +x test.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./test.sh
+```
+
+การทดสอบประกอบด้วย:
+- ตรวจสอบว่า ReplicaSet สร้าง Pod ตามจำนวนที่กำหนด
+- ตรวจสอบว่า Deployment สร้าง ReplicaSet และ Pod ถูกต้อง
+- ทดสอบการ Scale Deployment แบบ manual
+- ทดสอบการ Update Deployment และดูการทำ rolling update
+- ตรวจสอบการเข้าถึง Pod ผ่าน Service
+- ทดสอบความทนทานโดยการลบ Pod และดูว่ามีการสร้างใหม่ทดแทน
+
+### 3. การลบทรัพยากรทั้งหมด (cleanup.sh)
+
+เมื่อต้องการลบทรัพยากรทั้งหมดที่สร้างขึ้นในบทเรียนนี้:
+
+```bash
+chmod +x cleanup.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./cleanup.sh
+```
+
+Script นี้จะดำเนินการ:
+- ลบ Deployment ทั้งหมด
+- ลบ ReplicaSet ทั้งหมด (ที่ไม่ได้ถูกสร้างโดย Deployment)
+- ลบ Service ทั้งหมด
+- ลบ ConfigMap ทั้งหมด
+- ลบ namespace `replica-demo`
+- ตั้งค่า context กลับไปที่ namespace `default`
+
 ## แผนภาพสถาปัตยกรรม
 
 ```mermaid
@@ -196,5 +251,4 @@ graph TD
 5. การปรับจำนวน replicas แบบ manual scale
 
 หากมี Pod ล้ม Kubernetes จะสร้าง Pod ใหม่ขึ้นมาทดแทนโดยอัตโนมัติ และ Service จะปรับเปลี่ยน endpoints ให้ชี้ไปยัง Pod ที่ทำงานอยู่ ทำให้แอปพลิเคชันของเรายังคงให้บริการได้อย่างต่อเนื่อง
-```
 
