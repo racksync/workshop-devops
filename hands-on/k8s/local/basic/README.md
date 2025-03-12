@@ -256,6 +256,51 @@ kubectl delete namespace basic-demo
 
 การลบ namespace จะลบทรัพยากรทั้งหมดที่อยู่ภายใน namespace นั้นโดยอัตโนมัติ
 
+## การแก้ไขปัญหา Ingress ที่แสดงข้อความ 404 Not Found
+
+หากคุณสามารถเข้าถึง NGINX ผ่าน port-forward (http://localhost:8080) ได้อย่างถูกต้อง แต่เมื่อเข้าผ่าน Ingress (http://nginx.k8s.local) กลับได้รับข้อความ 404 Not Found คุณสามารถทำตามขั้นตอนต่อไปนี้:
+
+### 1. ตรวจสอบการติดตั้ง Ingress Controller
+
+```bash
+kubectl get pods -n ingress-nginx
+```
+
+ถ้าไม่พบ pods ที่เกี่ยวข้อง แสดงว่ายังไม่ได้ติดตั้ง Ingress Controller สามารถติดตั้งได้ดังนี้:
+
+```bash
+# สำหรับ Docker Desktop
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+
+# สำหรับ Minikube
+minikube addons enable ingress
+```
+
+### 2. ตรวจสอบการตั้งค่า Ingress Controller
+
+Ingress Controller อาจต้องการการตั้งค่าเพิ่มเติม:
+
+```bash
+# ตรวจสอบ logs ของ Ingress Controller
+kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
+
+# ตรวจสอบรายละเอียดของ Ingress
+kubectl describe ingress nginx-ingress -n basic-demo
+```
+
+### 3. รีสตาร์ท Pod
+
+บางครั้งการรีสตาร์ท Pod อาจช่วยแก้ปัญหาได้:
+
+```bash
+kubectl delete pod nginx-pod -n basic-demo
+kubectl apply -f nginx-pod.yaml
+```
+
+### 4. ตรวจสอบการตั้งค่า hosts file
+
+ตรวจสอบว่าในไฟล์ hosts มีบรรทัดต่อไปนี้:
+
 ## สรุป
 
 ในบทเรียนนี้เราได้เรียนรู้การสร้างทรัพยากรพื้นฐานใน Kubernetes ได้แก่:

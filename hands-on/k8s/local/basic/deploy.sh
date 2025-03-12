@@ -44,6 +44,12 @@ print_status "   Waiting for Namespace to be ready..."
 kubectl get namespace basic-demo -o jsonpath='{.status.phase}' | grep -q Active
 check_error "Namespace is not ready"
 
+# 1.5. Create ConfigMap with custom content
+print_status "1.5. Creating ConfigMap with custom NGINX content..."
+kubectl apply -f nginx-configmap.yaml
+check_error "Cannot create ConfigMap"
+print_success "ConfigMap created successfully"
+
 # 2. Create Pod
 print_status "2. Creating NGINX Pod..."
 kubectl apply -f nginx-pod.yaml
@@ -92,6 +98,9 @@ echo ""
 echo "3. If you have an Ingress Controller installed, you can access it at:"
 echo "   http://nginx.k8s.local"
 echo ""
-echo "4. To remove all resources, use the command:"
-echo "   kubectl delete namespace basic-demo"
+echo "4. To run automated tests, use the command:"
+echo "   ./test.sh"
+echo ""
+echo "5. To remove all resources, use the command:"
+echo "   ./cleanup.sh or kubectl delete namespace basic-demo"
 echo ""

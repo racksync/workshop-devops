@@ -1,0 +1,5 @@
+{
+  "apiEndpoint": "https://api.example.com",
+  "enableFeatureA": true,
+  "maxConnections": 100
+}
