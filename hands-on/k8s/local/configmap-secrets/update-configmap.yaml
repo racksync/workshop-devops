@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config  # ชื่อต้องตรงกับ ConfigMap เดิมที่ต้องการอัปเดต
+  namespace: config-demo
+data:
+  app.properties: |  # ข้อมูลใหม่ที่แก้ไขจากเดิม
+    app.name=MyApp
+    app.version=1.0.1  # เปลี่ยนเวอร์ชัน
+    app.environment=staging  # เปลี่ยนสภาพแวดล้อม
+  database.properties: |  # ข้อมูลนี้ยังคงเหมือนเดิม
+    db.host=my-db-service
+    db.port=3306
+    db.name=mydb
+  message: "สวัสดี Kubernetes ConfigMap (updated)"  # ข้อความที่อัปเดต
+
+# การอัปเดต ConfigMap จะทำให้:
+# 1. Environment variables ที่อ้างอิงจาก ConfigMap โดยตรง จะ*ไม่*อัปเดตอัตโนมัติ
+#    ต้องรีสตาร์ท Pod หรือใช้ Deployment เพื่อทำ rolling update
+# 
+# 2. ไฟล์ที่ mount ผ่าน volume จะถูกอัปเดตอัตโนมัติหลังจากผ่านไป
+#    ระยะเวลาหนึ่ง (โดยปกติประมาณ 60 วินาที) แต่เป็นการอัปเดต
+#    symlink ไม่ใช่ไฟล์โดยตรง คุณต้องตรวจสอบว่าแอปพลิเคชันของคุณ
+#    สามารถรองรับการอัปเดตแบบนี้ได้
+#
+# 3. การอัปเดตแบบนี้มีประโยชน์มากสำหรับการแก้ไขค่า configuration 
+#    เช่น log level หรือ feature flags โดยไม่ต้องรีสตาร์ท Pod

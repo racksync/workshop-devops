@@ -209,6 +209,57 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt
 kubectl create secret tls tls-secret --cert=tls.crt --key=tls.key
 ```
 
+## การใช้ Shell Script สำหรับการจัดการทรัพยากร
+
+เพื่อความสะดวกในการติดตั้งและทดสอบ workshop นี้ เราได้เตรียม shell script สำหรับการจัดการทรัพยากรทั้งหมด:
+
+### 1. การติดตั้งทรัพยากรทั้งหมด (deploy.sh)
+
+Script นี้จะสร้าง namespace และทรัพยากรทั้งหมดที่จำเป็นสำหรับ workshop นี้:
+
+```bash
+chmod +x deploy.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./deploy.sh
+```
+
+เมื่อรัน script นี้แล้ว จะมีการดำเนินการดังนี้:
+- สร้าง namespace `config-demo`
+- ตั้งค่า context ให้ใช้งาน namespace `config-demo`
+- สร้าง ConfigMap จากไฟล์และคำสั่ง
+- สร้าง Secret จากไฟล์และคำสั่ง
+- สร้าง Pod สำหรับการทดสอบ
+- สร้างตัวอย่างการใช้งานจริง
+
+### 2. การทดสอบทรัพยากร (test.sh)
+
+Script นี้จะทดสอบการทำงานของทรัพยากรต่างๆ ที่สร้างขึ้น:
+
+```bash
+chmod +x test.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./test.sh
+```
+
+การทดสอบประกอบด้วย:
+- ตรวจสอบว่า ConfigMap และ Secret ถูกสร้างขึ้นอย่างถูกต้อง
+- ตรวจสอบว่า Pod ทดสอบทำงานได้อย่างถูกต้อง
+- ทดสอบการอัปเดต ConfigMap และดูผลกระทบ
+- ตรวจสอบการทำงานของตัวอย่างการใช้งานจริง
+
+### 3. การลบทรัพยากรทั้งหมด (cleanup.sh)
+
+เมื่อต้องการลบทรัพยากรทั้งหมดที่สร้างขึ้นในบทเรียนนี้:
+
+```bash
+chmod +x cleanup.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./cleanup.sh
+```
+
+Script นี้จะดำเนินการ:
+- ลบ Pod ทดสอบและ Deployment
+- ลบ ConfigMap และ Secret ทั้งหมด
+- ลบ namespace `config-demo`
+- ตั้งค่า context กลับไปที่ namespace `default`
+
 ## ความแตกต่างระหว่าง ConfigMap และ Secret
 
 | คุณสมบัติ | ConfigMap | Secret |
