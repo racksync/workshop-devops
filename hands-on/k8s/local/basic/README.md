@@ -195,6 +195,57 @@ kubectl get ingress -n basic-demo
 127.0.0.1 nginx.k8s.local
 ```
 
+## การใช้ Shell Script สำหรับการจัดการทรัพยากร
+
+เพื่อความสะดวกในการติดตั้งและทดสอบ workshop นี้ เราได้เตรียม shell script สำหรับการจัดการทรัพยากรทั้งหมด:
+
+### 1. การติดตั้งทรัพยากรทั้งหมด (deploy.sh)
+
+Script นี้จะสร้าง namespace และทรัพยากรทั้งหมดที่จำเป็นสำหรับ workshop นี้:
+
+```bash
+chmod +x deploy.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./deploy.sh
+```
+
+เมื่อรัน script นี้แล้ว จะมีการดำเนินการดังนี้:
+- สร้าง namespace `basic-demo`
+- ตั้งค่า context ให้ใช้งาน namespace `basic-demo`
+- สร้าง Pod ตัวอย่างทั้งหมด (nginx-pod, multi-container-pod)
+- สร้าง Service สำหรับเข้าถึง Pod
+- สร้าง ConfigMap และ Secret ที่จำเป็นสำหรับตัวอย่าง
+
+### 2. การทดสอบทรัพยากร (test.sh)
+
+Script นี้จะทดสอบการทำงานของทรัพยากรต่างๆ ที่สร้างขึ้น:
+
+```bash
+chmod +x test.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./test.sh
+```
+
+การทดสอบประกอบด้วย:
+- ตรวจสอบว่า Pod ทำงานปกติ
+- ทดสอบการเข้าถึง Pod ผ่าน Service
+- ตรวจสอบ logs ของ container ใน Pod
+- ทดสอบการรัน command ภายใน container
+
+### 3. การลบทรัพยากรทั้งหมด (cleanup.sh)
+
+เมื่อต้องการลบทรัพยากรทั้งหมดที่สร้างขึ้นในบทเรียนนี้:
+
+```bash
+chmod +x cleanup.sh  # ให้สิทธิ์การเรียกใช้งาน script (ครั้งแรกเท่านั้น)
+./cleanup.sh
+```
+
+Script นี้จะดำเนินการ:
+- ลบ Pod ทั้งหมดที่สร้างในบทเรียน
+- ลบ Service ทั้งหมด
+- ลบ ConfigMap และ Secret ที่สร้างขึ้น
+- ลบ namespace `basic-demo`
+- ตั้งค่า context กลับไปที่ namespace `default`
+
 ## การลบทรัพยากรทั้งหมด
 
 เมื่อเสร็จสิ้นการทดสอบ คุณสามารถลบทรัพยากรทั้งหมดได้ด้วยคำสั่ง:
