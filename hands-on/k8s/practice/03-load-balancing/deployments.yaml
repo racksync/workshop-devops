@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-v1
+spec:
+  replicas: 2  # จำนวน Pod ที่ต้องการ
+  selector:
+    matchLabels:
+      app: web
+      version: v1  # ใช้ label แยกเวอร์ชัน
+  template:
+    metadata:
+      labels:
+        app: web
+        version: v1
+    spec:
+      containers:
+      - name: web
+        image: nginx:1.19  # ใช้ nginx เป็นเว็บเซิร์ฟเวอร์
+        command: ["/bin/sh", "/usr/share/nginx/html/startup.sh"]
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/nginx/html  # กำหนด path ที่จะแสดงไฟล์ HTML
+      volumes:
+      - name: config
+        configMap:
+          name: web-v1-config  # ใช้ ConfigMap เพื่อกำหนดเนื้อหาเว็บ
+          defaultMode: 0755  # Allow execution of the startup script
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-v2
+spec:
+  replicas: 2  # จำนวน Pod ที่ต้องการ
+  selector:
+    matchLabels:
+      app: web
+      version: v2  # ใช้ label แยกเวอร์ชัน
+  template:
+    metadata:
+      labels:
+        app: web
+        version: v2
+    spec:
+      containers:
+      - name: web
+        image: nginx:1.19  # ใช้ nginx เป็นเว็บเซิร์ฟเวอร์
+        command: ["/bin/sh", "/usr/share/nginx/html/startup.sh"]
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/nginx/html  # กำหนด path ที่จะแสดงไฟล์ HTML
+      volumes:
+      - name: config
+        configMap:
+          name: web-v2-config  # ใช้ ConfigMap เพื่อกำหนดเนื้อหาเว็บ
+          defaultMode: 0755  # Allow execution of the startup script

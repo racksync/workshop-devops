@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service-all
+spec:
+  selector:
+    app: web  # เลือก Pod ทั้งหมดที่มี label app=web (ทั้ง v1 และ v2)
+  ports:
+  - port: 80  # port ที่ Service เปิดให้บริการ
+    targetPort: 80  # port ของ Pod ที่จะส่งทราฟฟิกไป
+  type: ClusterIP  # ประเภท Service เป็น ClusterIP (ใช้ภายใน cluster)

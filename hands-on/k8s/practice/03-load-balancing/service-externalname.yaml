@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-api
+spec:
+  type: ExternalName  # ประเภทเป็น ExternalName สำหรับเชื่อมต่อกับบริการภายนอก
+  externalName: api.external-service.com  # ชื่อโดเมนของบริการภายนอก
+  ports:
+  - port: 80
