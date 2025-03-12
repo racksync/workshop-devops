@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-deployment
+  namespace: resource-demo
+spec:
+  replicas: 3  # จำนวน Pod ที่ต้องการสร้าง
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        resources:
+          # การกำหนดทรัพยากรขั้นต่ำและสูงสุดสำหรับแต่ละ Pod ใน Deployment
+          requests:
+            memory: "64Mi"  # หน่วยความจำขั้นต่ำ 64 Mebibytes
+            cpu: "100m"     # CPU ขั้นต่ำ 0.1 cores
+          limits:
+            memory: "128Mi" # หน่วยความจำสูงสุด 128 Mebibytes
+            cpu: "200m"     # CPU สูงสุด 0.2 cores

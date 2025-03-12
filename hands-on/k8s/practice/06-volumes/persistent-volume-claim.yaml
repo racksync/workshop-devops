@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: example-pvc
+  namespace: volume-demo
+spec:
+  accessModes:
+    - ReadWriteOnce  # ต้องตรงกับ accessModes ของ PV ที่ต้องการใช้
+  resources:
+    requests:
+      storage: 500Mi  # ขนาดพื้นที่เก็บข้อมูลที่ต้องการ

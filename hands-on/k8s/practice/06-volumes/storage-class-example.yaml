@@ -1,0 +1,37 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+provisioner: k8s.io/minikube-hostpath  # เปลี่ยนตาม provisioner ที่คลัสเตอร์ของคุณรองรับ
+reclaimPolicy: Delete  # นโยบายการเรียกคืนเมื่อ PVC ถูกลบ
+volumeBindingMode: Immediate  # ผูกกับ volume ทันทีเมื่อมีการสร้าง PVC
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dynamic-pvc
+  namespace: volume-demo
+spec:
+  storageClassName: standard  # ชื่อของ StorageClass ที่ใช้
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dynamic-pvc-pod
+  namespace: volume-demo
+spec:
+  containers:
+  - name: app
+    image: nginx
+    volumeMounts:
+    - name: dynamic-storage
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: dynamic-storage
+    persistentVolumeClaim:
+      claimName: dynamic-pvc  # ชื่อของ PVC ที่สร้างไว้
