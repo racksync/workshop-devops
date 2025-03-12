@@ -75,8 +75,8 @@ spec:
       containers:
       - name: web-app
         image: node:14-alpine
-        # สั่งให้รัน Node.js application
-        command: ["node", "server.js"]
+        # แก้ไขคำสั่งให้สร้าง HTTP server แทนการรัน server.js ที่ไม่มีอยู่จริง
+        command: ["node", "-e", "const http = require('http'); const server = http.createServer((req, res) => { res.statusCode = 200; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({status: 'ok', message: 'Hello from Node.js', config: process.env.APP_CONFIG})); }); server.listen(3000, '0.0.0.0', () => { console.log('Server running on port 3000'); });"]
         ports:
         - containerPort: 3000
           name: http

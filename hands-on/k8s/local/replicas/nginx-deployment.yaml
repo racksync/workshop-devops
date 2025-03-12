@@ -41,3 +41,10 @@ spec:                      # ข้อมูลจำเพาะของ Deplo
             port: 80       # port ที่จะใช้ตรวจสอบ
           initialDelaySeconds: 10  # รอเวลาก่อนเริ่มตรวจสอบครั้งแรก
           periodSeconds: 5  # ความถี่ในการตรวจสอบ
+        volumeMounts:      # การกำหนดการ mount volumes เข้าไปใน container
+        - name: nginx-html # ชื่อของ volume ที่จะ mount (ต้องตรงกับชื่อใน volumes)
+          mountPath: /usr/share/nginx/html # ตำแหน่งที่จะ mount volume ในตัว container
+      volumes:             # การกำหนด volumes ที่จะใช้ใน Pod
+      - name: nginx-html   # ชื่อของ volume (ต้องตรงกับที่อ้างอิงใน volumeMounts)
+        configMap:         # ระบุว่า volume นี้เป็น ConfigMap
+          name: nginx-html-content # ชื่อของ ConfigMap ที่จะใช้

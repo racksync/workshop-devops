@@ -6,7 +6,7 @@ metadata:
 data:
   app.properties: |  # ข้อมูลใหม่ที่แก้ไขจากเดิม
     app.name=MyApp
-    app.version=1.0.1  # เปลี่ยนเวอร์ชัน
+    app.version=1.0.3  # เปลี่ยนเวอร์ชัน
     app.environment=staging  # เปลี่ยนสภาพแวดล้อม
   database.properties: |  # ข้อมูลนี้ยังคงเหมือนเดิม
     db.host=my-db-service

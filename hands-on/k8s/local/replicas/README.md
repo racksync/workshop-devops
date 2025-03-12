@@ -16,6 +16,49 @@
 - การสร้าง service เพื่อเชื่อมต่อกับ pods
 - การสร้าง ingress เพื่อเข้าถึงแอปพลิเคชันจากภายนอก
 - การทดสอบ replicas และ auto-healing
+- การใช้ ConfigMap เพื่อกำหนด custom HTML content
+
+## ข้อกำหนดเบื้องต้น
+
+ก่อนเริ่มเวิร์คช็อปนี้ ตรวจสอบให้แน่ใจว่าคุณมีสิ่งต่อไปนี้:
+
+1. Kubernetes cluster ที่ทำงานอยู่ (เช่น Minikube, K3s, Docker Desktop Kubernetes)
+2. kubectl ที่ตั้งค่าเพื่อเชื่อมต่อกับคลัสเตอร์ของคุณ
+3. **Ingress Controller ที่ติดตั้งในคลัสเตอร์** - สำคัญมากสำหรับการใช้งาน Ingress!
+   - สำหรับ Minikube: `minikube addons enable ingress`
+   - สำหรับคลัสเตอร์อื่นๆ: ติดตั้ง NGINX Ingress Controller ตามคำแนะนำทางการ
+
+## การแก้ไขปัญหา 404 Not Found เมื่อเข้าถึงผ่าน Ingress
+
+หากคุณพบกับปัญหา 404 Not Found เมื่อพยายามเข้าถึง `nginx.k8s.local` ให้ตรวจสอบสิ่งต่อไปนี้:
+
+1. **ตรวจสอบว่าได้ติดตั้ง Ingress Controller แล้ว**:
+   ```bash
+   kubectl get pods -n ingress-nginx
+   # หรือตรวจสอบในเนมสเปซที่คุณติดตั้ง Ingress Controller
+   ```
+
+2. **เพิ่ม DNS resolution**:
+   ```bash
+   # เพิ่มบรรทัดนี้ใน /etc/hosts
+   127.0.0.1 nginx.k8s.local
+   ```
+
+3. **ตรวจสอบสถานะของ Ingress**:
+   ```bash
+   kubectl describe ingress nginx-ingress -n replica-demo
+   ```
+
+4. **ตรวจสอบ log ของ Ingress Controller**:
+   ```bash
+   kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
+   ```
+
+5. **ทดสอบการเข้าถึงโดยตรงผ่าน port-forward**:
+   ```bash
+   kubectl port-forward service/nginx-service 8080:80 -n replica-demo
+   # จากนั้นเปิดเบราว์เซอร์ไปที่ http://localhost:8080
+   ```
 
 ## ขั้นตอนการทำงาน
 
@@ -64,9 +107,60 @@ spec:
           requests:
             cpu: "0.2"
             memory: "128Mi"
+        volumeMounts:
+        - name: nginx-html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nginx-html
+        configMap:
+          name: nginx-html-content
 ```
 
-### 3. สร้าง Service
+### 3. สร้าง ConfigMap
+
+ConfigMap จะเก็บไฟล์ custom HTML ที่จะแสดงใน NGINX:
+
+```bash
+kubectl apply -f nginx-configmap.yaml
+```
+
+**nginx-configmap.yaml**:
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-html-content
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Welcome to NGINX on Kubernetes</title>
+      <style>
+        body {
+          width: 35em;
+          margin: 0 auto;
+          font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Welcome to NGINX on Kubernetes!</h1>
+      <p>If you see this page, your Kubernetes NGINX deployment with Ingress is working correctly.</p>
+      
+      <h2>Environment Information:</h2>
+      <ul>
+        <li>Pod Name: NGINX Demo Pod</li>
+        <li>Namespace: replica-demo</li>
+        <li>Accessed via Ingress: nginx.k8s.local</li>
+      </ul>
+      
+      <p><em>Thank you for using the DevOps Workshop tutorial.</em></p>
+    </body>
+    </html>
+```
+
+### 4. สร้าง Service
 
 Service จะทำหน้าที่เป็นตัวกลางในการเชื่อมต่อกับ Pod
 
@@ -89,7 +183,7 @@ spec:
   type: ClusterIP
 ```
 
-### 4. สร้าง Ingress
+### 5. สร้าง Ingress
 
 Ingress จะช่วยให้เราเข้าถึงแอปพลิเคชันจากภายนอก cluster
 
@@ -107,7 +201,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: nginx-demo.local
+  - host: nginx.k8s.local
     http:
       paths:
       - path: /
@@ -119,9 +213,9 @@ spec:
               number: 80
 ```
 
-หมายเหตุ: คุณอาจต้องเพิ่ม `nginx-demo.local` ไปยังไฟล์ `/etc/hosts` ของคุณ
+หมายเหตุ: คุณอาจต้องเพิ่ม `nginx.k8s.local` ไปยังไฟล์ `/etc/hosts` ของคุณ
 
-### 5. ตรวจสอบการทำงานของ Replicas
+### 6. ตรวจสอบการทำงานของ Replicas
 
 ตรวจสอบว่า Pod ทำงานปกติ:
 ```bash
@@ -133,7 +227,7 @@ kubectl get pods -o wide
 kubectl describe deployment nginx-deployment
 ```
 
-### 6. ทดสอบ Auto-healing
+### 7. ทดสอบ Auto-healing
 
 ลบ Pod หนึ่งตัวเพื่อดูว่า Kubernetes จะสร้าง Pod ใหม่มาทดแทนหรือไม่:
 ```bash
@@ -144,7 +238,7 @@ kubectl delete pod <pod-name>
 kubectl get pods
 ```
 
-### 7. ปรับจำนวน Replicas
+### 8. ปรับจำนวน Replicas
 
 เพิ่มจำนวน replicas เป็น 5 ตัว:
 ```bash
@@ -224,9 +318,14 @@ graph TD
     D --> G[(Container: nginx)]
     E --> H[(Container: nginx)]
     
+    I[ConfigMap: nginx-html-content] --> C
+    I --> D
+    I --> E
+    
     subgraph "Kubernetes Cluster"
         A
         B
+        I
         subgraph "Deployment: nginx-deployment (replicas=3)"
             C
             D
@@ -237,7 +336,7 @@ graph TD
         end
     end
     
-    I[User] --> A
+    J[User] --> A
 ```
 
 ## สรุป
