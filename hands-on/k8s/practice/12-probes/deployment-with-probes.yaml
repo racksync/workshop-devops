@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-with-probes
+  namespace: probes-demo
+spec:
+  replicas: 3 # จำนวน replicas ที่ต้องการ
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: nginx
+        ports:
+        - containerPort: 80
+        startupProbe:
+          httpGet:
+            path: / # ตรวจสอบหน้าแรกของ nginx
+            port: 80 # พอร์ตมาตรฐานของ nginx
+          failureThreshold: 30 # อนุญาตให้ล้มเหลวได้ 30 ครั้ง
+          periodSeconds: 10 # ตรวจสอบทุก 10 วินาที (รวมเป็นเวลา 300 วินาทีหรือ 5 นาที)
+        readinessProbe:
+          httpGet:
+            path: / # ตรวจสอบความพร้อมในการรับ traffic
+            port: 80
+          initialDelaySeconds: 5 # รอ 5 วินาทีหลังจาก container เริ่มต้น
+          periodSeconds: 5 # ตรวจสอบทุก 5 วินาที
+        livenessProbe:
+          httpGet:
+            path: / # ตรวจสอบว่าแอปพลิเคชันทำงานอยู่หรือไม่
+            port: 80
+          initialDelaySeconds: 15 # รอ 15 วินาทีหลังจาก container เริ่มต้น
+          periodSeconds: 20 # ตรวจสอบทุก 20 วินาที

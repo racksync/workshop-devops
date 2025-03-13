@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-container-demo
+  namespace: pod-patterns
+spec:
+  initContainers:
+  - name: init-db  # คอนเทนเนอร์สำหรับเตรียมข้อมูลเริ่มต้นก่อนแอพหลักทำงาน
+    image: busybox
+    command: ['/bin/sh', '-c', 'echo "Initializing database..."; sleep 10; echo "CREATE TABLE users (id INT, name VARCHAR(255));" > /init-data/init.sql; echo "Database initialized"']
+    volumeMounts:
+    - name: init-data
+      mountPath: /init-data
+  containers:
+  - name: app  # คอนเทนเนอร์หลักที่ทำงานหลังจาก init container เสร็จสิ้น
+    image: busybox
+    command: ['/bin/sh', '-c', 'echo "Application starting..."; if [ -f /init-data/init.sql ]; then echo "Found initialization script:"; cat /init-data/init.sql; else echo "No initialization script found"; fi; sleep 3600']
+    volumeMounts:
+    - name: init-data  # แชร์ volume เพื่อเข้าถึงข้อมูลที่ init container เตรียมไว้
+      mountPath: /init-data
+  volumes:
+  - name: init-data  # volume สำหรับแชร์ข้อมูลระหว่าง init container และ container หลัก
+    emptyDir: {}

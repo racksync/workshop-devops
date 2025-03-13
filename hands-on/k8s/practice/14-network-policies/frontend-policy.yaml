@@ -1,0 +1,13 @@
+# Network Policy อนุญาตให้ frontend สามารถเข้าถึงได้จากภายนอก
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Ingress
+  ingress:
+  - {}  # อนุญาตการเข้าถึงจากแหล่งใดก็ได้

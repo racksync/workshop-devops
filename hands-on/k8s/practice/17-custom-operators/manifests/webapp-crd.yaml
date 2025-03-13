@@ -1,0 +1,70 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: webapps.apps.example.com
+  annotations:
+    # คำอธิบาย: CRD สำหรับจัดการ Web Application
+    description: Custom Resource Definition สำหรับ WebApp Operator
+spec:
+  group: apps.example.com
+  names:
+    kind: WebApp
+    listKind: WebAppList
+    plural: webapps
+    singular: webapp
+    shortNames:
+      - wa
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - image
+              properties:
+                # จำนวน replica ของ web application
+                size:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  default: 1
+                # Container image ที่ต้องการใช้
+                image:
+                  type: string
+                # Port ที่ container เปิดให้บริการ
+                port:
+                  type: integer
+                  default: 80
+            status:
+              type: object
+              properties:
+                # รายชื่อของ pod ที่ทำงานอยู่
+                nodes:
+                  type: array
+                  items:
+                    type: string
+                # จำนวน replica ที่พร้อมให้บริการ
+                availableReplicas:
+                  type: integer
+      subresources:
+        # เปิดใช้งาน status subresource
+        status: {}
+      additionalPrinterColumns:
+        - name: Replicas
+          type: integer
+          jsonPath: .spec.size
+        - name: Image
+          type: string
+          jsonPath: .spec.image
+        - name: Available
+          type: integer
+          jsonPath: .status.availableReplicas
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp

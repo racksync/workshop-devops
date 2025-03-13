@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: failing-probe
+  namespace: probes-demo
+spec:
+  containers:
+  - name: app
+    image: nginx
+    command:
+    - /bin/sh
+    - -c
+    - "sleep 30; echo 'Simulating failure'; mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.backup; sleep 600" # จำลองความล้มเหลวโดยย้ายไฟล์ index.html หลังจาก 30 วินาที
+    ports:
+    - containerPort: 80
+    livenessProbe:
+      httpGet:
+        path: / # ตรวจสอบหน้าแรกของ nginx
+        port: 80 # หลังจาก index.html ถูกย้าย liveness probe จะล้มเหลว
+      initialDelaySeconds: 5 # รอ 5 วินาทีหลังจาก container เริ่มต้น
+      periodSeconds: 5 # ตรวจสอบทุก 5 วินาที

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exec-probe
+  namespace: probes-demo
+spec:
+  containers:
+  - name: app
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600 # สร้างไฟล์ /tmp/healthy แล้วลบทิ้งหลังจาก 30 วินาที
+    livenessProbe:
+      exec:
+        command: # รัน command เพื่อตรวจสอบว่าไฟล์ /tmp/healthy มีอยู่หรือไม่
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5 # รอ 5 วินาทีหลังจาก container เริ่มต้น
+      periodSeconds: 5 # ตรวจสอบทุก 5 วินาที

@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: parallel-job
+spec:
+  completions: 5     # ต้องทำงานให้สำเร็จ 5 ครั้ง
+  parallelism: 2     # อนุญาตให้ทำงานพร้อมกัน 2 Pod
+  template:
+    spec:
+      containers:
+      - name: worker
+        image: busybox
+        command: ["sh", "-c", "echo 'Working on task!' && sleep $(( $RANDOM % 20 + 10 ))"]
+      restartPolicy: Never
+  backoffLimit: 4
+# คำอธิบาย: Job นี้กำหนดให้ทำงานสำเร็จ 5 ครั้ง โดยอนุญาตให้ทำงานพร้อมกันได้ 2 Pod ทำงานเสร็จแล้วจะหยุด
