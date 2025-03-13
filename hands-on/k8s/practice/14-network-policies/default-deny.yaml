@@ -1,0 +1,10 @@
+# Network Policy สำหรับปิดกั้นการเชื่อมต่อทั้งหมดโดยค่าเริ่มต้น (Default Deny)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}  # เลือกทุก Pod
+  policyTypes:
+  - Ingress
+  - Egress

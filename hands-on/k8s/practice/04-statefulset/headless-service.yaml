@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-headless
+  namespace: statefulset-demo
+  labels:
+    app: mongodb
+    type: database
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017
+    targetPort: 27017
+    name: mongodb
+  clusterIP: None  # กำหนดให้เป็น Headless Service โดยไม่มี ClusterIP
+  publishNotReadyAddresses: false  # ไม่ประกาศ endpoints ของ Pod ที่ยังไม่พร้อมใช้งาน
+
+# Headless Service คือ Service ที่ไม่มี ClusterIP แต่จะสร้าง DNS records สำหรับ Pod แต่ละตัว
+# ในรูปแบบ: <pod-name>.<service-name>.<namespace>.svc.cluster.local
+# เช่น: mongodb-0.mongodb-headless.statefulset-demo.svc.cluster.local
+#
+# Service นี้จำเป็นสำหรับ StatefulSet เพื่อให้แต่ละ Pod มี DNS name ที่คงที่และคาดเดาได้
+# แม้ว่า Pod จะถูกรีสตาร์ทและได้รับ IP ใหม่ก็ตาม

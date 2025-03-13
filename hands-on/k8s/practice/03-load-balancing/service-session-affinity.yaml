@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service-sticky
+spec:
+  selector:
+    app: web  # เลือกทั้งเวอร์ชัน v1 และ v2
+  ports:
+  - port: 80
+    targetPort: 80
+  sessionAffinity: ClientIP  # กำหนด session affinity ตาม IP ของ client
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 180  # timeout ของ session (3 นาที)

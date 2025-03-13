@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mongodb-admin
+  namespace: statefulset-demo
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # ในกรณีจริงอาจต้องมีการตั้งค่า TLS และการยืนยันตัวตน
+    # เนื่องจากเป็นการเข้าถึงฐานข้อมูลโดยตรง
+spec:
+  rules:
+  - host: mongodb-admin.example.com  # ต้องแก้ไขเป็นโดเมนที่คุณเป็นเจ้าของ
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mongodb-admin-ui  # ต้องสร้าง service สำหรับ admin UI เพิ่มเติม
+            port:
+              number: 80
+
+# Ingress นี้เป็นตัวอย่างสำหรับการเข้าถึง MongoDB admin UI จากภายนอก
+# ในการใช้งานจริง ควรพิจารณาด้านความปลอดภัยอย่างรอบคอบ
+# เช่น การใช้ TLS, Authentication และ Network Policies
+#
+# สำหรับ MongoDB โดยตรง ไม่แนะนำให้เปิด port 27017 ผ่าน Ingress
+# แต่ควรใช้ VPN หรือ SSH tunneling เพื่อเข้าถึงอย่างปลอดภัย

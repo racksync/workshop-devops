@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: advanced-cronjob
+spec:
+  schedule: "*/10 * * * *"  # ทุกๆ 10 นาที
+  startingDeadlineSeconds: 180  # หากเริ่มช้าเกิน 3 นาที ให้ข้าม
+  concurrencyPolicy: Forbid     # ห้ามทำงานซ้อนกัน
+  successfulJobsHistoryLimit: 3 # เก็บประวัติงานสำเร็จไว้ 3 ชุด
+  failedJobsHistoryLimit: 1     # เก็บประวัติงานล้มเหลวไว้ 1 ชุด
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: advanced-worker
+            image: busybox
+            command: ["sh", "-c", "echo 'Running advanced job' && date && sleep 30"]
+          restartPolicy: OnFailure
+# คำอธิบาย: CronJob ขั้นสูงที่มีการกำหนดเงื่อนไขเพิ่มเติม เช่น ห้ามทำงานซ้อนกัน เก็บประวัติงาน และมีเวลาเริ่มต้นที่จำกัด

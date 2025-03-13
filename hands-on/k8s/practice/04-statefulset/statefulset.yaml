@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  namespace: statefulset-demo
+  labels:
+    app: mongodb
+    type: database
+spec:
+  serviceName: "mongodb-headless"  # ต้องระบุชื่อ headless service ที่ใช้กับ StatefulSet นี้
+  replicas: 3  # จำนวน replicas ที่ต้องการ
+  selector:
+    matchLabels:
+      app: mongodb  # ต้องตรงกับ labels ใน template
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      terminationGracePeriodSeconds: 10  # เวลาที่รอให้ pod ปิดตัวเองอย่างสมบูรณ์
+      containers:
+      - name: mongodb
+        image: mongo:4.4
+        ports:
+        - containerPort: 27017
+          name: mongodb
+        volumeMounts:
+        - name: data
+          mountPath: /data/db  # ตำแหน่งที่ MongoDB เก็บข้อมูล
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "admin"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: "password"
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"
+        readinessProbe:  # ตรวจสอบว่า Pod พร้อมใช้งานหรือไม่
+          tcpSocket:
+            port: 27017
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:  # ตรวจสอบว่า Pod ยังมีชีวิตอยู่หรือไม่
+          tcpSocket:
+            port: 27017
+          initialDelaySeconds: 15
+          periodSeconds: 20
+  # volumeClaimTemplates จะสร้าง PVC สำหรับแต่ละ Pod โดยอัตโนมัติ
+  # ชื่อจะเป็น <volumeClaimTemplates[].metadata.name>-<statefulset-name>-<ordinal>
+  # เช่น data-mongodb-0, data-mongodb-1, data-mongodb-2
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]  # RWO คือ อ่าน-เขียนโดย node เดียว
+      resources:
+        requests:
+          storage: 1Gi  # ขนาดที่ต้องการสำหรับแต่ละ PVC
+      # ไม่ระบุ storageClassName จะใช้ default storage class ของคลัสเตอร์
+
+# StatefulSet แตกต่างจาก Deployment ตรงที่:
+# 1. สร้าง Pod ตามลำดับ (mongodb-0, mongodb-1, mongodb-2) และลบย้อนกลับ
+# 2. แต่ละ Pod มี identity คงที่ แม้จะถูกรีสตาร์ท
+# 3. สามารถเข้าถึงแต่ละ Pod ด้วย DNS name ที่คงที่
+# 4. แต่ละ Pod มี PVC เป็นของตัวเอง

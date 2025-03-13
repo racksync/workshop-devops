@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-k8s-app # ชื่อ Deployment
+spec:
+  replicas: 3 # จำนวน replica ที่ต้องการ
+  selector:
+    matchLabels:
+      app: my-k8s-app # เลือก Pod ที่มี label นี้
+  template:
+    metadata:
+      labels:
+        app: my-k8s-app # กำหนด label ให้ Pod
+    spec:
+      containers:
+      - name: my-k8s-app # ชื่อ container
+        image: username/my-k8s-app:latest # Docker image ที่ใช้ (ปรับ username ให้เหมาะสม)
+        ports:
+        - containerPort: 3000 # พอร์ตที่ container เปิดให้บริการ

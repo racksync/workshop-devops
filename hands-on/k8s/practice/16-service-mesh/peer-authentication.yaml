@@ -1,0 +1,15 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-demo
+spec:
+  mtls:
+    mode: STRICT
+# PeerAuthentication นี้กำหนดให้การสื่อสารระหว่าง services ภายใน namespace istio-demo
+# ต้องใช้ mutual TLS (mTLS) ในโหมด STRICT เท่านั้น
+# 
+# โหมด STRICT หมายถึง:
+# - การสื่อสารระหว่าง services จะเข้ารหัสด้วย TLS เสมอ
+# - services จะปฏิเสธการเชื่อมต่อที่ไม่ได้ใช้ TLS
+# - ช่วยรับประกันความปลอดภัยในการสื่อสารระหว่าง services

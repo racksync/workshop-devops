@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress-path
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx  # Add this line to specify the IngressClass
+  rules:
+  - host: lb.k8s.local  # โฮสต์เนมเดียวกัน แต่แยก path
+    http:
+      paths:
+      - path: /v1  # path สำหรับเวอร์ชัน 1
+        pathType: Prefix
+        backend:
+          service:
+            name: web-service-v1  # ส่ง traffic ไปยัง service v1
+            port:
+              number: 80
+      - path: /v2  # path สำหรับเวอร์ชัน 2
+        pathType: Prefix
+        backend:
+          service:
+            name: web-service-v2  # ส่ง traffic ไปยัง service v2
+            port:
+              number: 80

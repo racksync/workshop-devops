@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sample-app-alerts
+  namespace: monitoring
+  labels:
+    # ให้ Prometheus Operator ค้นพบ PrometheusRule นี้
+    release: prometheus
+spec:
+  groups:
+  - name: sample-app.rules
+    rules:
+    - alert: SampleAppHighCPU
+      # กฎการแจ้งเตือนเมื่อ CPU usage > 80% เป็นเวลา 5 นาที
+      expr: avg(rate(container_cpu_usage_seconds_total{pod=~"sample-app-.*"}[5m])) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Sample App high CPU usage"
+        description: "Sample App has been using high CPU for more than 5 minutes."
+    - alert: SampleAppHighMemory
+      # กฎการแจ้งเตือนเมื่อ Memory usage > 90% 
+      expr: avg(container_memory_usage_bytes{pod=~"sample-app-.*"}) / avg(container_spec_memory_limit_bytes{pod=~"sample-app-.*"}) * 100 > 90
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Sample App high memory usage"
+        description: "Sample App has been using high memory for more than 5 minutes."

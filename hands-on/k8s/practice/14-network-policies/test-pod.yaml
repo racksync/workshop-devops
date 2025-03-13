@@ -1,0 +1,12 @@
+# Pod นี้จะใช้สำหรับทดสอบการเชื่อมต่อระหว่าง Pods ในระบบ
+apiVersion: v1
+kind: Pod
+metadata:
+  name: network-test
+  labels:
+    role: test
+spec:
+  containers:
+  - name: network-test
+    image: nicolaka/netshoot
+    command: ["sleep", "infinity"]

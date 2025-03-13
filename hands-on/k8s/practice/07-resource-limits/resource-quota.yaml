@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: namespace-quota
+  namespace: resource-demo
+spec:
+  hard:  # กำหนดขีดจำกัดสูงสุดของทรัพยากรทั้งหมดใน namespace
+    requests.cpu: "1"        # จำกัดการจอง CPU รวมไม่เกิน 1 core
+    requests.memory: 1Gi     # จำกัดการจองหน่วยความจำรวมไม่เกิน 1 Gibibyte
+    limits.cpu: "2"          # จำกัดการใช้ CPU สูงสุดรวมไม่เกิน 2 cores
+    limits.memory: 2Gi       # จำกัดการใช้หน่วยความจำสูงสุดรวมไม่เกิน 2 Gibibytes
+    pods: "10"               # จำกัดจำนวน Pod สูงสุดไม่เกิน 10 Pods

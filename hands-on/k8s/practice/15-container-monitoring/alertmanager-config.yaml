@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: sample-alertmanager-config
+  namespace: monitoring
+  labels:
+    # ให้ Prometheus Operator ค้นพบ AlertmanagerConfig นี้
+    release: prometheus
+spec:
+  route:
+    # ตั้งค่า receiver เริ่มต้นเป็น 'slack'
+    receiver: 'slack'
+    # จัดกลุ่มการแจ้งเตือนตาม alertname และ namespace
+    groupBy: ['alertname', 'namespace']
+    # รอ 30 วินาที ก่อนส่งการแจ้งเตือนกลุ่มแรก
+    groupWait: 30s
+    # รอ 5 นาทีระหว่างการส่งการแจ้งเตือนกลุ่ม
+    groupInterval: 5m
+    # รอ 12 ชั่วโมงก่อนที่จะส่งซ้ำ
+    repeatInterval: 12h
+  receivers:
+  - name: 'slack'
+    slackConfigs:
+    - apiURL: 'https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK'
+      channel: '#monitoring-alerts'
+      # ส่งการแจ้งเตือนเมื่อแก้ไขปัญหาแล้ว
+      sendResolved: true

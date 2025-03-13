@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sample-app-dev
+  namespace: argocd
+  annotations:
+    # แอพพลิเคชัน ArgoCD สำหรับ GitOps CD Pipeline
+    # ใช้สำหรับจัดการการ deploy แอพพลิเคชันตัวอย่างไปยัง Kubernetes
+    description: "Sample application deployed via GitOps"
+spec:
+  project: default
+  source:
+    # URL ของ repository สำหรับ GitOps configuration
+    repoURL: https://github.com/yourusername/gitops-config.git
+    targetRevision: HEAD
+    path: overlays/dev
+  destination:
+    # เป้าหมายสำหรับการ deploy (ใช้คลัสเตอร์ปัจจุบัน)
+    server: https://kubernetes.default.svc
+    namespace: development
+  syncPolicy:
+    automated:
+      # การตั้งค่าให้ลบทรัพยากรที่ไม่ได้ระบุใน Git
+      prune: true
+      # การตั้งค่าให้แก้ไขความแตกต่างโดยอัตโนมัติ
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

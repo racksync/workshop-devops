@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-k8s-app
+  namespace: gitlab-demo
+spec:
+  selector:
+    app: my-k8s-app
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+  type: ClusterIP
+# คำอธิบาย: Service นี้ expose แอปพลิเคชันที่รันบน Pod ที่มี label app: my-k8s-app
+# โดยจะ map port 80 ของ Service ไปยัง port 3000 ของ Pod
+# Service type เป็น ClusterIP ทำให้สามารถเข้าถึงได้ภายใน cluster เท่านั้น

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: basic-demo
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: nginx-index-html
+      mountPath: /usr/share/nginx/html/index.html
+      subPath: index.html
+  volumes:
+  - name: nginx-index-html
+    configMap:
+      name: nginx-index-html-configmap

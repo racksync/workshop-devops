@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-pattern
+  namespace: pod-patterns
+spec:
+  containers:
+  - name: app
+    image: busybox
+    command: ["/bin/sh", "-c", "while true; do echo \"$(date): Application log\" >> /var/log/app.log; sleep 5; done"]
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log
+  - name: log-sidecar  # คอนเทนเนอร์ sidecar ที่ทำหน้าที่อ่านและแสดงผล log
+    image: busybox
+    command: ["/bin/sh", "-c", "tail -f /var/log/app.log"]
+    volumeMounts:
+    - name: log-volume  # แชร์ volume เดียวกันกับคอนเทนเนอร์หลัก
+      mountPath: /var/log
+  volumes:
+  - name: log-volume  # volume สำหรับแชร์ไฟล์ระหว่างคอนเทนเนอร์
+    emptyDir: {}

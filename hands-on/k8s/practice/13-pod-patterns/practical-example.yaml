@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: pod-patterns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+      - name: web  # คอนเทนเนอร์หลักที่เป็น web server
+        image: nginx:1.19
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-logs  # แชร์ volume สำหรับเก็บ logs
+          mountPath: /var/log/nginx
+        - name: nginx-conf  # แชร์ volume สำหรับ config
+          mountPath: /etc/nginx/conf.d
+      - name: metrics-exporter  # sidecar container สำหรับรวบรวม metrics
+        image: busybox
+        command: ["/bin/sh", "-c", "while true; do count=$(grep -c 'GET' /var/log/nginx/access.log 2>/dev/null || echo 0); echo \"requests_total $count\" > /metrics/requests.prom; sleep 15; done"]
+        volumeMounts:
+        - name: nginx-logs  # อ่าน log จากเดียวกับที่ nginx เขียน
+          mountPath: /var/log/nginx
+        - name: metrics  # volume สำหรับเก็บข้อมูล metrics
+          mountPath: /metrics
+      volumes:
+      - name: nginx-logs
+        emptyDir: {}
+      - name: metrics
+        emptyDir: {}
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  namespace: pod-patterns
+data:
+  default.conf: |
+    server {
+      listen 80;
+      location / {
+        root /usr/share/nginx/html;
+        index index.html;
+      }
+      location /metrics {
+        alias /metrics;  # ตั้งค่าให้ nginx สามารถแสดงข้อมูล metrics ที่ sidecar สร้างไว้
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app
+  namespace: pod-patterns
+spec:
+  selector:
+    app: web-app
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP

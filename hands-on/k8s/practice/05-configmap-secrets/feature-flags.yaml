@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feature-flags
+  namespace: config-demo
+  labels:
+    app: demo-app
+    component: feature-flags
+data:
+  # Feature flags สามารถถูกเปิด-ปิดได้โดยไม่ต้อง deploy ใหม่
+  ENABLE_NEW_UI: "true"         # เปิดใช้ UI ใหม่
+  ENABLE_BETA_FEATURES: "false" # ปิดการใช้ feature ที่ยังอยู่ในช่วง beta
+  ENABLE_ANALYTICS: "true"      # เปิดการเก็บข้อมูลการใช้งาน
+  MAINTENANCE_MODE: "false"     # ปิดโหมดบำรุงรักษา
+  USER_TRACKING: "opt-in"       # กำหนดวิธีการติดตามผู้ใช้
+  MAX_UPLOAD_SIZE_MB: "50"      # กำหนดขนาดไฟล์อัปโหลดสูงสุด
+  CACHE_TTL_SECONDS: "3600"     # กำหนดเวลาหมดอายุของ cache
+
+# การใช้ ConfigMap สำหรับ Feature Flags มีข้อดีคือ:
+# 1. สามารถอัปเดตได้โดยไม่ต้อง rebuild หรือ redeploy application
+# 2. สามารถ roll out หรือ roll back features ได้อย่างรวดเร็ว
+# 3. สามารถ A/B test โดยกำหนดค่าต่างกันในแต่ละ namespace หรือ environment
+# 4. ช่วยในการทำ canary release หรือ progressive rollout
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feature-flags-demo
+  namespace: config-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: feature-flags-demo
+  template:
+    metadata:
+      labels:
+        app: feature-flags-demo
+    spec:
+      containers:
+      - name: app
+        image: demo-app:1.0
+        env:
+        # นำ feature flags ทั้งหมดมาใช้เป็น environment variables
+        - name: ENABLE_NEW_UI
+          valueFrom:
+            configMapKeyRef:
+              name: feature-flags
+              key: ENABLE_NEW_UI
+        - name: ENABLE_BETA_FEATURES
+          valueFrom:
+            configMapKeyRef:
+              name: feature-flags
+              key: ENABLE_BETA_FEATURES
+        - name: ENABLE_ANALYTICS
+          valueFrom:
+            configMapKeyRef:
+              name: feature-flags
+              key: ENABLE_ANALYTICS
+        - name: MAINTENANCE_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: feature-flags
+              key: MAINTENANCE_MODE
+        # สามารถกำหนด default value ได้ในกรณีที่ไม่พบ key ใน ConfigMap
+        - name: DEBUG_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: feature-flags
+              key: DEBUG_MODE
+              optional: true  # ไม่มี key นี้ก็ไม่เป็นไร
+        # สามารถตรวจจับการเปลี่ยนแปลง ConfigMap โดยการ mount เป็น volume
+        volumeMounts:
+        - name: flags-volume
+          mountPath: /app/config/flags
+      volumes:
+      - name: flags-volume
+        configMap:
+          name: feature-flags
+
+# ในการใช้งานจริง อาจพิจารณาใช้เครื่องมือพิเศษสำหรับ feature flags โดยเฉพาะ เช่น:
+# - LaunchDarkly
+# - Flagsmith
+# - Unleash
+# หรือเขียนโค้ดให้แอปพลิเคชันตรวจจับการเปลี่ยนแปลงของไฟล์ใน volume

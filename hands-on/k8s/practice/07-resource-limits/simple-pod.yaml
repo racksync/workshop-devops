@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-pod
+  namespace: resource-demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    resources:
+      # จัดสรรทรัพยากรขั้นต่ำที่ Pod ต้องการ
+      requests:
+        memory: "64Mi"  # หน่วยความจำขั้นต่ำ 64 Mebibytes
+        cpu: "100m"     # CPU ขั้นต่ำ 0.1 cores
+      # จำกัดการใช้ทรัพยากรสูงสุดที่ Pod สามารถใช้ได้
+      limits:
+        memory: "128Mi" # จำกัดหน่วยความจำสูงสุด 128 Mebibytes
+        cpu: "200m"     # จำกัด CPU สูงสุด 0.2 cores
+    ports:
+    - containerPort: 80  # port ที่เปิดให้บริการภายใน container

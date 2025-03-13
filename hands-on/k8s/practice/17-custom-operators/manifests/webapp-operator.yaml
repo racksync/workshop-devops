@@ -1,0 +1,98 @@
+# คำอธิบาย: ไฟล์นี้ประกอบด้วย ServiceAccount, Role, RoleBinding และ Deployment สำหรับ operator
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: webapp-operator
+  namespace: operator-demo
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: webapp-operator-role
+  namespace: operator-demo
+rules:
+  # สิทธิ์สำหรับจัดการ custom resource
+  - apiGroups:
+      - apps.example.com
+    resources:
+      - webapps
+      - webapps/status
+      - webapps/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  # สิทธิ์สำหรับจัดการ resources ที่สร้างโดย operator
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - pods
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: webapp-operator-rolebinding
+  namespace: operator-demo
+subjects:
+  - kind: ServiceAccount
+    name: webapp-operator
+roleRef:
+  kind: Role
+  name: webapp-operator-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-operator
+  namespace: operator-demo
+  labels:
+    app: webapp-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp-operator
+  template:
+    metadata:
+      labels:
+        app: webapp-operator
+    spec:
+      serviceAccountName: webapp-operator
+      containers:
+      - name: webapp-operator
+        # หากใช้ image ของคุณเอง ให้เปลี่ยน image นี้
+        image: ghcr.io/racksync/webapp-operator:v0.1.0
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
