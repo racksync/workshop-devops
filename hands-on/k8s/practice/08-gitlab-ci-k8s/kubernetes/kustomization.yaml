@@ -1,9 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-- deployment.yaml
-- service.yaml
-namespace: gitlab-demo
-# คำอธิบาย: ไฟล์ Kustomization นี้ใช้สำหรับจัดการ Kubernetes resources ทั้งหมด
-# โดยระบุ resources ที่จะนำมาใช้ (deployment.yaml และ service.yaml)
-# และกำหนด namespace เป็น gitlab-demo

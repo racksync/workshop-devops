@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: gitlab-demo
-  labels:
-    name: gitlab-demo
-# คำอธิบาย: Namespace นี้ใช้สำหรับแยก resources ของ workshop GitLab CI/CD กับ Kubernetes ออกจากกัน
-# ทำให้ง่ายต่อการจัดการและลบทิ้งเมื่อเสร็จสิ้นการทดลอง
