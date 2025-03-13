@@ -28,7 +28,7 @@ OWASP (Open Web Application Security Project) เป็นองค์กรไ�
 docker build -t owasp-demo .
 
 # รัน container
-docker run -p 3000:3000 owasp-demo
+docker run -p 3000:3000 --name owasp-demo owasp-demo
 ```
 
 ### วิธีรันโดยตรง

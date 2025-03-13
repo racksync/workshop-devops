@@ -1,17 +1,21 @@
 services:
   sonar-scanner:
     container_name: sonar-scanner
-    #platform: linux/amd64
     platform: linux/amd64
     image: sonarsource/sonar-scanner-cli
     volumes:
       - .:/usr/src # Mount the current directory as the project directory
     working_dir: /usr/src
-    command: sonar-scanner
+    # environment:
+    #   - SONAR_TOKEN={$SONAR_TOKEN}
     networks:
       - sonarqube-network
+    command: >
+      sonar-scanner
+      -Dsonar.projectKey=test1
+      -Dsonar.sources=.
+      -Dsonar.host.url=http://10.10.10.205:9000
 
-# add network name sonarqube-network
 networks:
   sonarqube-network:
     external: true

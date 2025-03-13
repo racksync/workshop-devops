@@ -2,7 +2,7 @@ services:
   sonarqube:
     image: sonarqube:community # Use the Community Edition image
     ports:
-      - 9000:9000
+      - 0.0.0.0:9000:9000
     volumes:
       - sonarqube_data:/opt/sonarqube/data
     environment:
