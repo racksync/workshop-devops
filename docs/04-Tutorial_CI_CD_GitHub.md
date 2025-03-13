@@ -216,6 +216,11 @@ jobs:
 
 #### 4. ตั้งค่า sudo โดยไม่ต้องใส่รหัสผ่าน (สำหรับ workflows ที่ต้องใช้ sudo)
 
+หากยังไม่มี `package sudo` ให้ติดตั้ง:
+```
+apt -y install sudo
+```
+
 ```bash
 sudo visudo
 ```
