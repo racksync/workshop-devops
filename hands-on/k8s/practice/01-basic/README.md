@@ -154,6 +154,105 @@ Ingress ช่วยให้สามารถเข้าถึง Service จ
 
 **หมายเหตุ:** ต้องมี Ingress Controller (เช่น NGINX Ingress Controller) ติดตั้งในคลัสเตอร์ก่อน
 
+### การติดตั้ง NGINX Ingress Controller
+
+ก่อนที่จะใช้งาน Ingress resource ได้ จำเป็นต้องติดตั้ง Ingress Controller ก่อน โดย NGINX Ingress Controller เป็นตัวเลือกที่นิยมใช้งานกันมาก ทำหน้าที่เป็นตัวกลางในการจัดการ traffic และ routing rules ที่กำหนดไว้ใน Ingress resources
+
+#### ขั้นตอนการติดตั้ง NGINX Ingress Controller
+
+1. **ตรวจสอบว่ามี Ingress Controller ติดตั้งแล้วหรือไม่**:
+   ```bash
+   kubectl get pods -n ingress-nginx
+   ```
+   
+   หากยังไม่มีการติดตั้ง ไม่ต้องกังวล เราจะติดตั้งในขั้นตอนถัดไป
+
+2. **ใช้ Manifest จาก GitHub Repository ทางการ**:
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+   ```
+   
+   คำสั่งนี้จะ:
+   - สร้าง Namespace `ingress-nginx` สำหรับ Ingress Controller
+   - ติดตั้ง Custom Resource Definitions (CRDs) ที่จำเป็น
+   - ติดตั้ง RBAC resources (ServiceAccount, ClusterRole, RoleBinding)
+   - สร้าง Deployment สำหรับ Controller
+   - สร้าง Service สำหรับเข้าถึง Controller
+
+3. **รอให้ Ingress Controller ทำงาน**:
+   ```bash
+   kubectl wait --namespace ingress-nginx \
+     --for=condition=ready pod \
+     --selector=app.kubernetes.io/component=controller \
+     --timeout=120s
+   ```
+
+4. **ตรวจสอบว่า Ingress Controller ทำงานหรือไม่**:
+   ```bash
+   kubectl get pods -n ingress-nginx
+   ```
+   
+   ควรจะเห็น Pod ที่มีชื่อเริ่มต้นด้วย `ingress-nginx-controller` และมีสถานะเป็น `Running`
+
+5. **ตรวจสอบ Service ที่สร้างขึ้น**:
+   ```bash
+   kubectl get svc -n ingress-nginx
+   ```
+   
+   จะเห็น Service ชื่อ `ingress-nginx-controller` มี Type เป็น `LoadBalancer` หรือ `NodePort` ขึ้นอยู่กับ environment ที่ใช้
+
+#### การติดตั้งบน Environment เฉพาะ
+
+- **สำหรับ Minikube**:
+  ```bash
+  minikube addons enable ingress
+  ```
+
+- **สำหรับ Docker Desktop**:
+  ใช้คำสั่งเดียวกับที่แนะนำข้างต้น แต่อาจต้องรอสักครู่เพื่อให้ LoadBalancer ได้รับ External IP
+
+- **สำหรับ Kind (Kubernetes in Docker)**:
+  ```bash
+  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+  ```
+
+#### การทดสอบว่า Ingress Controller ทำงานถูกต้อง
+
+สร้างไฟล์ `test-ingress.yaml` มีเนื้อหาดังนี้:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /test
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes
+            port:
+              number: 443
+```
+
+ใช้คำสั่งเพื่อสร้าง Ingress:
+```bash
+kubectl apply -f test-ingress.yaml
+```
+
+ตรวจสอบสถานะ:
+```bash
+kubectl get ingress
+```
+
+หลังจากนั้นให้ทำการติดตั้ง Ingress resource ตามต้องการ:
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -172,27 +271,6 @@ spec:
             name: nginx-service
             port:
               number: 80
-```
-
-บันทึกเป็นไฟล์ `nginx-ingress.yaml` และใช้คำสั่ง:
-
-```bash
-kubectl apply -f nginx-ingress.yaml
-```
-
-ตรวจสอบ Ingress:
-
-```bash
-kubectl get ingress -n basic-demo
-```
-
-**หมายเหตุ:** หากต้องการทดสอบบน localhost คุณอาจต้องแก้ไขไฟล์ hosts:
-- สำหรับ Linux/macOS: `/etc/hosts`
-- สำหรับ Windows: `C:\Windows\System32\drivers\etc\hosts`
-
-เพิ่มบรรทัดนี้:
-```
-127.0.0.1 nginx.k8s.local
 ```
 
 ## การใช้ Shell Script สำหรับการจัดการทรัพยากร
