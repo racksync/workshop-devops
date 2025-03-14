@@ -1,3 +1,5 @@
+<img src="https://logos-world.net/wp-content/uploads/2023/06/Kubernetes-Logo.png" alt="Kubernetes Logo" height="450px">
+
 # Kubernetes พื้นฐาน - การสร้าง Pod แบบง่าย
 
 | รายละเอียด | คำอธิบาย |
@@ -6,7 +8,171 @@
 | **วัตถุประสงค์** | เรียนรู้หลักการพื้นฐานและการสร้าง resources หลักใน Kubernetes |
 | **ระดับความยาก** | ง่าย |
 
+## การเตรียมสภาพแวดล้อมสำหรับ Kubernetes
 
+### 1. Docker Desktop for Windows
+1. ดาวน์โหลดและติดตั้ง Docker Desktop จาก https://www.docker.com/products/docker-desktop
+
+2. สำหรับ Windows: ตั้งค่า WSL2 Integration
+   - ติดตั้ง WSL2 โดยเปิด PowerShell แบบ Administrator และรันคำสั่ง:
+     ```powershell
+     wsl --install
+     ```
+   - เปิด Docker Desktop ไปที่ Settings > Resources > WSL Integration
+   - เปิดใช้งาน "Enable integration with my default WSL distro"
+   - เลือกเปิดใช้งาน Linux distributions ที่ต้องการใช้งานกับ Docker
+   - กด "Apply & Restart"
+
+3. เปิดใช้งาน Kubernetes:
+   - ไปที่ Settings > Kubernetes
+   - เลือก "Enable Kubernetes"
+   - คลิก "Apply & Restart"
+
+4. ตรวจสอบการติดตั้ง:
+```bash
+kubectl version
+kubectl cluster-info
+```
+
+### 2. Orbstack for Mac
+1. ติดตั้ง Orbstack จาก https://orbstack.dev
+2. Kubernetes จะถูกเปิดใช้งานโดยอัตโนมัติ
+3. รันคำสั่งเพื่อตั้งค่า kubectl context:
+```bash
+orb k8s use
+```
+
+### 3. Minikube for Linux
+1. ติดตั้ง Minikube:
+```bash
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+```
+
+2. เริ่มใช้งาน Minikube:
+```bash
+minikube start --driver=docker
+# หรือใช้ driver อื่นๆ เช่น
+# minikube start --driver=kvm2
+# minikube start --driver=virtualbox
+```
+
+3. ตรวจสอบสถานะ:
+```bash
+minikube status
+kubectl get nodes
+```
+
+### 4. DigitalOcean Kubernetes (DOKS)
+
+#### การติดตั้ง doctl
+doctl คือ Command Line Interface (CLI) สำหรับจัดการทรัพยากรบน DigitalOcean
+
+##### macOS
+ติดตั้งด้วย Homebrew:
+```bash
+brew install doctl
+```
+
+
+##### Windows
+
+
+ติดตั้งแบบ Manual:
+   เข้าชมหน้า Releases ของโปรเจค GitHub doctl และค้นหาไฟล์ที่เหมาะสมสำหรับระบบปฏิบัติการและสถาปัตยกรรมของคุณ ดาวน์โหลดไฟล์จากเบราว์เซอร์หรือคัดลอก URL และดาวน์โหลดโดยใช้ PowerShell
+
+   ตัวอย่างเช่น เพื่อดาวน์โหลดเวอร์ชันล่าสุดของ doctl ให้รันคำสั่ง:
+   ```powershell
+   Invoke-WebRequest https://github.com/digitalocean/doctl/releases/download/v1.123.0/doctl-1.123.0-windows-amd64.zip -OutFile ~\doctl-1.123.0-windows-amd64.zip
+   ```
+
+   จากนั้น แตกไฟล์ binary โดยรันคำสั่ง:
+   ```powershell
+   Expand-Archive -Path ~\doctl-1.123.0-windows-amd64.zip
+   ```
+
+   สุดท้าย ในเทอร์มินัล PowerShell ที่เปิดด้วย Run as Administrator ให้ย้ายไฟล์ doctl binary ไปยังไดเรกทอรีเฉพาะและเพิ่มเข้าไปใน path ของระบบโดยรันคำสั่ง:
+   ```powershell
+   New-Item -ItemType Directory $env:ProgramFiles\doctl\
+   Move-Item -Path ~\doctl-1.123.0-windows-amd64\doctl.exe -Destination $env:ProgramFiles\doctl\
+   [Environment]::SetEnvironmentVariable(
+       "Path", 
+       [Environment]::GetEnvironmentVariable("Path",
+       [EnvironmentVariableTarget]::Machine) + ";$env:ProgramFiles\doctl\",
+       [EnvironmentVariableTarget]::Machine)
+   $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
+   ```
+
+##### Linux
+1. ติดตั้งด้วย Snap (Ubuntu และ distributions ที่รองรับ):
+```bash
+sudo snap install doctl
+```
+
+2. ติดตั้งแบบ Manual:
+```bash
+# ดาวน์โหลดไฟล์ล่าสุด (แทนที่ X.XX.X ด้วยเวอร์ชันล่าสุด)
+cd ~/Downloads
+wget https://github.com/digitalocean/doctl/releases/download/v1.123.0/doctl-1.123.0-linux-amd64.tar.gz
+
+# แตกไฟล์
+tar xf ~/doctl-1.123.0-linux-amd64.tar.gz
+
+# ย้ายไฟล์ doctl ไปยัง /usr/local/bin เพื่อให้รันได้ทุกที่
+sudo mv ~/doctl /usr/local/bin
+```
+
+
+##### ตรวจสอบการติดตั้ง
+หลังจากติดตั้ง doctl แล้ว ทดสอบการทำงานด้วยคำสั่ง:
+```bash
+doctl version
+```
+
+##### การตั้งค่าสิทธิ์การใช้งาน (Authentication)
+```bash
+# สร้าง Personal access token ที่ https://cloud.digitalocean.com/account/api/tokens
+# และใช้คำสั่งนี้เพื่อบันทึกลงในเครื่อง
+doctl auth init --context default
+# ระบบจะขอ API Token เพื่อบันทึก
+```
+
+สามารถใช้หลาย context สำหรับหลาย tokens:
+```bash
+# สร้าง context ใหม่
+doctl auth init --context `prod-cluster`
+
+# สลับไปใช้ context ที่ต้องการ
+doctl auth switch --context `prod-cluster`
+
+# ดู context ทั้งหมด
+doctl auth list
+```
+
+#### การสร้าง Kubernetes Cluster
+1. สร้าง Cluster:
+```bash
+doctl kubernetes cluster create k8s-workshop \
+  --region sgp1 \
+  --size s-2vcpu-4gb \
+  --count 3 \
+  --version latest
+```
+
+2. ตั้งค่า kubectl context:
+```bash
+doctl kubernetes cluster kubeconfig save k8s-workshop
+```
+
+3. ตรวจสอบ Node:
+```bash
+kubectl get nodes
+```
+
+4. การลบ Cluster เมื่อเลิกใช้งาน:
+```bash
+doctl kubernetes cluster delete k8s-workshop
+```
 
 บทเรียนนี้จะสอนการสร้าง resources พื้นฐานใน Kubernetes ตั้งแต่การสร้าง Namespace, Pod, Service และ Ingress โดยจะใช้ NGINX เป็นตัวอย่าง
 
@@ -48,7 +214,62 @@ kubectl apply -f namespace.yaml
 kubectl get namespaces
 ```
 
-## 2. การสร้าง Pod
+## 2. การสร้าง ConfigMap
+
+ConfigMap ใช้สำหรับเก็บค่า configuration ต่างๆ ที่ใช้ใน Pod เช่น ไฟล์ configuration หรือค่าตัวแปร environment
+
+สร้าง ConfigMap สำหรับเก็บไฟล์ index.html ของ NGINX:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-index-html-configmap
+  namespace: basic-demo
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Welcome to NGINX on Kubernetes</title>
+      <style>
+        body {
+          width: 35em;
+          margin: 0 auto;
+          font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Welcome to NGINX on Kubernetes!</h1>
+      <p>If you see this page, your Kubernetes NGINX deployment with Ingress is working correctly.</p>
+      
+      <h2>Environment Information:</h2>
+      <ul>
+        <li>Pod Name: NGINX Demo Pod</li>
+        <li>Namespace: basic-demo</li>
+        <li>Accessed via Ingress: nginx.k8s.local</li>
+      </ul>
+      
+      <p><em>Thank you for using the DevOps Workshop tutorial.</em></p>
+    </body>
+    </html>
+```
+
+บันทึกเป็นไฟล์ `nginx-configmap.yaml` และใช้คำสั่ง:
+
+```bash
+kubectl apply -f nginx-configmap.yaml
+```
+
+ตรวจสอบว่า ConfigMap ถูกสร้างแล้ว:
+
+```bash
+kubectl get configmaps -n basic-demo
+kubectl describe configmap nginx-index-html-configmap -n basic-demo
+```
+
+## 3. การสร้าง Pod
 
 Pod คือหน่วยการทำงานที่เล็กที่สุดใน Kubernetes ซึ่งสามารถมีได้หนึ่งหรือหลาย Container
 
@@ -388,3 +609,42 @@ kubectl apply -f nginx-pod.yaml
 4. Ingress - สำหรับกำหนดการเข้าถึงจากภายนอก
 
 นี่เป็นพื้นฐานสำหรับการสร้างแอปพลิเคชันบน Kubernetes ต่อไป
+
+## สรุปประโยชน์ที่ได้รับ
+
+| หัวข้อ | รายละเอียด |
+|-------|-----------|
+| **Namespace** | เรียนรู้การแยกทรัพยากรเป็นกลุ่มเพื่อการจัดการที่ดีขึ้น |
+| **ConfigMap** | เข้าใจการใช้ ConfigMap เพื่อเก็บค่า configuration แยกจาก Pod |
+| **Pod** | สามารถสร้างและจัดการ Pod ซึ่งเป็นหน่วยการทำงานพื้นฐานของ Kubernetes |
+| **Service** | เรียนรู้การใช้ Service เพื่อเชื่อมต่อกับ Pod อย่างเสถียร |
+| **Ingress** | เข้าใจการกำหนด routing rules เพื่อเข้าถึงแอพพลิเคชันจากภายนอก |
+
+## ทักษะที่ได้ฝึกปฏิบัติ
+1. การใช้งาน kubectl เพื่อจัดการทรัพยากรใน Kubernetes
+2. การเขียนไฟล์ YAML เพื่อกำหนดคุณสมบัติของทรัพยากร
+3. การตรวจสอบและแก้ไขปัญหาพื้นฐานใน Kubernetes
+4. การใช้งาน Shell Script เพื่อการ Automation
+5. การจัดการ configuration ด้วย ConfigMap
+
+## แหล่งข้อมูลเพิ่มเติม
+- [Kubernetes Official Documentation](https://kubernetes.io/docs/home/)
+- [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/)
+- [Kubernetes ConfigMap and Secrets](https://kubernetes.io/docs/concepts/configuration/configmap/)
+
+### การติดตั้งและการใช้งาน
+- [Docker Desktop Kubernetes](https://docs.docker.com/desktop/kubernetes/)
+- [Orbstack Documentation](https://docs.orbstack.dev/)
+- [Minikube Documentation](https://minikube.sigs.k8s.io/docs/)
+- [DigitalOcean Kubernetes Documentation](https://docs.digitalocean.com/products/kubernetes/)
+- [doctl Command Reference](https://docs.digitalocean.com/reference/doctl/)
+
+### คู่มือการเรียนรู้
+- [Kubernetes The Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way)
+- [Kubernetes Learning Path](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
+- [CNCF Kubernetes Training](https://www.cncf.io/certification/training/)
+
+### เครื่องมือที่เป็นประโยชน์
+- [k9s - Terminal UI for Kubernetes](https://k9scli.io/)
+- [Lens - Kubernetes IDE](https://k8slens.dev/)
+- [kubectx & kubens](https://github.com/ahmetb/kubectx)

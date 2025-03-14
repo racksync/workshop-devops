@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - image: yourusername/my-app
+        name: my-app
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app
+spec:
+  type: ClusterIP
+  ports:
+  - name: "my-app"
+    port: 5000
+  selector:
+    app: my-app
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app
+  annotations:
+    dev.okteto.com/generate-host: my-app
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: my-app
+                port:
+                  number: 5000
+            path: /
+            pathType: ImplementationSpecific
