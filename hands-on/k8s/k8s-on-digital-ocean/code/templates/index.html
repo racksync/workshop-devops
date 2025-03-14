@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header */
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        form label {
+            display: none; /* Hiding the label for a cleaner look */
+        }
+
+        form input[type="text"] {
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #titleInput {
+            width: 80%; /* Smaller width for title */
+        }
+
+        #contentInput {
+            width: 80%; /* Full width for content */
+            height: 100px; /* Larger height for content */
+            resize: vertical; /* Allows resizing of content box */
+        }
+
+        form input[type="text"]:focus {
+            border-color: #3498db;
+        }
+
+        form button {
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            width: 20%;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+    
+        form button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Post Styling */
+        article {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        article:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        article h2 {
+            font-size: 20px;
+            color: #333;
+            margin: 0 0 10px;
+        }
+
+        article p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #666;
+            margin: 0 0 10px;
+        }
+
+        article p small {
+            color: #999;
+        }
+
+        /* Divider Line */
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #eaeaea;
+            margin: 20px 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            #titleInput {
+                width: 100%; /* Adjust title width on small screens */
+            }
+
+            form button {
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        async function handleSubmit(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const form = event.target;
+            const titleInput = document.getElementById('titleInput').value;
+            const contentInput = document.getElementById('contentInput').value;
+
+            const data = {
+                title: titleInput,
+                content: contentInput
+            };
+
+            try {
+                const response = await fetch(event.target.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    console.log('Form submitted successfully!');
+                    form.reset();
+                    location.reload();
+                } else {
+                    console.error('Form submission failed:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ .Title }}</h1>
+
+        <form action="/submit" method="POST" onsubmit="handleSubmit(event)">
+            <label for="titleInput">Your Title:</label>
+            <input type="text" id="titleInput" name="titleInput" required>
+
+            <label for="contentInput">Your Content:</label>
+            <input type="text" id="contentInput" name="contentInput" required>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        {{ range .Posts }}
+        <article>
+            <h2>{{ .Title }}</h2>
+            <p><small>Posted on {{ .Date.Format "Jan 2, 2006 3:04:05 PM" }}</small></p>
+            <p>{{ .Content }}</p>
+        </article>
+        <hr>
+        {{ end }}
+    </div>
+</body>
+</html>

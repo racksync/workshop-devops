@@ -1,0 +1,22 @@
+{
+  "name": "owasp-demo",
+  "version": "1.0.0",
+  "description": "OWASP Top 10 Vulnerabilities Demo Application",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "scan": "docker-compose -f docker-compose-scanner.yml up -d"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "sqlite3": "^5.1.6",
+    "helmet": "^7.0.0",
+    "winston": "^3.10.0",
+    "bcrypt": "^5.1.1",
+    "express-session": "^1.17.3",
+    "sanitize-html": "^2.11.0"
+  }
+}

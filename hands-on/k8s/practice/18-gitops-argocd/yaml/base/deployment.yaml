@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-app
+  annotations:
+    # ไฟล์ Deployment พื้นฐานสำหรับแอพพลิเคชันตัวอย่าง
+    # ใช้เป็นฐานสำหรับการสร้าง overlays ในแต่ละ environment
+    description: "Base deployment for sample application"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-app
+  template:
+    metadata:
+      labels:
+        app: sample-app
+    spec:
+      containers:
+      - name: sample-app
+        # กำหนดให้ใช้ image nginx เวอร์ชัน 1.19 เป็นค่าเริ่มต้น
+        image: nginx:1.19
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
