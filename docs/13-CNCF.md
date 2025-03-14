@@ -1,3 +1,5 @@
+![CNCF Logo](https://raw.githubusercontent.com/cncf/artwork/8341ed685b5ac62d8317e14afe2653b050418205/other/cncf/horizontal/color-whitetext/cncf-color-whitetext.png)
+
 # Cloud Native Computing Foundation (CNCF)
 
 ## ประวัติความเป็นมา
