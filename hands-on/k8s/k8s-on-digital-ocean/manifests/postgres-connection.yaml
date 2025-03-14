@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pg-connection
+stringData:
+  CONN_STR: postgresql://postgres:POSTGRES-PASSWORD@postgresdb-postgresql/postgres
+
