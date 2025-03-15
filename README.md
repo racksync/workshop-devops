@@ -16,7 +16,8 @@ Welcome to the DevOps Workshop repository. This repository contains tutorials an
 10. [Load Balancing & CDN](docs/10-Tutorial_Load-Balance_CDN.md) - Implementing load balancing and content delivery networks
 11. [Deploy on Platforms](docs/11-Tutorial_Deploy-on-Platform.md) - Deploying applications to various cloud platforms
 12. [Load Testing](docs/12-Tutorial_Load-Test.md) - Performance testing and load testing techniques
-13. [Cloud Native Computing Foundation](docs/13-CNCF.md) - Introduction to CNCF and cloud native technologies
+13. [Security Practices & OWASP](docs/13-Tutorial_Security-Practice_OWASP.md) - Security best practices and OWASP guidelines
+14. [Cloud Native Computing Foundation](docs/14-CNCF.md) - Introduction to CNCF and cloud native technologies
 
 ## 🚀 Getting Started
 
