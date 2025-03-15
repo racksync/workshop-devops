@@ -20,6 +20,11 @@
       - [แผนภาพการสื่อสารระหว่าง Kubernetes กับ Container Runtime](#แผนภาพการสื่อสารระหว่าง-kubernetes-กับ-container-runtime)
     - [2.4 สถาปัตยกรรมของ Kubernetes](#24-สถาปัตยกรรมของ-kubernetes)
       - [2.4.1 แผนภาพสถาปัตยกรรม Kubernetes](#241-แผนภาพสถาปัตยกรรม-kubernetes)
+    - [2.5 การเปรียบเทียบ Kubernetes Distributions](#25-การเปรียบเทียบ-kubernetes-distributions)
+      - [2.5.1 เปรียบเทียบ Kubernetes Distributions](#251-เปรียบเทียบ-kubernetes-distributions)
+      - [2.5.2 แผนภาพเปรียบเทียบความซับซ้อนกับการจัดการ](#252-แผนภาพเปรียบเทียบความซับซ้อนกับการจัดการ)
+      - [2.5.3 แผนภาพการเลือก K8s Distribution ตามสถานการณ์](#253-แผนภาพการเลือก-k8s-distribution-ตามสถานการณ์)
+      - [2.5.4 สรุปการเลือก Kubernetes Distribution ที่เหมาะสม](#254-สรุปการเลือก-kubernetes-distribution-ที่เหมาะสม)
   - [3. ⚙️ การเตรียมสภาพแวดล้อมสำหรับ Windows User](#3-️-การเตรียมสภาพแวดล้อมสำหรับ-windows-user)
       - [3.1 MacOS](#31-macos)
       - [3.2 Linux](#32-linux)
@@ -331,6 +336,116 @@ flowchart TB
     SCH --> KL1
     SCH --> KL2
 ```
+
+### 2.5 การเปรียบเทียบ Kubernetes Distributions
+
+Kubernetes มีหลากหลาย "distributions" หรือรูปแบบการนำไปใช้งาน แต่ละแบบมีจุดเด่นและข้อจำกัดที่แตกต่างกัน การเลือกใช้ Kubernetes distribution ที่เหมาะสมจึงขึ้นอยู่กับความต้องการและสภาพแวดล้อมการทำงาน
+
+#### 2.5.1 เปรียบเทียบ Kubernetes Distributions
+
+| Distribution | จุดเด่น | จุดด้อย | เหมาะสำหรับ |
+|------------|--------|--------|------------|
+| **Kubernetes (Vanilla)** | - มาตรฐาน Official<br>- รองรับคุณสมบัติทั้งหมด<br>- ชุมชนขนาดใหญ่ | - ติดตั้งและดูแลยาก<br>- ต้องการทรัพยากรมาก<br>- ต้องมี expertise สูง | - องค์กรขนาดใหญ่<br>- Production workloads<br>- ผู้ที่ต้องการความยืดหยุ่นเต็มที่ |
+| **k3s** | - น้ำหนักเบา (< 100 MB)<br>- ติดตั้งง่าย single binary<br>- ใช้ทรัพยากรน้อย | - รองรับฟีเจอร์น้อยกว่า<br>- อาจมีปัญหาเมื่อ scale ใหญ่มาก<br>- บางฟีเจอร์อาจไม่รองรับ | - Edge computing<br>- IoT<br>- Development environments<br>- ระบบทรัพยากรจำกัด |
+| **k3d** | - สร้าง k3s clusters ใน Docker<br>- สร้าง/ลบ clusters ได้รวดเร็ว<br>- ใช้ทรัพยากรน้อย | - ไม่เหมาะกับ production<br>- ข้อจำกัดด้านเครือข่าย<br>- ต้องมี Docker | - พัฒนาและทดสอบแอปพลิเคชัน<br>- CI/CD pipelines<br>- การเรียนรู้ Kubernetes |
+| **Minikube** | - ติดตั้งง่าย<br>- รองรับหลาย OS<br>- รองรับ addons มากมาย | - รองรับเพียง single-node<br>- ไม่เหมาะกับ production<br>- ข้อจำกัดด้านประสิทธิภาพ | - การเรียนรู้ K8s<br>- พัฒนา local<br>- ทดสอบขนาดเล็ก |
+| **MicroK8s** | - ติดตั้งง่ายผ่าน snap<br>- มาพร้อม add-ons สำคัญ<br>- ทำงานได้เป็น single node หรือ cluster | - พึ่งพา snap<br>- ประสิทธิภาพต่ำกว่า vanilla<br>- รองรับ OS บางประเภท | - Edge computing<br>- IoT<br>- CI/CD<br>- Appliances |
+| **kind (K8s IN Docker)** | - สร้าง cluster บน Docker ได้เร็ว<br>- นิยมใช้ทดสอบ K8s เอง<br>- คอนฟิกได้ง่าย | - ไม่เหมาะกับ production<br>- ข้อจำกัดด้านเครือข่าย<br>- ต้องมี Docker | - ทดสอบ Kubernetes<br>- CI/CD Pipelines<br>- นักพัฒนา K8s เอง |
+| **RKE** | - ติดตั้งง่ายด้วย Docker<br>- บูรณาการกับ Rancher<br>- Backup/restore ง่าย | - ต้องการ Docker<br>- มีความซับซ้อนกว่า k3s<br>- Load balancer ต้องตั้งค่าเพิ่ม | - Production workloads<br>- ทีมที่ใช้ Rancher<br>- ระบบที่ต้องการความเสถียรสูง |
+| **OpenShift** | - Enterprise supported<br>- UI ใช้งานง่าย<br>- CI/CD และ security ในตัว | - ราคาสูง<br>- ต้องมี license<br>- มีข้อจำกัดบางอย่าง | - องค์กรขนาดใหญ่<br>- ระบบที่ต้องการ support<br>- ทีมที่ต้องการ UI |
+| **Tanzu Kubernetes Grid** | - VMware ecosystem<br>- บูรณาการกับ vSphere<br>- Enterprise supported | - ราคาสูง<br>- ต้องมี license<br>- ต้องการความรู้ VMware | - ลูกค้า VMware<br>- องค์กรขนาดใหญ่<br>- Hybrid cloud |
+| **Managed K8s (EKS, GKE, AKS)** | - ไม่ต้องจัดการ control plane<br>- Auto-scaling<br>- บูรณาการกับ cloud services | - ค่าใช้จ่ายสูง<br>- vendor lock-in<br>- ข้อจำกัดในการปรับแต่ง | - องค์กรที่ใช้ cloud<br>- ต้องการลดภาระบริหาร<br>- ต้องการความพร้อมใช้สูง |
+
+#### 2.5.2 แผนภาพเปรียบเทียบความซับซ้อนกับการจัดการ
+
+```mermaid
+quadrantChart
+    title Kubernetes Distributions: ความซับซ้อนและการจัดการ
+    x-axis Low Complexity --> High Complexity
+    y-axis Self Managed --> Fully Managed
+    quadrant-1 ซับซ้อนน้อย และจัดการเอง
+    quadrant-2 ซับซ้อนมาก และจัดการเอง
+    quadrant-3 ซับซ้อนน้อย และจัดการให้
+    quadrant-4 ซับซ้อนมาก และจัดการให้
+    "k3s": [0.3, 0.2]
+    "Minikube": [0.2, 0.1]
+    "k3d": [0.1, 0.2]
+    "MicroK8s": [0.3, 0.3]
+    "kind": [0.2, 0.2]
+    "RKE": [0.6, 0.3]
+    "Vanilla K8s": [0.9, 0.1]
+    "OpenShift": [0.8, 0.6]
+    "Tanzu": [0.7, 0.7]
+    "EKS/GKE/AKS": [0.5, 0.9]
+```
+
+#### 2.5.3 แผนภาพการเลือก K8s Distribution ตามสถานการณ์
+
+```mermaid
+flowchart TB
+    start[ต้องการใช้งาน Kubernetes] --> local{สภาพแวดล้อม?}
+    
+    local -->|Local Development| dev{เป้าหมายหลัก?}
+    local -->|Production| prod{ต้องการบริหารจัดการเอง?}
+    local -->|Edge/IoT| edge{ทรัพยากรจำกัด?}
+    
+    dev -->|เรียนรู้ K8s| minikube[Minikube]
+    dev -->|ทดสอบเร็ว| kind[kind/k3d]
+    dev -->|ใกล้เคียง Production| mk[MicroK8s]
+    
+    prod -->|Yes| self{ประสบการณ์ทีม?}
+    prod -->|No| managed{Cloud Provider?}
+    
+    self -->|มากพอ| vanilla[Vanilla K8s]
+    self -->|ปานกลาง| eco{Ecosystem?}
+    
+    eco -->|Rancher| rke[RKE/k3s]
+    eco -->|RedHat| openshift[OpenShift]
+    eco -->|VMware| tanzu[Tanzu]
+    
+    managed -->|AWS| eks[EKS]
+    managed -->|GCP| gke[GKE]
+    managed -->|Azure| aks[AKS]
+    
+    edge -->|Yes| k3s[k3s]
+    edge -->|No| microk8s[MicroK8s]
+    
+    classDef cloud fill:#b3e6ff,stroke:#3399ff
+    classDef lightweight fill:#c6ecc6,stroke:#66cc66
+    classDef enterprise fill:#ffcccc,stroke:#ff6666
+    
+    class eks,gke,aks cloud
+    class k3s,k3d,minikube,kind lightweight
+    class openshift,tanzu enterprise
+```
+
+#### 2.5.4 สรุปการเลือก Kubernetes Distribution ที่เหมาะสม
+
+การเลือก Kubernetes distribution ที่เหมาะสมขึ้นอยู่กับปัจจัยต่างๆ ดังนี้:
+
+1. **สภาพแวดล้อมการทำงาน**
+   - Local Development: Minikube, kind, k3d เหมาะสำหรับการพัฒนาและทดสอบแบบ local
+   - Production: Vanilla K8s, RKE, OpenShift, Tanzu หรือ Managed K8s (EKS, GKE, AKS)
+   - Edge/IoT: k3s, MicroK8s เหมาะสำหรับอุปกรณ์ทรัพยากรจำกัด
+
+2. **ทรัพยากรที่มี**
+   - ทรัพยากรจำกัด: k3s, k3d, Minikube
+   - ทรัพยากรเพียงพอ: Vanilla K8s, RKE, Managed K8s
+
+3. **ความเชี่ยวชาญของทีม**
+   - ทีมเริ่มต้น: Minikube (เรียนรู้), Managed K8s (ลดภาระ)
+   - ทีมมีประสบการณ์: Vanilla K8s, RKE, OpenShift
+
+4. **งบประมาณ**
+   - จำกัด: k3s, MicroK8s (open source)
+   - สูง: OpenShift, Tanzu, Managed K8s
+
+5. **กรณีการใช้งานเฉพาะ**
+   - CI/CD Testing: kind, k3d
+   - Enterprise Support: OpenShift, Tanzu, Managed K8s
+   - Edge Computing: k3s, MicroK8s
+
+การตัดสินใจสุดท้ายควรพิจารณาทั้งความต้องการทางธุรกิจ ข้อจำกัดทางเทคนิค และเป้าหมายระยะยาวของการใช้ Kubernetes ในองค์กร
 
 ## 3. ⚙️ การเตรียมสภาพแวดล้อมสำหรับ Windows User
 
@@ -1256,10 +1371,6 @@ kubectl describe service nginx-service
 # เข้าถึง service ใน minikube
 minikube service nginx-service
 ```
-
-
-
-
 
 ตัวอย่างการใช้งาน:
 ```bash
