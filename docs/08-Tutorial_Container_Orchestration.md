@@ -363,10 +363,10 @@ quadrantChart
     title Kubernetes Distributions: ความซับซ้อนและการจัดการ
     x-axis Low Complexity --> High Complexity
     y-axis Self Managed --> Fully Managed
-    quadrant-1 ซับซ้อนน้อย และจัดการเอง
-    quadrant-2 ซับซ้อนมาก และจัดการเอง
-    quadrant-3 ซับซ้อนน้อย และจัดการให้
-    quadrant-4 ซับซ้อนมาก และจัดการให้
+    quadrant-1 "ซับซ้อนน้อย และจัดการเอง"
+    quadrant-2 "ซับซ้อนมาก และจัดการเอง"
+    quadrant-3 "ซับซ้อนน้อย และจัดการให้"
+    quadrant-4 "ซับซ้อนมาก และจัดการให้"
     "k3s": [0.3, 0.2]
     "Minikube": [0.2, 0.1]
     "k3d": [0.1, 0.2]
