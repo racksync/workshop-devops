@@ -2,6 +2,7 @@
 
 Welcome to the DevOps Workshop repository. This repository contains tutorials and guides on various DevOps tools and practices.
 
+
 ## 📚 Table of Contents
 
 1. [Debian Linux Tutorial](docs/01-Tutorial_Debian_Linux.md) - Introduction to Linux commands, file system, package management, and more
@@ -24,8 +25,8 @@ Welcome to the DevOps Workshop repository. This repository contains tutorials an
 Clone this repository to get started:
 
 ```bash
-git clone https://github.com/racksync/devops-workshop.git
-cd devops-workshop
+git clone https://github.com/racksync/workshop-devops.git
+cd workshop-devops
 ```
 
 Follow the tutorials in the suggested order to build a comprehensive understanding of DevOps practices and tools.
