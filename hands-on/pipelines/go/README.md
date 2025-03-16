@@ -28,7 +28,7 @@
 ### 1. โคลนรีโพสิทอรี
 
 ```bash
-git clone https://github.com/racksync/devops-workshop.git
+git clone https://github.com/racksync/workshop-devops.git
 cd devops-workshop/hands-on/pipelines/go
 ```
 
@@ -313,7 +313,7 @@ docker exec -it <container_id> /bin/sh
 
 RACKSYNC CO., LTD. เป็นบริษัทชั้นนำด้านโซลูชัน DevOps และการฝึกอบรมในประเทศไทย เราเชี่ยวชาญในการช่วยองค์กรปรับใช้แนวทางปฏิบัติโครงสร้างพื้นฐานสมัยใหม่เพื่อปรับปรุงขั้นตอนการพัฒนาและประสิทธิภาพการทำงาน
 
-สำหรับข้อมูลเพิ่มเติม เยี่ยมชม [GitHub repository](https://github.com/racksync/devops-workshop) ของเราหรือติดต่อทีมของเราสำหรับการฝึกอบรมและคำปรึกษาที่ปรับแต่งตามความต้องการ
+สำหรับข้อมูลเพิ่มเติม เยี่ยมชม [GitHub repository](https://github.com/racksync/workshop-devops) ของเราหรือติดต่อทีมของเราสำหรับการฝึกอบรมและคำปรึกษาที่ปรับแต่งตามความต้องการ
 
 ## ลิขสิทธิ์
 

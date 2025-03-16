@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/racksync/devops-workshop/hands-on/pipelines/go/pkg/models"
+	"github.com/racksync/workshop-devops/hands-on/pipelines/go/pkg/models"
 )
 
 // RegisterRoutes sets up all the API routes

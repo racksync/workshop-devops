@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/racksync/devops-workshop/hands-on/pipelines/go/pkg/api"
-	"github.com/racksync/devops-workshop/hands-on/pipelines/go/pkg/config"
+	"github.com/racksync/workshop-devops/hands-on/pipelines/go/pkg/api"
+	"github.com/racksync/workshop-devops/hands-on/pipelines/go/pkg/config"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module github.com/racksync/devops-workshop/hands-on/pipelines/go
+module github.com/racksync/workshop-devops/hands-on/pipelines/go
 
 go 1.21
 
