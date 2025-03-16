@@ -1,4 +1,7 @@
-# DevOps Workshop
+# Hands On Workshop for DevOps [img:devops](
+https://img.shields.io/badge/DevOps-Workshop-blue?style=for-the-badge&logo=devops&logoColor=white)
+
+
 
 Welcome to the DevOps Workshop repository. This repository contains tutorials and guides on various DevOps tools and practices.
 
