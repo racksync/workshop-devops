@@ -3,16 +3,16 @@
 ![kubernetes](https://img.shields.io/badge/Kubernetes-Workshop-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
 ![docker](https://img.shields.io/badge/Docker-Workshop-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![git](https://img.shields.io/badge/Git-Workshop-F05032?style=for-the-badge&logo=git&logoColor=white)
-![github](https://img.shields.io/badge/GitHub-Workshop-181717?style=for-the-badge&logo=github&logoColor=white)
+![github](https://img.shields.io/badge/GitHub-Workshop-444444?style=for-the-badge&logo=github&logoColor=white)
 ![gitlab](https://img.shields.io/badge/GitLab-Workshop-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white)
 ![bitbucket](https://img.shields.io/badge/BitBucket-Workshop-0052CC?style=for-the-badge&logo=bitbucket&logoColor=white)
 ![linux](https://img.shields.io/badge/Linux-Workshop-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![owasp](https://img.shields.io/badge/OWASP-Workshop-000000?style=for-the-badge&logo=owasp&logoColor=white)
-![cncf](https://img.shields.io/badge/CNCF-Workshop-231F20?style=for-the-badge&logo=cncf&logoColor=white)
+![owasp](https://img.shields.io/badge/OWASP-Workshop-7A2518?style=for-the-badge&logo=owasp&logoColor=white)
+![cncf](https://img.shields.io/badge/CNCF-Workshop-6469A0?style=for-the-badge&logo=cncf&logoColor=white)
 ![racksync](https://img.shields.io/badge/RACKSYNC-Workshop-blue?style=for-the-badge&logo=racksync&logoColor=white)
 
 
-Welcome to the DevOps Workshop repository. This repository contains tutorials and guides on various DevOps tools and practices.
+Welcome to the DevOps Workshop repository. This repository contains tutorials and guides on various DevOps tools and practices. start with the basics of Linux and Docker, then move on to Git, CI/CD, Kubernetes, and more.
 
 
 ## 📚 Table of Contents
