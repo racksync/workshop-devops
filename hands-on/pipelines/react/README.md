@@ -23,7 +23,7 @@
 
 1. โคลนที่เก็บโค้ด
    ```bash
-   git clone https://github.com/racksync/devops-workshop.git
+   git clone https://github.com/racksync/workshop-devops.git
    cd devops-workshop/hands-on/react
    ```
 
@@ -227,7 +227,7 @@ react/
 
 - [React Documentation](https://react.dev/docs/getting-started)
 - [Vite Documentation](https://vitejs.dev/guide/)
-- [DevOps Workshop Repository](https://github.com/racksync/devops-workshop)
+- [DevOps Workshop Repository](https://github.com/racksync/workshop-devops)
 
 ## ลิขสิทธิ์
 

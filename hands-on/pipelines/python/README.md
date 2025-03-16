@@ -24,7 +24,7 @@
 
 1. โคลนรีโพสิทอรี:
    ```bash
-   git clone https://github.com/racksync/devops-workshop.git
+   git clone https://github.com/racksync/workshop-devops.git
    cd devops-workshop/hands-on/python
    ```
 
