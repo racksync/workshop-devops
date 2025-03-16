@@ -1,14 +1,14 @@
 # Hands On Workshop for DevOps 
 ![devops](https://img.shields.io/badge/DevOps-Workshop-blue?style=for-the-badge&logo=devops&logoColor=white)
-![kubernetes](https://img.shields.io/badge/Kubernetes-Workshop-blue?style=for-the-badge&logo=kubernetes&logoColor=white)
-![docker](https://img.shields.io/badge/Docker-Workshop-blue?style=for-the-badge&logo=docker&logoColor=white)
-![git](https://img.shields.io/badge/Git-Workshop-blue?style=for-the-badge&logo=git&logoColor=white)
-![github](https://img.shields.io/badge/GitHub-Workshop-blue?style=for-the-badge&logo=github&logoColor=white)
-![gitlab](https://img.shields.io/badge/GitLab-Workshop-blue?style=for-the-badge&logo=gitlab&logoColor=white)
-![bitbucket](https://img.shields.io/badge/BitBucket-Workshop-blue?style=for-the-badge&logo=bitbucket&logoColor=white)
-![linux](https://img.shields.io/badge/Linux-Workshop-blue?style=for-the-badge&logo=linux&logoColor=white)
-![owasp](https://img.shields.io/badge/OWASP-Workshop-blue?style=for-the-badge&logo=owasp&logoColor=white)
-![cncf](https://img.shields.io/badge/CNCF-Workshop-blue?style=for-the-badge&logo=cncf&logoColor=white)
+![kubernetes](https://img.shields.io/badge/Kubernetes-Workshop-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![docker](https://img.shields.io/badge/Docker-Workshop-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![git](https://img.shields.io/badge/Git-Workshop-F05032?style=for-the-badge&logo=git&logoColor=white)
+![github](https://img.shields.io/badge/GitHub-Workshop-181717?style=for-the-badge&logo=github&logoColor=white)
+![gitlab](https://img.shields.io/badge/GitLab-Workshop-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white)
+![bitbucket](https://img.shields.io/badge/BitBucket-Workshop-0052CC?style=for-the-badge&logo=bitbucket&logoColor=white)
+![linux](https://img.shields.io/badge/Linux-Workshop-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![owasp](https://img.shields.io/badge/OWASP-Workshop-000000?style=for-the-badge&logo=owasp&logoColor=white)
+![cncf](https://img.shields.io/badge/CNCF-Workshop-231F20?style=for-the-badge&logo=cncf&logoColor=white)
 ![racksync](https://img.shields.io/badge/RACKSYNC-Workshop-blue?style=for-the-badge&logo=racksync&logoColor=white)
 
 
