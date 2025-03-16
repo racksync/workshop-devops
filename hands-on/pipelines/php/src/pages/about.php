@@ -44,7 +44,7 @@
             All materials for this workshop are available on our GitHub repository.
             Feel free to explore, learn, and contribute!
         </p>
-        <a href="https://github.com/racksync/devops-workshop" class="btn btn-primary" target="_blank">
+        <a href="https://github.com/racksync/workshop-devops" class="btn btn-primary" target="_blank">
             <i class="fab fa-github me-2"></i> Visit Repository
         </a>
     </div>

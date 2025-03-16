@@ -1,6 +1,6 @@
 # DevOps Workshop: Modern PHP Application with CI/CD
 
-![RACKSYNC CO., LTD.](https://github.com/racksync/devops-workshop/raw/main/assets/racksync-logo.png)
+![RACKSYNC CO., LTD.](https://github.com/racksync/workshop-devops/raw/main/assets/racksync-logo.png)
 
 ## Overview
 
@@ -27,7 +27,7 @@ This workshop by RACKSYNC CO., LTD. provides a practical hands-on experience wit
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/racksync/devops-workshop.git
+git clone https://github.com/racksync/workshop-devops.git
 cd devops-workshop/hands-on/php
 ```
 
@@ -250,7 +250,7 @@ Located in `bitbucket-pipelines.yml`:
 
 RACKSYNC CO., LTD. is a leading provider of DevOps solutions and training in Thailand. We specialize in helping organizations implement modern infrastructure practices to improve their development workflows and operational efficiency.
 
-For more information, visit our [GitHub repository](https://github.com/racksync/devops-workshop) or contact our team for personalized training and consultation.
+For more information, visit our [GitHub repository](https://github.com/racksync/workshop-devops) or contact our team for personalized training and consultation.
 
 ## License
 
@@ -261,7 +261,7 @@ This workshop material is provided by RACKSYNC CO., LTD. and is licensed under t
 ### 1. โคลนโปรเจค (Clone Repository)
 
 ```bash
-git clone https://github.com/racksync/devops-workshop.git
+git clone https://github.com/racksync/workshop-devops.git
 cd devops-workshop/hands-on/php
 ```
 
@@ -484,7 +484,7 @@ docker run -d -p 8080:80 --name php-local php-app:local
 
 RACKSYNC CO., LTD. เป็นผู้ให้บริการชั้นนำด้านโซลูชัน DevOps และการฝึกอบรมในประเทศไทย เราเชี่ยวชาญในการช่วยให้องค์กรใช้แนวทางปฏิบัติโครงสร้างพื้นฐานสมัยใหม่เพื่อปรับปรุงกระบวนการพัฒนาและประสิทธิภาพการดำเนินงาน
 
-สำหรับข้อมูลเพิ่มเติม เยี่ยมชม [GitHub repository](https://github.com/racksync/devops-workshop) ของเราหรือติดต่อทีมของเราเพื่อรับการฝึกอบรมและคำปรึกษาเฉพาะบุคคล
+สำหรับข้อมูลเพิ่มเติม เยี่ยมชม [GitHub repository](https://github.com/racksync/workshop-devops) ของเราหรือติดต่อทีมของเราเพื่อรับการฝึกอบรมและคำปรึกษาเฉพาะบุคคล
 
 ## ลิขสิทธิ์
 

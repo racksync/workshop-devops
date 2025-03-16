@@ -7,7 +7,7 @@
                     <p>Empowering businesses through DevOps excellence</p>
                 </div>
                 <div class="col-lg-6 text-lg-end">
-                    <a href="https://github.com/racksync/devops-workshop" class="me-4 text-decoration-none">
+                    <a href="https://github.com/racksync/workshop-devops" class="me-4 text-decoration-none">
                         <i class="fab fa-github"></i> Workshop Repository
                     </a>
                     <p class="mb-0">© <?= date('Y') ?> RACKSYNC CO., LTD. All rights reserved.</p>
