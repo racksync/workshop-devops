@@ -61,7 +61,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## [RACKSYNC CO., LTD.](https://racksync.com)
 
-We are an expert in Automation and Smart Solutions of all sizes. We provide consulting services as well as system implementation. Installed and monitored by experts We are also a full-service Software As A Service development company.
+We are an expert in Automation and Smart Solutions of all sizes. We provide consulting services as well as system implementation. Installed and monitored by experts We are also a full-service Software As A Service development company. developing software for various industries. We are ready to provide advice and services to you.
 \
 \
 RACKSYNC COMPANY LIMITED \
