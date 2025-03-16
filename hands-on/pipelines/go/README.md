@@ -29,14 +29,14 @@
 
 ```bash
 git clone https://github.com/racksync/workshop-devops.git
-cd devops-workshop/hands-on/pipelines/go
+cd workshop-devops/hands-on/pipelines/go
 ```
 
 ### 2. รันแอปพลิเคชันในเครื่อง Local
 
 ```bash
 # สร้างและรันแอปพลิเคชัน Go โดยตรง
-go build -o app
+go build -o app ./cmd/server
 ./app
 
 # หรือใช้ Docker
