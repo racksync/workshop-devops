@@ -11,12 +11,13 @@ Welcome to the DevOps Workshop repository. This repository contains tutorials an
 5. [CI/CD with GitLab](docs/05-Tutorial_CI_CD_GitLab.md) - Implementing CI/CD pipelines with GitLab
 6. [CI/CD with BitBucket](docs/06-Tutorial_CI_CD_BitBucket.md) - Setting up CI/CD workflows in BitBucket
 7. [CI/CD Testing & Linting](docs/07-Tutorial_CI_CD_Test_Lint.md) - Advanced testing and linting in CI/CD pipelines
-8. [Container Orchestration](docs/08-Tutorial_Container_Orchestration.md) - Introduction to Kubernetes and container orchestration
+8. [Container Orchestration with Kubernetes](docs/08-Tutorial_Container_Orchestration.md) - Introduction to Kubernetes and container orchestration
 9. [Project Monitoring](docs/09-Project_Monitoring.md) - Tools and techniques for monitoring applications
 10. [Load Balancing & CDN](docs/10-Tutorial_Load-Balance_CDN.md) - Implementing load balancing and content delivery networks
-11. [Deploy on Platforms](docs/11-Deploy-on-Platform.md) - Deploying applications to various cloud platforms
+11. [Deploy on Platforms](docs/11-Tutorial_Deploy-on-Platform.md) - Deploying applications to various cloud platforms
 12. [Load Testing](docs/12-Tutorial_Load-Test.md) - Performance testing and load testing techniques
-13. [Cloud Native Computing Foundation](docs/13-CNCF.md) - Introduction to CNCF and cloud native technologies
+13. [Security Practices & OWASP](docs/13-Tutorial_Security-Practice_OWASP.md) - Security best practices and OWASP guidelines
+14. [Cloud Native Computing Foundation](docs/14-CNCF.md) - Introduction to CNCF and cloud native technologies
 
 ## 🚀 Getting Started
 
