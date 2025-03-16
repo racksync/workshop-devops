@@ -1,6 +1,19 @@
-# DevOps Workshop
+# Hands On Workshop for DevOps 
+![devops](https://img.shields.io/badge/DevOps-Workshop-blue?style=for-the-badge&logo=devops&logoColor=white)
+![kubernetes](https://img.shields.io/badge/Kubernetes-Workshop-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![docker](https://img.shields.io/badge/Docker-Workshop-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![git](https://img.shields.io/badge/Git-Workshop-F05032?style=for-the-badge&logo=git&logoColor=white)
+![github](https://img.shields.io/badge/GitHub-Workshop-444444?style=for-the-badge&logo=github&logoColor=white)
+![gitlab](https://img.shields.io/badge/GitLab-Workshop-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white)
+![bitbucket](https://img.shields.io/badge/BitBucket-Workshop-0052CC?style=for-the-badge&logo=bitbucket&logoColor=white)
+![linux](https://img.shields.io/badge/Linux-Workshop-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![owasp](https://img.shields.io/badge/OWASP-Workshop-7A2518?style=for-the-badge&logo=owasp&logoColor=white)
+![cncf](https://img.shields.io/badge/CNCF-Workshop-6469A0?style=for-the-badge&logo=cncf&logoColor=white)
+![racksync](https://img.shields.io/badge/RACKSYNC-Workshop-blue?style=for-the-badge&logo=racksync&logoColor=white)
 
-Welcome to the DevOps Workshop repository. This repository contains tutorials and guides on various DevOps tools and practices.
+
+Welcome to the DevOps Workshop repository. This repository contains tutorials and guides on various DevOps tools and practices. start with the basics of Linux and Docker, then move on to Git, CI/CD, Kubernetes, and more.
+
 
 ## 📚 Table of Contents
 
@@ -24,8 +37,8 @@ Welcome to the DevOps Workshop repository. This repository contains tutorials an
 Clone this repository to get started:
 
 ```bash
-git clone https://github.com/racksync/devops-workshop.git
-cd devops-workshop
+git clone https://github.com/racksync/workshop-devops.git
+cd workshop-devops
 ```
 
 Follow the tutorials in the suggested order to build a comprehensive understanding of DevOps practices and tools.
@@ -45,7 +58,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+See the LICENSE file for details.
 
 ### Links
 
@@ -60,7 +73,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## [RACKSYNC CO., LTD.](https://racksync.com)
 
-We are an expert in Automation and Smart Solutions of all sizes. We provide consulting services as well as system implementation. Installed and monitored by experts We are also a full-service Software As A Service development company.
+We are an expert in Automation and Smart Solutions of all sizes. We provide consulting services as well as system implementation. Installed and monitored by experts We are also a full-service Software As A Service development company. developing software for various industries. We are ready to provide advice and services to you.
 \
 \
 RACKSYNC COMPANY LIMITED \
