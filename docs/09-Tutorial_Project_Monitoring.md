@@ -7,7 +7,7 @@
 - [4. Uptime Monitoring](#4-uptime-monitoring)
 - [5. แนวทางการติดตั้งและใช้งาน](#5-แนวทางการติดตั้งและใช้งาน)
 - [6. การประยุกต์ใช้กับ Real-World Projects](#6-การประยุกต์ใช้กับ-real-world-projects)
-- [7. Best Practices ในการ Monitoring](#7-best-practices-ในการ-monitoring)
+- [7. Best Practices ในการ Monitoring](#7-best-practices-ในการ-monitoring) 
 - [8. แนวโน้มในอนาคตของ Monitoring](#8-แนวโน้มในอนาคตของ-monitoring)
 
 ## 1. บทนำสู่การ Monitoring
