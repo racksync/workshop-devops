@@ -12,9 +12,9 @@ services:
       - sonarqube-network
     command: >
       sonar-scanner
-      -Dsonar.projectKey=test1
-      -Dsonar.sources=.
-      -Dsonar.host.url=http://10.10.10.205:9000
+      -Dsonar.projectKey=test1 
+      -Dsonar.sources=. 
+      -Dsonar.host.url=http://sonarqube.sonarqube.orb.local
 
 networks:
   sonarqube-network:
