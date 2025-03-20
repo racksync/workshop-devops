@@ -5,6 +5,8 @@ services:
     image: sonarsource/sonar-scanner-cli
     volumes:
       - .:/usr/src # Mount the current directory as the project directory
+      # - ./dependency-check-report.html:/usr/src/dependency-check-report.html
+      # - ./dependency-check-report.json:/usr/src/dependency-check-report.json
     working_dir: /usr/src
     # environment:
     #   - SONAR_TOKEN={$SONAR_TOKEN}
