@@ -1,0 +1,75 @@
+services:
+  wordpress-test:
+    container_name: wp-test
+    image: wordpress:latest
+    #platform: linux/arm64/v8
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8088:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+    volumes:
+      - ./wordpress_test:/var/www/html
+    networks:
+      - backend_network
+
+  wordpress-prod:
+    container_name: wp-prod
+    image: wordpress:latest
+    #platform: linux/arm64/v8
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+    volumes:
+      - ./wordpress_production:/var/www/html
+    networks:
+      - backend_network
+
+  db:
+    container_name: wp-db
+    image: mariadb:10.6
+    #platform: linux/arm64/v8
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./db_data:/var/lib/mysql
+    networks:
+      - backend_network
+
+  phpmyadmin:
+    container_name: wp-pma
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "7077:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - backend_network
+
+# volumes:
+#   wordpress_data:
+#   db_data:
+
+networks:
+  backend_network:
+    external: true
