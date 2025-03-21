@@ -1,4 +1,4 @@
-# BitBucket Pipelines Workshop
+# BitBucket Pipelines Workshop                         
 image: atlassian/default-image:latest
 
 definitions:
