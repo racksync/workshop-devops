@@ -5,7 +5,7 @@ metadata:
   namespace: replica-demo         # Namespace ที่สร้าง Ingress นี้
   annotations:                    # Annotations สำหรับกำหนดพฤติกรรมเพิ่มเติม
     nginx.ingress.kubernetes.io/rewrite-target: /  # กำหนดให้ปรับเปลี่ยน path ที่เข้ามาเป็น /
-    kubernetes.io/ingress.class: "nginx"  # ระบุ Ingress class ให้ชัดเจน
+    #kubernetes.io/ingress.class: "nginx"  # ระบุ Ingress class ให้ชัดเจน
     nginx.ingress.kubernetes.io/ssl-redirect: "false"  # ไม่บังคับให้เป็น HTTPS
     nginx.ingress.kubernetes.io/use-regex: "true"  # อนุญาตใช้ regex สำหรับ path
   labels:
