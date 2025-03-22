@@ -1,0 +1,12 @@
+[package]
+name = "rust-cicd-workshop"
+version = "0.1.0"
+edition = "2021"
+authors = ["RackSync Team"]
+description = "A Rust project demonstrating CI/CD with GitHub Actions"
+
+[dependencies]
+# โปรเจคนี้ไม่มี dependencies เพิ่มเติม ณ ตอนนี้
+
+[dev-dependencies]
+# dependencies สำหรับการทดสอบสามารถเพิ่มที่นี่
