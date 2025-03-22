@@ -44,6 +44,8 @@ cd workshop-devops
 
 Follow the tutorials in the suggested order to build a comprehensive understanding of DevOps practices and tools.
 
+
+
 ## 📋 Prerequisites
 
 See individual tutorials for specific prerequisites. Generally, you'll need:
