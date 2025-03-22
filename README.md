@@ -31,6 +31,7 @@ Welcome to the DevOps Workshop repository. This repository contains tutorials an
 12. [Load Testing](docs/12-Tutorial_Load-Test.md) - Performance testing and load testing techniques
 13. [Security Practices & OWASP](docs/13-Tutorial_Security-Practice_OWASP.md) - Security best practices and OWASP guidelines
 14. [Cloud Native Computing Foundation](docs/14-CNCF.md) - Introduction to CNCF and cloud native technologies
+15. [GitOps](docs/15-GitOps.md) - Implementing GitOps practices for managing infrastructure
 
 ## 🚀 Getting Started
 
