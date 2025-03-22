@@ -1,0 +1,49 @@
+name: WordPress Deployment
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # งานสำหรับทดสอบเมื่อมีการ Push ไปยัง dev
+  test:
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    steps:
+    # ขั้นตอนการดึงโค้ดจาก Repository
+    - uses: actions/checkout@v3
+    
+    # ขั้นตอนการตั้งค่าสภาพแวดล้อม
+    - name: Set up environment
+      run: |
+        cp .env.example .env
+        
+    # ขั้นตอนการ Deploy WordPress ด้วย Docker Compose สำหรับการทดสอบ
+    - name: Deploy WordPress with Docker Compose for testing
+      run: |
+        docker-compose down
+        docker-compose up -d wordpress-test db phpmyadmin
+        
+
+
+  # งานสำหรับการ Deploy เมื่อมีการสร้าง Pull Request ไปยัง main
+  deploy:
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    steps:
+    # ขั้นตอนการดึงโค้ดจาก Repository
+    - uses: actions/checkout@v3
+    
+    # ขั้นตอนการตั้งค่าสภาพแวดล้อม
+    - name: Set up environment
+      run: |
+        cp .env.example .env
+        
+    # ขั้นตอนการ Deploy WordPress ด้วย Docker Compose ไปยัง Production
+    - name: Deploy WordPress with Docker Compose
+      run: |
+        docker-compose down
+        docker-compose up -d wordpress-prod db phpmyadmin
+

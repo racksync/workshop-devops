@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .response {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>แอปทดสอบช่องโหว่ OWASP</h1>
+    <p>แอปพลิเคชันนี้มีช่องโหว่ความปลอดภัยตามรายการ OWASP Top 10 เพื่อศึกษาและเรียนรู้</p>
+
+    <div class="section">
+        <h2>1. ช่องโหว่ SQL Injection</h2>
+        <p>ลองใช้ <code>admin' --</code> เป็นชื่อผู้ใช้ และรหัสผ่านอะไรก็ได้</p>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="ชื่อผู้ใช้" required>
+            <input type="password" id="password" placeholder="รหัสผ่าน" required>
+            <button type="submit">เข้าสู่ระบบ</button>
+        </form>
+        <div id="loginResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. ช่องโหว่ Cross-Site Scripting (XSS)</h2>
+        <p>ลองใส่ <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> ในช่องข้อความ</p>
+        <form id="messageForm">
+            <textarea id="message" placeholder="ข้อความ" rows="4"></textarea>
+            <button type="submit">ส่งข้อความ</button>
+        </form>
+        <div id="messageResponse" class="response"></div>
+        <h3>ข้อความทั้งหมด</h3>
+        <div id="messages"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. ช่องโหว่ Insecure Direct Object References (IDOR)</h2>
+        <p>ลองป้อน ID ข้อความต่างๆ เพื่อเข้าถึงข้อความที่คุณอาจไม่มีสิทธิ์</p>
+        <input type="number" id="messageId" placeholder="ID ข้อความ" min="1" value="1">
+        <button id="fetchMessage">ดูข้อความ</button>
+        <div id="idorResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. ช่องโหว่ Broken Access Control</h2>
+        <p>ลองเข้าถึงข้อมูลผู้ใช้ทั้งหมด (สำหรับแอดมินเท่านั้น)</p>
+        <button id="adminUsers">ดูข้อมูลผู้ใช้ทั้งหมด</button>
+        <div id="adminResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. ช่องโหว่ Security Misconfiguration</h2>
+        <p>ตรวจสอบข้อมูลการกำหนดค่าเซิร์ฟเวอร์ที่รั่วไหลออกมา</p>
+        <button id="checkConfig">ตรวจสอบการกำหนดค่า</button>
+        <div id="configResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>6. ช่องโหว่ Sensitive Data Exposure</h2>
+        <p>ตัวอย่างการเก็บข้อมูลที่ละเอียดอ่อนไว้ในเว็บแอปพลิเคชัน</p>
+        <label for="creditCard">บัตรเครดิต:</label>
+        <input type="text" id="creditCard" placeholder="เลขบัตรเครดิต 16 หลัก">
+        <button id="saveCardInfo">บันทึกข้อมูล</button>
+        <button id="showStoredCards">แสดงข้อมูลบัตรที่บันทึก</button>
+        <div id="cardResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>7. ช่องโหว่ Cross-Site Request Forgery (CSRF)</h2>
+        <p>ตัวอย่างแบบฟอร์มที่ไม่มีการป้องกัน CSRF</p>
+        <form id="transferForm">
+            <input type="text" id="recipient" placeholder="ชื่อผู้รับ" required>
+            <input type="number" id="amount" placeholder="จำนวนเงิน" required>
+            <button type="submit">โอนเงิน</button>
+        </form>
+        <div id="transferResponse" class="response"></div>
+        <p>ลองดูการโจมตีผ่าน CSRF:</p>
+        <button id="simulateCsrf">จำลองการโจมตี CSRF</button>
+    </div>
+
+    <div class="section">
+        <h2>8. ช่องโหว่ Using Components with Known Vulnerabilities</h2>
+        <p>แสดงรายการไลบรารีที่มีช่องโหว่ที่ใช้ในแอปพลิเคชัน</p>
+        <button id="checkDependencies">ตรวจสอบไลบรารี</button>
+        <div id="dependenciesResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>9. ช่องโหว่ Insufficient Logging & Monitoring</h2>
+        <p>ทดสอบความล้มเหลวในการเข้าสู่ระบบหลายครั้งโดยไม่มีการล็อกที่เหมาะสม</p>
+        <form id="failedLoginForm">
+            <input type="text" id="failedUsername" placeholder="ชื่อผู้ใช้" value="admin">
+            <input type="password" id="failedPassword" placeholder="รหัสผ่านผิด" value="wrongpassword">
+            <button type="submit">พยายามเข้าสู่ระบบ</button>
+            <button type="button" id="multipleFailedLogin">ล็อกอินผิด 5 ครั้ง</button>
+        </form>
+        <div id="loggingResponse" class="response"></div>
+        <button id="checkLogs">ตรวจสอบล็อก</button>
+    </div>
+
+    <div class="section">
+        <h2>10. ช่องโหว่ XML External Entities (XXE)</h2>
+        <p>ลองโจมตี XXE โดยการส่ง XML ที่มี DOCTYPE ไปยังเซิร์ฟเวอร์</p>
+        <textarea id="xmlInput" rows="6" placeholder="ใส่ XML ที่นี่">
+<user>
+  <name>TestUser</name>
+  <role>User</role>
+</user>
+        </textarea>
+        <p>ตัวอย่าง XXE Payload: <button id="xxePayloadExample">แสดงตัวอย่าง</button></p>
+        <button id="processXml">ประมวลผล XML</button>
+        <div id="xxeResponse" class="response"></div>
+    </div>
+
+    <script>
+        // ฟังก์ชันสำหรับแสดงผลลัพธ์
+        function showResponse(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            if (typeof data === 'object') {
+                data = JSON.stringify(data, null, 2);
+            }
+            element.innerHTML = `<pre>${data}</pre>`;
+            element.style.color = isError ? 'red' : 'black';
+        }
+
+        // 1. ฟอร์มล็อกอิน (SQL Injection)
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                showResponse('loginResponse', data);
+            } catch (error) {
+                showResponse('loginResponse', error.message, true);
+            }
+        });
+
+        // 2. ฟอร์มส่งข้อความ (XSS)
+        document.getElementById('messageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('message').value;
+            
+            try {
+                const response = await fetch('/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                showResponse('messageResponse', data);
+                document.getElementById('message').value = '';
+                // แสดงข้อความที่ไม่ปลอดภัย (ช่องโหว่ XSS)
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML += `<div>${message}</div>`;
+            } catch (error) {
+                showResponse('messageResponse', error.message, true);
+            }
+        });
+
+        // 3. ดูข้อความตาม ID (IDOR)
+        document.getElementById('fetchMessage').addEventListener('click', async () => {
+            const messageId = document.getElementById('messageId').value;
+            
+            try {
+                const response = await fetch(`/messages/${messageId}`);
+                const data = await response.json();
+                showResponse('idorResponse', data);
+            } catch (error) {
+                showResponse('idorResponse', error.message, true);
+            }
+        });
+
+        // 4. ดูข้อมูลผู้ใช้ทั้งหมด (Broken Access Control)
+        document.getElementById('adminUsers').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/admin/users');
+                const data = await response.json();
+                showResponse('adminResponse', data);
+            } catch (error) {
+                showResponse('adminResponse', error.message, true);
+            }
+        });
+
+        // 5. ช่องโหว่ Security Misconfiguration
+        document.getElementById('checkConfig').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/server-info');
+                const data = await response.json();
+                showResponse('configResponse', data);
+            } catch (error) {
+                showResponse('configResponse', error.message, true);
+            }
+        });
+
+        // 6. ช่องโหว่ Sensitive Data Exposure
+        document.getElementById('saveCardInfo').addEventListener('click', async () => {
+            const creditCard = document.getElementById('creditCard').value;
+            if (!creditCard) {
+                showResponse('cardResponse', 'กรุณาระบุหมายเลขบัตร', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/save-card', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cardNumber: creditCard })
+                });
+                const data = await response.json();
+                showResponse('cardResponse', data);
+                document.getElementById('creditCard').value = '';
+            } catch (error) {
+                showResponse('cardResponse', error.message, true);
+            }
+        });
+
+        document.getElementById('showStoredCards').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/cards');
+                const data = await response.json();
+                showResponse('cardResponse', data);
+            } catch (error) {
+                showResponse('cardResponse', error.message, true);
+            }
+        });
+
+        // 7. ช่องโหว่ Cross-Site Request Forgery (CSRF)
+        document.getElementById('transferForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const recipient = document.getElementById('recipient').value;
+            const amount = document.getElementById('amount').value;
+            
+            try {
+                const response = await fetch('/transfer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipient, amount })
+                });
+                const data = await response.json();
+                showResponse('transferResponse', data);
+            } catch (error) {
+                showResponse('transferResponse', error.message, true);
+            }
+        });
+
+        document.getElementById('simulateCsrf').addEventListener('click', () => {
+            // สร้างหน้าเว็บอื่นที่ส่งคำขอไปยังเซิร์ฟเวอร์ของเรา
+            const csrfAttackHtml = `
+                <html>
+                <body onload="document.forms[0].submit()">
+                <form action="${window.location.origin}/transfer" method="POST">
+                    <input type="hidden" name="recipient" value="hacker" />
+                    <input type="hidden" name="amount" value="1000" />
+                </form>
+                </body>
+                </html>
+            `;
+            const csrfWindow = window.open();
+            csrfWindow.document.write(csrfAttackHtml);
+            showResponse('transferResponse', 'กำลังจำลองการโจมตี CSRF...');
+        });
+
+        // 8. ช่องโหว่ Using Components with Known Vulnerabilities
+        document.getElementById('checkDependencies').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/dependencies');
+                const data = await response.json();
+                showResponse('dependenciesResponse', data);
+            } catch (error) {
+                showResponse('dependenciesResponse', error.message, true);
+            }
+        });
+
+        // 9. ช่องโหว่ Insufficient Logging & Monitoring
+        document.getElementById('failedLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('failedUsername').value;
+            const password = document.getElementById('failedPassword').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                showResponse('loggingResponse', data);
+            } catch (error) {
+                showResponse('loggingResponse', error.message, true);
+            }
+        });
+
+        document.getElementById('multipleFailedLogin').addEventListener('click', async () => {
+            const username = document.getElementById('failedUsername').value;
+            const password = document.getElementById('failedPassword').value;
+            showResponse('loggingResponse', 'กำลังทดสอบล็อกอินผิดหลายครั้ง...');
+            
+            try {
+                for (let i = 0; i < 5; i++) {
+                    await fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                }
+                showResponse('loggingResponse', 'ทดสอบเสร็จสิ้น: ล็อกอินผิด 5 ครั้ง');
+            } catch (error) {
+                showResponse('loggingResponse', error.message, true);
+            }
+        });
+
+        document.getElementById('checkLogs').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/logs');
+                const data = await response.json();
+                showResponse('loggingResponse', data);
+            } catch (error) {
+                showResponse('loggingResponse', error.message, true);
+            }
+        });
+
+        // 10. ช่องโหว่ XML External Entities (XXE)
+        document.getElementById('processXml').addEventListener('click', async () => {
+            const xmlContent = document.getElementById('xmlInput').value;
+            
+            try {
+                const response = await fetch('/process-xml', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/xml' },
+                    body: xmlContent
+                });
+                const data = await response.json();
+                showResponse('xxeResponse', data);
+            } catch (error) {
+                showResponse('xxeResponse', error.message, true);
+            }
+        });
+
+        document.getElementById('xxePayloadExample').addEventListener('click', () => {
+            const xxePayload = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE foo [
+  <!ELEMENT foo ANY >
+  <!ENTITY xxe SYSTEM "file:///etc/passwd" >
+]>
+<user>
+  <name>&xxe;</name>
+  <role>User</role>
+</user>`;
+            document.getElementById('xmlInput').value = xxePayload;
+        });
+    </script>
+</body>
+</html>

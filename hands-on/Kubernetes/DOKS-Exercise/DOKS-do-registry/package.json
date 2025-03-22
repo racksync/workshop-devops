@@ -1,0 +1,13 @@
+{
+  "name": "k8s-sample-app",
+  "version": "1.0.0",
+  "description": "Sample application for Kubernetes deployment",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

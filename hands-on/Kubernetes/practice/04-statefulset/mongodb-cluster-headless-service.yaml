@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-cluster-headless
+  namespace: statefulset-demo
+  labels:
+    app: mongodb-cluster
+    type: database-cluster
+spec:
+  selector:
+    app: mongodb-cluster
+  ports:
+  - port: 27017
+    targetPort: 27017
+    name: mongodb
+  clusterIP: None  # ทำให้เป็น Headless Service
+  publishNotReadyAddresses: true  # จำเป็นสำหรับการตั้งค่า replica set
+
+# สำหรับ MongoDB Replica Set เราจำเป็นต้องให้ Pods สามารถติดต่อกันได้โดยตรง
+# หากตั้งค่า publishNotReadyAddresses เป็น true จะทำให้สามารถค้นหา DNS ได้
+# แม้ว่า Pod จะยังไม่พร้อมใช้งานก็ตาม ซึ่งจำเป็นสำหรับการตั้งค่า replica set

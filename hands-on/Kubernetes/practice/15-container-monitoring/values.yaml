@@ -1,0 +1,44 @@
+# ไฟล์ค่าตั้งต้นสำหรับ Helm chart
+grafana:
+  adminPassword: admin123
+  # ตั้งค่าการเข้าถึง Dashboard
+  service:
+    type: ClusterIP
+  # เพิ่ม datasource แบบอัตโนมัติ
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-operated:9090
+        access: proxy
+        isDefault: true
+  
+# ตั้งค่า Prometheus
+prometheus:
+  prometheusSpec:
+    # อนุญาตให้ค้นพบ ServiceMonitor ทุกตัวในคลัสเตอร์
+    serviceMonitorSelectorNilUsesHelmValues: false
+    # ตั้งค่าการเก็บข้อมูล
+    retention: 7d
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 200m
+
+alertmanager:
+  alertmanagerSpec:
+    # ตั้งค่าการเก็บข้อมูลการแจ้งเตือน
+    retention: 120h
+    # ตั้งค่าทรัพยากร
+    resources:
+      requests:
+        memory: 64Mi
+        cpu: 50m
+      limits:
+        memory: 128Mi
+        cpu: 100m

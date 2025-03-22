@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: statefulset-demo
+  labels:
+    app: mongodb
+    type: database
+spec:
+  selector:
+    app: mongodb  # เลือก Pod ที่มี label app=mongodb
+  ports:
+  - port: 27017
+    targetPort: 27017
+    name: mongodb
+  type: ClusterIP  # ประเภทเป็น ClusterIP ซึ่งเข้าถึงได้เฉพาะภายใน cluster
+
+# Service นี้ใช้สำหรับการเข้าถึง MongoDB แบบปกติ (load balancing)
+# ต่างจาก Headless Service ที่ใช้สำหรับการเข้าถึงแต่ละ Pod โดยตรง
+#
+# เมื่อเชื่อมต่อผ่าน Service นี้ จะใช้ round-robin load balancing ไปยัง Pod ที่พร้อมใช้งาน
+# เหมาะสำหรับการอ่านข้อมูล แต่สำหรับการเขียนข้อมูล ควรเข้าถึง primary Pod โดยตรง
+# ผ่าน Headless Service (mongodb-0.mongodb-headless.statefulset-demo.svc.cluster.local)

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: sample-app
+  annotations:
+    # ไฟล์กำหนดการทำ Progressive Delivery ด้วย Argo Rollouts
+    # ใช้สำหรับการทำ canary deployment เพื่อลดความเสี่ยงในการ deploy
+    description: "Progressive deployment configuration"
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      # ขั้นตอนการทำ canary deployment
+      # ค่อยๆเพิ่ม traffic ไปยังเวอร์ชันใหม่ที่ละขั้น
+      steps:
+      - setWeight: 20  # เริ่มต้นด้วยการส่ง traffic 20% ไปยังเวอร์ชันใหม่
+      - pause: {duration: 1m}  # รอ 1 นาที เพื่อตรวจสอบความเสถียร
+      - setWeight: 40  # เพิ่ม traffic เป็น 40%
+      - pause: {duration: 1m}
+      - setWeight: 60  # เพิ่ม traffic เป็น 60%
+      - pause: {duration: 1m}
+      - setWeight: 80  # เพิ่ม traffic เป็น 80%
+      - pause: {duration: 1m}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: sample-app
+  template:
+    metadata:
+      labels:
+        app: sample-app
+    spec:
+      containers:
+      - name: sample-app
+        image: nginx:1.19
+        ports:
+        - containerPort: 80

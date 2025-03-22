@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
+    outlierDetection:
+      consecutive5xxErrors: 1
+      interval: 1s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+# DestinationRule นี้กำหนดนโยบาย Circuit Breaking สำหรับ service "reviews" ดังนี้:
+#
+# 1. Connection Pool:
+#   - จำกัดจำนวน TCP connections สูงสุด 100 connections
+#   - อนุญาตให้มี HTTP request ที่รอดำเนินการได้ 1 request เท่านั้น
+#   - กำหนด 1 request ต่อ connection
+#
+# 2. Outlier Detection (การตรวจจับ instance ที่ทำงานผิดปกติ):
+#   - หากมี error 5xx ติดต่อกัน 1 ครั้ง จะทำการ eject instance นั้น
+#   - ตรวจสอบทุก 1 วินาที
+#   - เมื่อ eject แล้ว จะไม่ส่ง traffic ไปยัง instance นั้นเป็นเวลา 30 วินาที
+#   - สามารถ eject instances ได้สูงสุด 100% (ทั้งหมด)
+#
+# 3. Subsets: กำหนดกลุ่มย่อยของ service ตามเวอร์ชัน v1, v2 และ v3

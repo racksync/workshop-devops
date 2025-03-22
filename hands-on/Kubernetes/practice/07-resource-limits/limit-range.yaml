@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: resource-demo
+spec:
+  limits:
+  - default:  # ค่า limits เริ่มต้นสำหรับ containers ที่ไม่ได้กำหนดค่า
+      memory: "256Mi"  # หน่วยความจำเริ่มต้น 256 Mebibytes
+      cpu: "500m"      # CPU เริ่มต้น 0.5 cores
+    defaultRequest:  # ค่า requests เริ่มต้นสำหรับ containers ที่ไม่ได้กำหนดค่า
+      memory: "128Mi"  # หน่วยความจำเริ่มต้น 128 Mebibytes
+      cpu: "250m"      # CPU เริ่มต้น 0.25 cores
+    type: Container  # ประเภทของทรัพยากรที่ต้องการกำหนดขอบเขต

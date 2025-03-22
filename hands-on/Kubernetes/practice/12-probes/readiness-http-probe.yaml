@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readiness-http
+  namespace: probes-demo
+spec:
+  containers:
+  - name: app
+    image: nginx
+    ports:
+    - containerPort: 80
+    readinessProbe:
+      httpGet:
+        path: / # ตรวจสอบหน้าแรกของ nginx
+        port: 80 # พอร์ตมาตรฐานของ nginx
+      initialDelaySeconds: 5 # รอ 5 วินาทีหลังจาก container เริ่มต้น
+      periodSeconds: 5 # ตรวจสอบทุก 5 วินาที

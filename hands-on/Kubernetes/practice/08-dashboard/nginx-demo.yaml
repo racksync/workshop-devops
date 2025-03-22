@@ -1,0 +1,49 @@
+# แอปพลิเคชันตัวอย่าง NGINX สำหรับการทดสอบ K8s Dashboard
+# สร้าง Deployment สำหรับ NGINX
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-demo
+  namespace: dashboard-demo
+  labels:
+    app: nginx-demo
+spec:
+  # จำนวน replicas (pod) ที่ต้องการให้ทำงาน
+  replicas: 2
+  # ตัวเลือกให้ selector ตรงกับ labels ของ pod
+  selector:
+    matchLabels:
+      app: nginx-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-demo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        # ค่า resources ที่เหมาะสมในสภาพแวดล้อมการทดสอบ
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 80
+---
+# สร้าง Service สำหรับเข้าถึง NGINX
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-demo
+  namespace: dashboard-demo
+spec:
+  selector:
+    app: nginx-demo
+  ports:
+  - port: 80
+    targetPort: 80
+  # ใช้ LoadBalancer สำหรับการเข้าถึงจากภายนอก
+  type: LoadBalancer

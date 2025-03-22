@@ -1,0 +1,50 @@
+apiVersion: apps/v1        # API version ของ Kubernetes สำหรับ Deployment
+kind: Deployment           # ประเภทของ Object คือ Deployment (ใช้จัดการการ deploy และ ดูแล Pods)
+metadata:
+  name: nginx-deployment   # ชื่อของ Deployment สำหรับอ้างอิง
+  namespace: replica-demo  # Namespace ที่จะสร้าง Deployment นี้
+  labels:                  # Labels ใช้สำหรับการจัดกลุ่มและค้นหา resources
+    app: nginx
+    type: webserver
+    demo: replicas
+spec:                      # ข้อมูลจำเพาะของ Deployment
+  replicas: 3              # จำนวน Pod ที่ต้องการให้ทำงานพร้อมกันตลอดเวลา
+                           # ถ้า Pod ล้มหาย Kubernetes จะสร้างใหม่อัตโนมัติให้ครบตามจำนวนนี้
+  selector:                # กำหนดว่า Deployment จะจัดการ Pods ที่มี labels ตรงกับอะไร
+    matchLabels:
+      app: nginx           # เลือก Pods ที่มี label app=nginx
+  strategy:                # กลยุทธ์การอัปเดต Pods เมื่อมีการเปลี่ยนแปลง
+    type: RollingUpdate    # การอัปเดตแบบทยอย ทำให้ service ยังทำงานได้ขณะอัปเดต
+    rollingUpdate:
+      maxSurge: 1          # จำนวนสูงสุดของ Pods ที่สามารถสร้างเกินกว่าที่กำหนดระหว่างอัปเดต
+      maxUnavailable: 0    # จำนวน Pods ที่ยอมให้ไม่พร้อมใช้งานระหว่างอัปเดต (0 = ต้องพร้อมตลอด)
+  template:                # Template สำหรับสร้าง Pods
+    metadata:
+      labels:              # Labels ของ Pod ที่จะถูกสร้าง (ต้องตรงกับ selector ด้านบน)
+        app: nginx
+    spec:                  # ข้อมูลจำเพาะของ Pod
+      containers:          # รายการ containers ที่จะทำงานใน Pod
+      - name: nginx        # ชื่อของ container
+        image: nginx:latest # Docker image ที่จะใช้
+        ports:             # Ports ที่ container เปิดให้บริการ
+        - containerPort: 80 # Port ที่ application ฟังอยู่ในตัว container
+        resources:         # การจำกัดและขอใช้ทรัพยากร
+          limits:          # ทรัพยากรสูงสุดที่ container นี้สามารถใช้ได้
+            cpu: "0.5"     # จำกัด CPU ที่ 0.5 core 
+            memory: "256Mi" # จำกัด memory ที่ 256 MB
+          requests:        # ทรัพยากรที่ต้องการเพื่อเริ่มทำงาน
+            cpu: "0.2"     # ขอ CPU อย่างน้อย 0.2 core
+            memory: "128Mi" # ขอ memory อย่างน้อย 128 MB
+        livenessProbe:     # ตรวจสอบว่า container ยังทำงานอยู่หรือไม่
+          httpGet:
+            path: /        # เส้นทาง URL ที่จะตรวจสอบ
+            port: 80       # port ที่จะใช้ตรวจสอบ
+          initialDelaySeconds: 10  # รอเวลาก่อนเริ่มตรวจสอบครั้งแรก
+          periodSeconds: 5  # ความถี่ในการตรวจสอบ
+        volumeMounts:      # การกำหนดการ mount volumes เข้าไปใน container
+        - name: nginx-html # ชื่อของ volume ที่จะ mount (ต้องตรงกับชื่อใน volumes)
+          mountPath: /usr/share/nginx/html # ตำแหน่งที่จะ mount volume ในตัว container
+      volumes:             # การกำหนด volumes ที่จะใช้ใน Pod
+      - name: nginx-html   # ชื่อของ volume (ต้องตรงกับที่อ้างอิงใน volumeMounts)
+        configMap:         # ระบุว่า volume นี้เป็น ConfigMap
+          name: nginx-html-content # ชื่อของ ConfigMap ที่จะใช้

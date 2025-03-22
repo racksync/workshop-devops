@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-pod
+  namespace: volume-demo
+spec:
+  containers:
+  - name: app
+    image: busybox
+    command: ["/bin/sh", "-c", "while true; do echo $(date) >> /mnt/data/output.txt; sleep 5; done"]
+    volumeMounts:
+    - name: persistent-storage
+      mountPath: /mnt/data  # ตำแหน่งที่จะ mount volume ในคอนเทนเนอร์
+  volumes:
+  - name: persistent-storage
+    persistentVolumeClaim:
+      claimName: example-pvc  # ชื่อของ PVC ที่สร้างไว้ก่อนหน้า

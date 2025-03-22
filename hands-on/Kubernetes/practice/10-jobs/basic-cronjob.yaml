@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello-cronjob
+spec:
+  schedule: "*/5 * * * *"  # ทุกๆ 5 นาที
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            command: ["sh", "-c", "echo 'Hello from scheduled job!' && date"]
+          restartPolicy: OnFailure
+# คำอธิบาย: CronJob นี้จะทำงานทุก 5 นาที โดยจะแสดงข้อความทักทายและเวลาปัจจุบัน

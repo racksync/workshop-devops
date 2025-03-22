@@ -1,0 +1,182 @@
+# ไฟล์กำหนด NetworkPolicies สำหรับการแบ่งส่วนเครือข่ายแบบละเอียด
+# ภายใต้สถาปัตยกรรมแบบ Zero-Trust เราต้องระบุทุกการสื่อสารที่อนุญาตให้เกิดขึ้นได้
+
+# นโยบายปฏิเสธการเชื่อมต่อทุกอย่างเป็นค่าเริ่มต้น (Default Deny All)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: zero-trust-demo
+spec:
+  # เลือกทุก Pod (ไม่มี selector เฉพาะเจาะจง)
+  podSelector: {}
+  # บังคับใช้ทั้งขาเข้าและขาออก
+  policyTypes:
+  - Ingress
+  - Egress
+---
+# อนุญาตให้ทุก Pod สื่อสารกับ DNS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: zero-trust-demo
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+# อนุญาตให้ Frontend App เชื่อมต่อกับ Backend
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: zero-trust-demo
+spec:
+  # เลือก Pod ที่มี label app=frontend
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    # ปลายทางคือ Pod ที่มี label app=backend
+    - podSelector:
+        matchLabels:
+          app: backend
+    ports:
+    - protocol: TCP
+      port: 8080 # พอร์ตที่ backend service เปิดให้บริการ
+---
+# อนุญาตให้ Backend App เชื่อมต่อกับ Database
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-to-database
+  namespace: zero-trust-demo
+spec:
+  # เลือก Pod ที่มี label app=backend
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    # ปลายทางคือ Pod ที่มี label app=database
+    - podSelector:
+        matchLabels:
+          app: database
+    ports:
+    - protocol: TCP
+      port: 3306 # พอร์ต MySQL หรือ MariaDB ทั่วไป
+---
+# อนุญาตให้มีการเชื่อมต่อขาเข้าไปยัง Frontend จาก Ingress Gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-frontend
+  namespace: zero-trust-demo
+spec:
+  # เลือก Pod ที่มี label app=frontend
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    # ต้นทางคือ Pod ที่มี label app=istio-ingressgateway
+    - podSelector:
+        matchLabels:
+          app: istio-ingressgateway
+      # ใน namespace istio-system
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: istio-system
+    ports:
+    - protocol: TCP
+      port: 8080 # พอร์ตที่ frontend service เปิดให้บริการ
+---
+# อนุญาตให้มีการเชื่อมต่อขาเข้าไปยัง Backend จาก Frontend
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend-ingress
+  namespace: zero-trust-demo
+spec:
+  # เลือก Pod ที่มี label app=backend
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    # ต้นทางคือ Pod ที่มี label app=frontend
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8080 # พอร์ตที่ backend service เปิดให้บริการ
+---
+# อนุญาตให้มีการเชื่อมต่อขาเข้าไปยัง Database จาก Backend
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-to-database-ingress
+  namespace: zero-trust-demo
+spec:
+  # เลือก Pod ที่มี label app=database
+  podSelector:
+    matchLabels:
+      app: database
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    # ต้นทางคือ Pod ที่มี label app=backend
+    - podSelector:
+        matchLabels:
+          app: backend
+    ports:
+    - protocol: TCP
+      port: 3306 # พอร์ต MySQL หรือ MariaDB ทั่วไป
+---
+# อนุญาตให้มีการเชื่อมต่อไปยังระบบโครงสร้างพื้นฐาน (Istio, Prometheus, etc.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-to-infrastructure
+  namespace: zero-trust-demo
+spec:
+  # บังคับใช้กับทุก Pod
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    # ปลายทางคือทุก Pod ใน namespace istio-system
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: istio-system
+  - to:
+    # ปลายทางคือทุก Pod ใน namespace monitoring
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring

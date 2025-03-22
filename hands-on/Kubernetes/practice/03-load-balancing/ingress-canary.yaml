@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress-canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "50"
+    # Use cookie-based canary - remove comment if you want to test this approach
+    nginx.ingress.kubernetes.io/canary-by-cookie: "canary-cookie"
+    # Use header-based canary - remove comment if you want to test this approach
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "true"
+    kubernetes.io/ingress.class: nginx  # Add this for older versions
+spec:
+  ingressClassName: nginx  # Add this line to specify the IngressClass
+  rules:
+  - host: lb.k8s.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-service-v1  # ส่ง 50% ของ traffic ไปยัง service v1
+            port:
+              number: 80

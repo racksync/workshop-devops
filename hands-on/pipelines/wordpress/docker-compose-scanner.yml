@@ -1,0 +1,23 @@
+services:
+  sonar-scanner:
+    container_name: sonar-scanner-wordpress
+    platform: linux/amd64
+    image: sonarsource/sonar-scanner-cli
+    volumes:
+      - .:/usr/src # Mount the current directory as the project directory
+      # - ./dependency-check-report.html:/usr/src/dependency-check-report.html
+      # - ./dependency-check-report.json:/usr/src/dependency-check-report.json
+    working_dir: /usr/src
+    # environment:
+    #   - SONAR_TOKEN={$SONAR_TOKEN}
+    networks:
+      - sonarqube-network
+    command: >
+      sonar-scanner
+      -Dsonar.projectKey=WordPress
+      -Dsonar.sources=. 
+      -Dsonar.host.url=http://sonarqube.sonarqube.orb.local
+
+networks:
+  sonarqube-network:
+    external: true

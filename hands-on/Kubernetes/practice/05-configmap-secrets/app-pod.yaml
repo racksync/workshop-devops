@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config-demo-pod  # ชื่อของ Pod
+  namespace: config-demo  # namespace ที่ Pod นี้อยู่
+  labels:
+    app: config-demo
+spec:
+  containers:
+  - name: app  # ชื่อของ container
+    image: busybox  # ใช้ image busybox ซึ่งเป็น container ขนาดเล็กที่มีเครื่องมือพื้นฐาน
+    command: ["/bin/sh", "-c", "while true; do echo Environment: $APP_ENV, Message: $APP_MESSAGE, DB User: $DB_USER; sleep 10; done"]
+    # คำสั่งที่จะรันใน container - แสดงค่า environment variables ทุก 10 วินาที
+    
+    env:  # กำหนด environment variables
+    - name: APP_ENV  # ชื่อ env var ที่จะให้มีใน container
+      valueFrom:  # ค่าที่จะกำหนดให้ env var นี้
+        configMapKeyRef:  # อ้างอิงค่าจาก ConfigMap
+          name: app-config  # ชื่อของ ConfigMap
+          key: app.properties  # key ใน ConfigMap
+    
+    - name: APP_MESSAGE
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: message
+    
+    - name: DB_USER  # สร้าง env var จาก Secret
+      valueFrom:
+        secretKeyRef:  # อ้างอิงค่าจาก Secret
+          name: app-secret  # ชื่อของ Secret
+          key: db.user  # key ใน Secret
+    
+    volumeMounts:  # กำหนดการ mount volumes
+    - name: config-volume  # ชื่อของ volume (ต้องตรงกับ volumes ด้านล่าง)
+      mountPath: /etc/config  # ตำแหน่งที่จะ mount ใน container
+    
+    - name: secret-volume
+      mountPath: /etc/secret
+      readOnly: true  # mount แบบอ่านอย่างเดียวสำหรับความปลอดภัย
+  
+  volumes:  # กำหนด volumes ที่จะใช้กับ Pod
+  - name: config-volume  # ชื่อของ volume
+    configMap:  # volume นี้มาจาก ConfigMap
+      name: app-config  # ชื่อของ ConfigMap
+  
+  - name: secret-volume  # ชื่อของ volume
+    secret:  # volume นี้มาจาก Secret
+      secretName: app-secret  # ชื่อของ Secret
+
+# Pod นี้แสดงตัวอย่างการใช้งาน ConfigMap และ Secret ใน 2 รูปแบบ:
+# 1. ใช้เป็น Environment Variables โดยการอ้างอิงค่าผ่าน configMapKeyRef และ secretKeyRef
+# 2. ใช้เป็น Volume ที่จะสร้างไฟล์ใน container โดยแต่ละ key ใน ConfigMap และ Secret
+#    จะกลายเป็นไฟล์ที่มีชื่อตาม key และเนื้อหาตาม value
+#
+# เมื่อ mount ConfigMap หรือ Secret เป็น volume:
+# - /etc/config/app.properties จะมีเนื้อหาตาม key "app.properties" ใน ConfigMap
+# - /etc/config/message จะมีเนื้อหาตาม key "message" ใน ConfigMap 
+# - /etc/secret/db.user จะมีค่า "admin" (ถูกถอดรหัสจาก base64 แล้ว)
+# - /etc/secret/db.password จะมีค่า "P@$$w0rd" (ถูกถอดรหัสจาก base64 แล้ว)

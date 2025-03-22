@@ -1,0 +1,29 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Build Docker Image 🐳
+        run: sudo docker build -f Dockerfile . -t php-main:latest
+
+      - name: Remove exist container 🏺
+        run: sudo docker rm -f php-main
+
+      - name: Ensure Docker Network Created 🌐
+        run: |
+          if ! sudo docker network inspect backend > /dev/null 2>&1; then
+            sudo docker network create backend
+          fi
+
+      - name: Run Docker Container 🏺
+        run: sudo docker run -p 8081:80 --network backend --name php-main -d php-main:latest

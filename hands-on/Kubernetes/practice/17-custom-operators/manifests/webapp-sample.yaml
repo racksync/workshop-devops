@@ -1,0 +1,25 @@
+apiVersion: apps.example.com/v1alpha1
+kind: WebApp
+metadata:
+  name: sample-webapp
+  # คำอธิบาย: ตัวอย่าง WebApp resource
+spec:
+  # จำนวน replica: 3 pod
+  size: 3
+  # ใช้ image: nginx
+  image: nginx:latest
+  # เปิด port 80
+  port: 80
+---
+apiVersion: apps.example.com/v1alpha1
+kind: WebApp
+metadata:
+  name: demo-webapp
+  # คำอธิบาย: ตัวอย่าง WebApp resource ด้วย httpd
+spec:
+  # จำนวน replica: 2 pod
+  size: 2
+  # ใช้ image: httpd
+  image: httpd:latest
+  # เปิด port 80
+  port: 80

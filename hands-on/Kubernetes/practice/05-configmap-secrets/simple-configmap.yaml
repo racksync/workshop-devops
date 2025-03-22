@@ -1,0 +1,24 @@
+apiVersion: v1       # API version ของ Kubernetes สำหรับ ConfigMap
+kind: ConfigMap      # ประเภทของ resource คือ ConfigMap
+metadata:
+  name: app-config   # ชื่อของ ConfigMap
+  namespace: config-demo  # namespace ที่ ConfigMap นี้อยู่
+  labels:           # labels สำหรับจัดกลุ่ม resource
+    app: config-demo
+    type: configuration
+data:               # ข้อมูลใน ConfigMap เป็นคู่ key-value
+  app.properties: |  # ไฟล์ properties (สัญลักษณ์ | คือการเขียนแบบ multi-line)
+    app.name=MyApp
+    app.version=1.0.0
+    app.environment=development
+  database.properties: |  # อีกหนึ่งไฟล์ properties
+    db.host=my-db-service
+    db.port=3306
+    db.name=mydb
+  message: "สวัสดี Kubernetes ConfigMap"  # ข้อความแบบ single line
+
+# ConfigMap ใช้สำหรับเก็บข้อมูลที่ไม่ใช่ความลับในรูปแบบ key-value
+# เหมาะสำหรับ configuration ของแอพลิเคชันที่ไม่มีความจำเป็นต้องเก็บเป็นความลับ
+# สามารถใช้ได้ทั้งการอ้างอิงเป็น environment variables หรือ mount เป็นไฟล์
+# การเปลี่ยนแปลง ConfigMap จะไม่ทำให้ Pod restart อัตโนมัติ ต้องทำ rolling update
+# หรือใช้เครื่องมือเสริม เช่น configmap-reload

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: config-demo
+  labels:
+    purpose: workshop
+    topic: config-management
+  annotations:
+    description: "Namespace สำหรับการทดลอง Kubernetes ConfigMap และ Secret"
+    created-by: "DevOps Workshop"
+
+# Namespace ใช้สำหรับแยกทรัพยากรใน Kubernetes ออกเป็นกลุ่ม
+# ช่วยให้สามารถจัดการทรัพยากรได้เป็นสัดส่วน และป้องกันการชนกันของชื่อ
+# เหมาะสำหรับการแยกทรัพยากรตามทีม โปรเจค หรือสภาพแวดล้อม

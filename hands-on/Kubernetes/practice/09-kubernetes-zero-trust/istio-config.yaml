@@ -1,0 +1,96 @@
+# ไฟล์กำหนดค่าสำหรับการติดตั้ง Istio พร้อมการเปิดใช้งาน mTLS แบบเข้มงวด
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio-control-plane
+  namespace: zero-trust-demo
+spec:
+  # กำหนดค่าพื้นฐานของ mesh
+  meshConfig:
+    # เปิดใช้งาน Auto mTLS สำหรับทุกการสื่อสารภายใน mesh
+    enableAutoMtls: true
+    # บังคับให้ทุกการเชื่อมต่อภายใน mesh เข้ารหัสด้วย TLS
+    accessLogFile: "/dev/stdout"
+    # เปิดใช้งาน access logging เพื่อการตรวจสอบ
+    accessLogFormat: '{"protocol": "%PROTOCOL%", "upstream_service_time": "%REQ(X-ENVOY-UPSTREAM-SERVICE-TIME)%", "upstream_local_address": "%UPSTREAM_LOCAL_ADDRESS%", "duration": "%DURATION%", "upstream_transport_failure_reason": "%UPSTREAM_TRANSPORT_FAILURE_REASON%", "route_name": "%ROUTE_NAME%", "downstream_local_address": "%DOWNSTREAM_LOCAL_ADDRESS%", "user_agent": "%REQ(USER-AGENT)%", "response_code": "%RESPONSE_CODE%", "response_flags": "%RESPONSE_FLAGS%", "start_time": "%START_TIME%", "method": "%REQ(:METHOD)%", "request_id": "%REQ(X-REQUEST-ID)%", "upstream_host": "%UPSTREAM_HOST%", "x_forwarded_for": "%REQ(X-FORWARDED-FOR)%", "path": "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%", "response_code_details": "%RESPONSE_CODE_DETAILS%", "authority": "%REQ(:AUTHORITY)%"}'
+  
+  # กำหนดค่าทั่วไป
+  values:
+    global:
+      # ใช้ Istiod ในการออกใบรับรอง
+      pilotCertProvider: istiod
+      # เปิดใช้งานการรักษาความปลอดภัยของ control plane
+      controlPlaneSecurityEnabled: true
+      # เปิดใช้งาน mTLS
+      mtls:
+        enabled: true
+      # กำหนดให้ใช้ proxy เป็น istio-proxy
+      proxy:
+        autoInject: enabled
+        privileged: false
+      # กำหนดค่าการตรวจสอบ
+      meshExpansion:
+        enabled: false
+      # กำหนดลำดับความสำคัญของนโยบาย security
+      imagePullPolicy: Always
+
+  # กำหนดค่าองค์ประกอบของ Istio
+  components:
+    # กำหนดค่า Ingress Gateway
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+        # กำหนด service type เป็น LoadBalancer
+        service:
+          type: LoadBalancer
+          ports:
+          - port: 80
+            name: http2
+          - port: 443
+            name: https
+    
+    # กำหนดค่า Egress Gateway
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+    
+    # กำหนดค่า Pilot
+    pilot:
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+        # เปิดใช้งาน sidecar injection
+        env:
+        - name: PILOT_ENABLE_ANALYSIS
+          value: "true"
+        - name: PILOT_ENABLE_STATUS
+          value: "true"
+    
+    # กำหนดค่า Telemetry
+    telemetry:
+      enabled: true
+
+# ไฟล์นี้ใช้สำหรับติดตั้ง Istio พร้อมกับการกำหนดค่าเบื้องต้นสำหรับระบบรักษาความปลอดภัยแบบ Zero-Trust
+# โดยมุ่งเน้นที่การเปิดใช้งาน mTLS และการตั้งค่าที่เกี่ยวข้องกับความปลอดภัย

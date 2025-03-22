@@ -1,0 +1,47 @@
+groups:
+- name: example
+  rules:
+  - alert: HighCPULoad
+    expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU load (instance {{ $labels.instance }})"
+      description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes) / node_memory_MemTotal_bytes * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage (instance {{ $labels.instance }})"
+      description: "Memory usage is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HighDiskUsage
+    expr: 100 - ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes) > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High disk usage (instance {{ $labels.instance }})"
+      description: "Disk usage is > 85%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      
+  - alert: InstanceDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+
+  - alert: ServiceHighRequestLatency
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Service has high request latency"
+      description: "Service response time is above 0.5s (95th percentile over 10m)."

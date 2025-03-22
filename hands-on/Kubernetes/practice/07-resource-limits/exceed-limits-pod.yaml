@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exceed-memory-pod
+  namespace: resource-demo
+spec:
+  containers:
+  - name: memory-hog
+    image: polinux/stress
+    # คำสั่งสำหรับทดสอบการใช้หน่วยความจำเกินขีดจำกัด
+    command: ["stress"]
+    # สร้างกระบวนการที่ใช้หน่วยความจำ 300 MB ซึ่งเกินกว่า limit ที่กำหนด (200Mi)
+    args: ["--vm", "1", "--vm-bytes", "300M", "--vm-hang", "1"]
+    resources:
+      limits:
+        memory: "200Mi"  # จำกัดหน่วยความจำสูงสุดที่ 200 Mebibytes
+        cpu: "300m"      # จำกัด CPU สูงสุดที่ 0.3 cores
+      requests:
+        memory: "100Mi"  # จองหน่วยความจำขั้นต่ำที่ 100 Mebibytes
+        cpu: "150m"      # จอง CPU ขั้นต่ำที่ 0.15 cores

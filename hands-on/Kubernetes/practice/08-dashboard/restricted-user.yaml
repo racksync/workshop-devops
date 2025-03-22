@@ -1,0 +1,47 @@
+# สร้างเนมสเปซสำหรับการทดสอบแอปพลิเคชัน
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dashboard-demo
+---
+# สร้างบัญชีผู้ใช้ที่มีสิทธิ์จำกัดเฉพาะในเนมสเปซ dashboard-demo
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: view-only-user
+  namespace: kubernetes-dashboard
+---
+# สร้าง Role เพื่อกำหนดสิทธิ์ให้ผู้ใช้สามารถดูทรัพยากรได้เท่านั้น (ไม่สามารถแก้ไขหรือลบได้)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dashboard-view-only
+  namespace: dashboard-demo
+rules:
+- apiGroups: [""]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+---
+# สร้าง RoleBinding เพื่อผูกบัญชี view-only-user กับบทบาท dashboard-view-only
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: view-only-binding
+  namespace: dashboard-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dashboard-view-only
+subjects:
+- kind: ServiceAccount
+  name: view-only-user
+  namespace: kubernetes-dashboard

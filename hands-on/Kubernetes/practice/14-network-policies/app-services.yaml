@@ -1,0 +1,65 @@
+# Service สำหรับ Frontend ที่เปิด port 80
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# Service สำหรับ Backend API ที่เปิด port 8080
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-svc
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+# Service สำหรับ Database ที่เปิด port 3306
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-svc
+spec:
+  selector:
+    app: database
+  ports:
+  - port: 3306
+    targetPort: 3306
+---
+# Service สำหรับ Monitoring ที่เปิด port 9090
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitoring-svc
+spec:
+  selector:
+    app: monitoring
+  ports:
+  - port: 9090
+    targetPort: 9090
+---
+# สร้าง Ingress เพื่อเข้าถึง frontend จากภายนอกผ่าน demo.k8s.local
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+spec:
+  rules:
+  - host: demo.k8s.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-svc
+            port:
+              number: 80

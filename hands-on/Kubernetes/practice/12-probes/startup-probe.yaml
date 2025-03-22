@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: startup-probe
+  namespace: probes-demo
+spec:
+  containers:
+  - name: app
+    image: nginx
+    ports:
+    - containerPort: 80
+    startupProbe:
+      httpGet:
+        path: / # ตรวจสอบหน้าแรกของ nginx
+        port: 80 # พอร์ตมาตรฐานของ nginx
+      failureThreshold: 30 # อนุญาตให้ล้มเหลวได้ 30 ครั้งก่อนที่จะถือว่าไม่สามารถเริ่มต้นได้
+      periodSeconds: 10 # ตรวจสอบทุก 10 วินาที (รวมเป็นเวลา 300 วินาทีหรือ 5 นาที)
+    livenessProbe:
+      httpGet:
+        path: / # ตรวจสอบหน้าแรกของ nginx
+        port: 80 # พอร์ตมาตรฐานของ nginx
+      periodSeconds: 10 # ตรวจสอบทุก 10 วินาที (จะเริ่มทำงานหลังจาก startupProbe สำเร็จแล้ว)

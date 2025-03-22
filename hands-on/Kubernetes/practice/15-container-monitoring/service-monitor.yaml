@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sample-app
+  namespace: monitoring
+  labels:
+    # ให้ Prometheus Operator ค้นพบ ServiceMonitor นี้
+    release: prometheus
+spec:
+  selector:
+    # เลือก Service ที่มี label app=sample-app
+    matchLabels:
+      app: sample-app
+  endpoints:
+  - port: web
+    # path สำหรับเก็บ metrics
+    path: /metrics
+    # ความถี่ในการเก็บข้อมูล (15 วินาที)
+    interval: 15s

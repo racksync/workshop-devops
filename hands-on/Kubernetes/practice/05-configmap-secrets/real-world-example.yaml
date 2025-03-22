@@ -1,0 +1,155 @@
+# ตัวอย่างการใช้งาน ConfigMap และ Secret ในโลกแห่งความเป็นจริง
+# การทำ web application ที่เชื่อมต่อกับฐานข้อมูล
+
+# 1. สร้าง ConfigMap สำหรับค่าการตั้งค่าแอปพลิเคชัน
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-app-config
+  namespace: config-demo
+data:
+  # ค่าการตั้งค่าแอปพลิเคชัน
+  app.config.json: |
+    {
+      "appName": "My Web Application",
+      "logLevel": "info",
+      "features": {
+        "enableCache": true,
+        "enableCompression": true,
+        "maxUploadSizeMB": 50
+      },
+      "cors": {
+        "allowedOrigins": ["https://example.com", "https://dev.example.com"],
+        "allowedMethods": ["GET", "POST", "PUT", "DELETE"]
+      }
+    }
+  # ค่าการตั้งค่า NGINX
+  nginx.conf: |
+    server {
+      listen 80;
+      server_name myapp.local;
+      
+      location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+
+      location /api {
+        proxy_pass http://localhost:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+    }
+---
+# 2. สร้าง Secret สำหรับข้อมูลที่เป็นความลับ
+apiVersion: v1
+kind: Secret
+metadata:
+  name: web-app-secrets
+  namespace: config-demo
+type: Opaque
+stringData:  # ใช้ stringData เพื่อไม่ต้อง encode base64 เอง
+  DATABASE_USER: "db_user"
+  DATABASE_PASSWORD: "strong-password-123"
+  API_KEY: "a9b8c7d6e5f4g3h2i1j0"
+  SESSION_SECRET: "f9b6d3s8c0k4j6r2m5n7q1"
+  JWT_SECRET: "jwt-very-secure-secret-key-1234567890"
+---
+# 3. สร้าง Deployment สำหรับแอปพลิเคชัน
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-application
+  namespace: config-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+      - name: web-app
+        image: node:14-alpine
+        # แก้ไขคำสั่งให้สร้าง HTTP server แทนการรัน server.js ที่ไม่มีอยู่จริง
+        command: ["node", "-e", "const http = require('http'); const server = http.createServer((req, res) => { res.statusCode = 200; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({status: 'ok', message: 'Hello from Node.js', config: process.env.APP_CONFIG})); }); server.listen(3000, '0.0.0.0', () => { console.log('Server running on port 3000'); });"]
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        # Environment variables จาก ConfigMap
+        - name: APP_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: web-app-config
+              key: app.config.json
+        # Environment variables จาก Secret
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: web-app-secrets
+              key: DATABASE_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: web-app-secrets
+              key: DATABASE_PASSWORD
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: web-app-secrets
+              key: API_KEY
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: web-app-secrets
+              key: SESSION_SECRET
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: web-app-secrets
+              key: JWT_SECRET
+        # Mount configuration files
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+      
+      # สร้าง sidecar container สำหรับ NGINX
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+          name: http-nginx
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+      
+      # กำหนด volumes
+      volumes:
+      - name: config-volume
+        configMap:
+          name: web-app-config
+          items:
+          - key: app.config.json
+            path: app.config.json
+      - name: nginx-config
+        configMap:
+          name: web-app-config
+          items:
+          - key: nginx.conf
+            path: default.conf
+
+# ตัวอย่างนี้แสดงถึงการใช้งานจริงของ ConfigMap และ Secret กับแอปพลิเคชัน web ที่:
+# 1. มีการใช้ ConfigMap เพื่อเก็บค่าการตั้งค่าแอปพลิเคชันและ NGINX configuration
+# 2. มีการใช้ Secret เพื่อเก็บข้อมูลที่เป็นความลับ เช่น รหัสผ่านฐานข้อมูล และ API keys
+# 3. มีการใช้ทั้ง environment variables และ mounted files
+# 4. มีการใช้ multiple containers (main app + NGINX sidecar) ในหนึ่ง Pod

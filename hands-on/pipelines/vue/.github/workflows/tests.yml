@@ -1,0 +1,35 @@
+name: Run Tests
+
+on:
+  push:
+    branches: dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        cache-dependency-path: './app/yarn.lock'
+
+    - name: Install dependencies
+      working-directory: ./app
+      run: yarn install
+
+    - name: Run tests
+      working-directory: ./app
+      run: yarn test run
+
+    - name: Upload test coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: app/coverage/
+        retention-days: 30

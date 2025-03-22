@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "false"  # Explicitly mark as non-canary
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: lb.k8s.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-service-all
+            port:
+              number: 80

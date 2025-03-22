@@ -1,0 +1,9 @@
+name: python-app
+image: python:3.8
+command: ["bash"]
+volumes:
+  - /root/.cache/pip
+sync:
+  - .:/app
+forward:
+  - 8080:8080

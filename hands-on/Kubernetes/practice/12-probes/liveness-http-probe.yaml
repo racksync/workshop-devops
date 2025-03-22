@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-http
+  namespace: probes-demo
+spec:
+  containers:
+  - name: app
+    image: k8s.gcr.io/liveness
+    ports:
+    - containerPort: 8080
+    livenessProbe:
+      httpGet:
+        path: /healthz # เส้นทาง endpoint ที่ใช้ตรวจสอบสถานะ
+        port: 8080  # พอร์ตที่ใช้ในการตรวจสอบ
+      initialDelaySeconds: 3  # รอ 3 วินาทีหลังจาก container เริ่มต้นก่อนทำการตรวจสอบครั้งแรก
+      periodSeconds: 3  # ตรวจสอบทุก 3 วินาที

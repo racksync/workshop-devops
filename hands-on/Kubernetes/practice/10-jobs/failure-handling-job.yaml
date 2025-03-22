@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sometimes-fails
+spec:
+  template:
+    spec:
+      containers:
+      - name: sometimes-fails
+        image: busybox
+        command: ["sh", "-c", "if [ $((RANDOM % 3)) -eq 0 ]; then echo 'Failed!'; exit 1; else echo 'Success!'; fi"]
+      restartPolicy: OnFailure
+  backoffLimit: 6  # จำนวนครั้งที่ยอมให้ล้มเหลวก่อนจะหยุดพยายาม
+# คำอธิบาย: Job นี้จะสุ่มล้มเหลว 1 ใน 3 ครั้ง เพื่อแสดงให้เห็นถึงการจัดการกับความล้มเหลวโดยกำหนด backoffLimit

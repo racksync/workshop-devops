@@ -1,0 +1,12 @@
+apiVersion: v1        # API version สำหรับ Namespace resource
+kind: Namespace       # ประเภทของ Kubernetes resource 
+metadata:
+  name: replica-demo  # ชื่อของ Namespace ที่จะถูกสร้าง
+  labels:            # Labels ใช้สำหรับการจัดหมวดหมู่และค้นหา resources
+    purpose: workshop
+    topic: replicas
+  annotations:       # Annotations ใช้เก็บข้อมูลเพิ่มเติมที่ไม่ใช่สำหรับการ select/filter
+    description: "Namespace สำหรับการทดลอง Kubernetes replicas"
+    created-by: "DevOps Workshop"
+# Namespace เป็น logical boundary ในคลัสเตอร์ ช่วยแยกทรัพยากรและป้องกันการชนกันของชื่อ
+# เป็นพื้นฐานสำหรับการทำ RBAC (Role-Based Access Control)

@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-world-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        command: ["sh", "-c", "echo 'Hello from Kubernetes job!' && sleep 30"]
+      restartPolicy: Never
+  backoffLimit: 4
+# คำอธิบาย: ไฟล์นี้สร้าง Job แบบพื้นฐานที่จะทำงานจนเสร็จแล้วหยุด โดยจะพิมพ์ข้อความ Hello และรอ 30 วินาที
